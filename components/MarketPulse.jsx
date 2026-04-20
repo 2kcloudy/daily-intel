@@ -2,25 +2,28 @@ export default function MarketPulse({ text }) {
   if (!text) return null;
   return (
     <div style={{
-      background: "linear-gradient(135deg, #1a2540 0%, #0f1a30 100%)",
-      border: "1px solid rgba(201,168,76,0.3)",
-      borderLeft: "4px solid #c9a84c",
+      background: "var(--pulse-bg)",
+      border: "1px solid var(--pulse-border)",
+      borderLeft: "4px solid var(--pulse-accent)",
       borderRadius: 10,
-      padding: "20px 28px",
-      marginBottom: 36,
+      padding: "22px 28px",
+      marginBottom: 32,
     }}>
       <div style={{
-        display: "flex", alignItems: "center", gap: 10, marginBottom: 10
+        display: "flex", alignItems: "center", gap: 10, marginBottom: 10,
       }}>
         <span style={{
-          background: "rgba(201,168,76,0.15)", color: "#c9a84c",
+          background: "var(--gold-badge-bg)",
+          color: "var(--gold)",
           padding: "3px 10px", borderRadius: 20, fontSize: 11,
           fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
         }}>⚡ Market Pulse</span>
       </div>
       <p style={{
-        fontSize: 17, lineHeight: 1.65, color: "#d4dae8",
+        fontSize: 16.5, lineHeight: 1.7,
+        color: "var(--text-secondary)",
         fontStyle: "italic", fontWeight: 400,
+        fontFamily: "'Playfair Display', serif",
       }}>{text}</p>
     </div>
   );
