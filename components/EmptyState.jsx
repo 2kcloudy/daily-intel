@@ -9,20 +9,30 @@ export default function EmptyState() {
         background: "linear-gradient(135deg, #c9a84c, #8a6420)",
         display: "flex", alignItems: "center", justifyContent: "center",
         fontSize: 28,
+        boxShadow: "0 4px 16px rgba(184,146,26,0.25)",
       }}>📰</div>
       <div>
-        <h2 style={{ fontSize: 22, fontWeight: 700, color: "#e8edf5", marginBottom: 8 }}>
+        <h2 style={{
+          fontSize: 22, fontWeight: 700,
+          color: "var(--text-primary)",
+          marginBottom: 10,
+          fontFamily: "'Playfair Display', serif",
+        }}>
           No digest yet today
         </h2>
-        <p style={{ color: "#4a5a75", fontSize: 14, maxWidth: 400, lineHeight: 1.7 }}>
+        <p style={{
+          color: "var(--text-muted)", fontSize: 14,
+          maxWidth: 400, lineHeight: 1.75,
+        }}>
           Ask Claude to "do the news digest" and your Daily Intel briefing will appear here automatically.
         </p>
       </div>
       <div style={{
-        background: "#131929", border: "1px solid #1e2a42",
+        background: "var(--empty-code-bg)",
+        border: "1px solid var(--border)",
         borderRadius: 8, padding: "14px 24px", marginTop: 8,
       }}>
-        <code style={{ color: "#c9a84c", fontSize: 14 }}>
+        <code style={{ color: "var(--gold)", fontSize: 14 }}>
           "Do the news digest for today"
         </code>
       </div>
