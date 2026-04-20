@@ -15,10 +15,10 @@ export default function WatchList({ items }) {
           background: "var(--gold-badge-bg)",
           color: "var(--gold)",
           padding: "4px 12px", borderRadius: 20,
-          fontSize: 11, fontWeight: 700,
+          fontSize: 12, fontWeight: 700,
           letterSpacing: "0.08em", textTransform: "uppercase",
         }}>👁 Watch List</span>
-        <span style={{ color: "var(--text-muted)", fontSize: 12 }}>
+        <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
           Tickers to monitor from today's digest
         </span>
       </div>
@@ -36,16 +36,16 @@ export default function WatchList({ items }) {
             display: "flex", alignItems: "flex-start", gap: 14,
           }}>
             <span style={{
-              fontFamily: "ui-monospace, 'SF Mono', 'Cascadia Code', monospace",
+              fontFamily: "'IBM Plex Mono', 'SF Mono', ui-monospace, monospace",
               fontWeight: 700,
-              fontSize: 13, color: "var(--gold)",
+              fontSize: 14, color: "var(--gold)",
               background: "var(--gold-badge-bg)",
               padding: "3px 8px", borderRadius: 4,
               minWidth: "fit-content", flexShrink: 0,
               letterSpacing: "0.03em",
             }}>{item.ticker}</span>
             <span style={{
-              fontSize: 13,
+              fontSize: 14,
               color: "var(--text-secondary)",
               lineHeight: 1.55,
             }}>
