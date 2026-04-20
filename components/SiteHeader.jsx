@@ -2,8 +2,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
-export default function SiteHeader({ currentDate, allDates }) {
-  const [open, setOpen] = useState(false);
+export default function SiteHeader({ currentDate }) {
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -52,13 +51,13 @@ export default function SiteHeader({ currentDate, allDates }) {
             width: 32, height: 32, borderRadius: 7,
             background: "linear-gradient(135deg, #c9a84c 0%, #8a6420 100%)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 13, fontWeight: 800, color: "#fff",
+            fontSize: 14, fontWeight: 800, color: "#fff",
             letterSpacing: "-0.02em",
             boxShadow: "0 2px 8px rgba(184,146,26,0.3)",
           }}>DI</div>
           <span style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: 20, fontWeight: 700,
+            fontFamily: "'Source Serif 4', Georgia, serif",
+            fontSize: 21, fontWeight: 700,
             color: "var(--text-primary)",
             letterSpacing: "-0.02em",
           }}>
@@ -66,63 +65,14 @@ export default function SiteHeader({ currentDate, allDates }) {
           </span>
         </Link>
 
-        {/* Right side controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Current date — hidden on mobile-ish */}
+        {/* Right side */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           {currentDate && (
             <span style={{
-              color: "var(--text-muted)", fontSize: 13, fontWeight: 400,
+              color: "var(--text-muted)", fontSize: 14, fontWeight: 400,
             }}>
               {fmtDate(currentDate)}
             </span>
-          )}
-
-          {/* Archive dropdown */}
-          {allDates && allDates.length > 1 && (
-            <div style={{ position: "relative" }}>
-              <button
-                onClick={() => setOpen(!open)}
-                style={{
-                  background: "var(--btn-bg)",
-                  border: "1px solid var(--btn-border)",
-                  color: "var(--btn-text)",
-                  padding: "6px 14px", borderRadius: 7,
-                  cursor: "pointer", fontSize: 13,
-                  display: "flex", alignItems: "center", gap: 6,
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 500,
-                  transition: "border-color 0.2s",
-                }}
-              >
-                Archive <span style={{ fontSize: 10, opacity: 0.7 }}>▾</span>
-              </button>
-              {open && (
-                <div style={{
-                  position: "absolute", right: 0, top: "calc(100% + 8px)",
-                  background: "var(--bg-card)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 10,
-                  minWidth: 220,
-                  boxShadow: "var(--shadow-dropdown)",
-                  zIndex: 200,
-                  overflow: "hidden",
-                }}>
-                  {allDates.map((d, i) => (
-                    <Link key={d} href={`/${d}`} onClick={() => setOpen(false)}
-                      style={{
-                        display: "block", padding: "11px 16px",
-                        color: d === currentDate ? "var(--gold)" : "var(--text-secondary)",
-                        fontSize: 13,
-                        borderBottom: i < allDates.length - 1 ? "1px solid var(--border)" : "none",
-                        fontWeight: d === currentDate ? 600 : 400,
-                        transition: "background 0.15s",
-                      }}>
-                      {fmtDate(d)}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
           )}
 
           {/* Theme toggle */}
@@ -135,12 +85,11 @@ export default function SiteHeader({ currentDate, allDates }) {
               border: "1px solid var(--btn-border)",
               cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 15,
+              fontSize: 16,
               transition: "background 0.2s, border-color 0.2s",
               flexShrink: 0,
             }}
           >
-            {/* Avoid hydration mismatch — only show icon after mount */}
             {mounted ? (isDark ? "☀️" : "🌙") : "🌙"}
           </button>
         </div>
