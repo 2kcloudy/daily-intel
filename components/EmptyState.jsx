@@ -13,15 +13,15 @@ export default function EmptyState() {
       }}>📰</div>
       <div>
         <h2 style={{
-          fontSize: 22, fontWeight: 700,
+          fontSize: 23, fontWeight: 700,
           color: "var(--text-primary)",
           marginBottom: 10,
-          fontFamily: "'Playfair Display', serif",
+          fontFamily: "'Source Serif 4', Georgia, serif",
         }}>
           No digest yet today
         </h2>
         <p style={{
-          color: "var(--text-muted)", fontSize: 14,
+          color: "var(--text-muted)", fontSize: 15,
           maxWidth: 400, lineHeight: 1.75,
         }}>
           Ask Claude to "do the news digest" and your Daily Intel briefing will appear here automatically.
