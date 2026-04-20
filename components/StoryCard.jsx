@@ -1,12 +1,24 @@
+"use client";
+import { useState } from "react";
+
+/* Topic color map — works on both light and dark backgrounds */
 const TOPIC_COLORS = {
-  "AI": "#4a90d9", "Tech": "#4a90d9", "Markets": "#2ecc71",
-  "Defense": "#e67e22", "Energy": "#e67e22", "Commodities": "#c9a84c",
-  "Crypto": "#9b59b6", "Space": "#4a90d9", "Biotech": "#2ecc71",
-  "Macro": "#e74c3c", "Policy": "#e74c3c", "Earnings": "#2ecc71",
-  "default": "#4a5a75",
+  AI:          { text: "#1d6fb8", bg: "rgba(29,111,184,0.08)" },
+  Tech:        { text: "#1d6fb8", bg: "rgba(29,111,184,0.08)" },
+  Markets:     { text: "#16863d", bg: "rgba(22,134,61,0.08)" },
+  Defense:     { text: "#c05621", bg: "rgba(192,86,33,0.08)" },
+  Energy:      { text: "#c05621", bg: "rgba(192,86,33,0.08)" },
+  Commodities: { text: "#b8921a", bg: "rgba(184,146,26,0.10)" },
+  Crypto:      { text: "#6d28d9", bg: "rgba(109,40,217,0.08)" },
+  Space:       { text: "#0e7490", bg: "rgba(14,116,144,0.08)" },
+  Biotech:     { text: "#059669", bg: "rgba(5,150,105,0.08)" },
+  Macro:       { text: "#b91c1c", bg: "rgba(185,28,28,0.08)" },
+  Policy:      { text: "#b91c1c", bg: "rgba(185,28,28,0.08)" },
+  Earnings:    { text: "#16863d", bg: "rgba(22,134,61,0.08)" },
+  default:     { text: "#6b7280", bg: "rgba(107,114,128,0.08)" },
 };
 
-function topicColor(topic) {
+function topicStyle(topic) {
   if (!topic) return TOPIC_COLORS.default;
   for (const [key, val] of Object.entries(TOPIC_COLORS)) {
     if (topic.toLowerCase().includes(key.toLowerCase())) return val;
@@ -15,38 +27,45 @@ function topicColor(topic) {
 }
 
 export default function StoryCard({ rank, headline, summary, source, url, topic }) {
-  const color = topicColor(topic);
+  const [hovered, setHovered] = useState(false);
+  const { text: topicText, bg: topicBg } = topicStyle(topic);
+
   return (
-    <article style={{
-      background: "#131929",
-      border: "1px solid #1e2a42",
-      borderRadius: 10,
-      padding: "22px 26px",
-      transition: "border-color 0.2s, background 0.2s",
-      display: "flex", flexDirection: "column", gap: 12,
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.borderColor = "#253349";
-      e.currentTarget.style.background = "#182035";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.borderColor = "#1e2a42";
-      e.currentTarget.style.background = "#131929";
-    }}>
+    <article
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: "var(--bg-card)",
+        border: hovered
+          ? "1px solid var(--gold-light)"
+          : "1px solid var(--border)",
+        borderRadius: 10,
+        padding: "22px 24px",
+        boxShadow: hovered ? "var(--shadow-card-hover)" : "var(--shadow-card)",
+        transition: "border-color 0.2s, box-shadow 0.2s",
+        display: "flex", flexDirection: "column", gap: 14,
+        cursor: "default",
+      }}
+    >
       {/* Top row: rank badge + topic tag */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{
+        display: "flex", alignItems: "center",
+        justifyContent: "space-between",
+      }}>
         <span style={{
-          background: "rgba(201,168,76,0.12)", color: "#c9a84c",
+          background: "var(--gold-badge-bg)",
+          color: "var(--gold)",
           width: 28, height: 28, borderRadius: 6, fontSize: 12,
-          fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center",
+          fontWeight: 700,
+          display: "flex", alignItems: "center", justifyContent: "center",
           flexShrink: 0,
         }}>{rank}</span>
         {topic && (
           <span style={{
-            background: `${color}18`,
-            color: color,
+            background: topicBg,
+            color: topicText,
             padding: "3px 10px", borderRadius: 20,
-            fontSize: 11, fontWeight: 600, letterSpacing: "0.05em",
+            fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em",
             textTransform: "uppercase",
           }}>{topic}</span>
         )}
@@ -54,30 +73,41 @@ export default function StoryCard({ rank, headline, summary, source, url, topic 
 
       {/* Headline */}
       <h2 style={{
-        fontSize: 15.5, fontWeight: 700, color: "#e8edf5",
-        lineHeight: 1.4, letterSpacing: "-0.01em",
+        fontSize: 15, fontWeight: 700,
+        color: "var(--text-primary)",
+        lineHeight: 1.45, letterSpacing: "-0.01em",
       }}>{headline}</h2>
 
       {/* Summary */}
       <p style={{
-        fontSize: 13.5, color: "#8a9ab5", lineHeight: 1.7, flexGrow: 1,
+        fontSize: 13.5,
+        color: "var(--text-secondary)",
+        lineHeight: 1.75,
+        flexGrow: 1,
       }}>{summary}</p>
 
-      {/* Footer */}
+      {/* Card footer */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        borderTop: "1px solid #1e2a42", paddingTop: 12, marginTop: 4,
+        borderTop: "1px solid var(--border)",
+        paddingTop: 12, marginTop: 2,
       }}>
         <span style={{
-          fontSize: 12, color: "#4a5a75", fontWeight: 500, textTransform: "uppercase",
-          letterSpacing: "0.05em",
+          fontSize: 11, color: "var(--text-muted)",
+          fontWeight: 600, textTransform: "uppercase",
+          letterSpacing: "0.06em",
         }}>{source}</span>
         {url && (
-          <a href={url} target="_blank" rel="noopener noreferrer"
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
-              fontSize: 12, color: "#c9a84c", fontWeight: 600,
+              fontSize: 12, color: "var(--gold)", fontWeight: 600,
               display: "flex", alignItems: "center", gap: 4,
-            }}>
+              transition: "color 0.2s",
+            }}
+          >
             Read more →
           </a>
         )}
