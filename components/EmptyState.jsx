@@ -13,10 +13,10 @@ export default function EmptyState() {
       }}>📰</div>
       <div>
         <h2 style={{
-          fontSize: 23, fontWeight: 700,
+          fontSize: 24, fontWeight: 800,
           color: "var(--text-primary)",
           marginBottom: 10,
-          fontFamily: "'Source Serif 4', Georgia, serif",
+          fontFamily: "'Barlow', 'Helvetica Neue', Helvetica, sans-serif",
         }}>
           No digest yet today
         </h2>
