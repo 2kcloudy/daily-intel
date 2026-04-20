@@ -55,7 +55,7 @@ export default function StoryCard({ rank, headline, summary, source, url, topic 
         <span style={{
           background: "var(--gold-badge-bg)",
           color: "var(--gold)",
-          width: 28, height: 28, borderRadius: 6, fontSize: 12,
+          width: 28, height: 28, borderRadius: 6, fontSize: 13,
           fontWeight: 700,
           display: "flex", alignItems: "center", justifyContent: "center",
           flexShrink: 0,
@@ -65,7 +65,7 @@ export default function StoryCard({ rank, headline, summary, source, url, topic 
             background: topicBg,
             color: topicText,
             padding: "3px 10px", borderRadius: 20,
-            fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em",
+            fontSize: 12, fontWeight: 700, letterSpacing: "0.06em",
             textTransform: "uppercase",
           }}>{topic}</span>
         )}
@@ -73,14 +73,14 @@ export default function StoryCard({ rank, headline, summary, source, url, topic 
 
       {/* Headline */}
       <h2 style={{
-        fontSize: 15, fontWeight: 700,
+        fontSize: 16, fontWeight: 700,
         color: "var(--text-primary)",
         lineHeight: 1.45, letterSpacing: "-0.01em",
       }}>{headline}</h2>
 
       {/* Summary */}
       <p style={{
-        fontSize: 13.5,
+        fontSize: 14.5,
         color: "var(--text-secondary)",
         lineHeight: 1.75,
         flexGrow: 1,
@@ -93,7 +93,7 @@ export default function StoryCard({ rank, headline, summary, source, url, topic 
         paddingTop: 12, marginTop: 2,
       }}>
         <span style={{
-          fontSize: 11, color: "var(--text-muted)",
+          fontSize: 12, color: "var(--text-muted)",
           fontWeight: 600, textTransform: "uppercase",
           letterSpacing: "0.06em",
         }}>{source}</span>
@@ -103,7 +103,7 @@ export default function StoryCard({ rank, headline, summary, source, url, topic 
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              fontSize: 12, color: "var(--gold)", fontWeight: 600,
+              fontSize: 13, color: "var(--gold)", fontWeight: 600,
               display: "flex", alignItems: "center", gap: 4,
               transition: "color 0.2s",
             }}
