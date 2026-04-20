@@ -88,10 +88,10 @@ export default function DigestView({ digest, allDates }) {
               flexWrap: "wrap",
             }}>
               <h1 style={{
-                fontFamily: "'Source Serif 4', Georgia, serif",
-                fontSize: 36, fontWeight: 700,
+                fontFamily: "'Barlow', 'Helvetica Neue', Helvetica, sans-serif",
+                fontSize: 38, fontWeight: 800,
                 color: "var(--text-primary)",
-                letterSpacing: "-0.03em",
+                letterSpacing: "-0.04em",
               }}>Daily Intel</h1>
               {digest?.date && (
                 <span style={{
@@ -153,7 +153,7 @@ export default function DigestView({ digest, allDates }) {
                       color: activeTag === null ? "var(--gold)" : "var(--text-muted)",
                       transition: "all 0.15s",
                       letterSpacing: "0.02em",
-                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
                     }}
                   >All</button>
                   {topics.map(t => (
@@ -168,7 +168,7 @@ export default function DigestView({ digest, allDates }) {
                         color: activeTag === t ? "var(--gold)" : "var(--text-muted)",
                         transition: "all 0.15s",
                         letterSpacing: "0.02em",
-                        fontFamily: "'IBM Plex Sans', sans-serif",
+                        fontFamily: "'Inter', 'Helvetica Neue', sans-serif",
                       }}
                     >{t}</button>
                   ))}
