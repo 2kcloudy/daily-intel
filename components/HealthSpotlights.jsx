@@ -1,13 +1,10 @@
 /**
- * HealthSpotlights — displays influencer/podcast spotlights from the health digest.
+ * HealthSpotlights -- displays influencer/podcast spotlights from the health digest.
  * Each spotlight: { name, type, insight, url }
  * type: "influencer" | "podcast"
  */
 export default function HealthSpotlights({ items }) {
   if (!items || items.length === 0) return null;
-
-  const influencers = items.filter((i) => i.type !== "podcast");
-  const podcasts = items.filter((i) => i.type === "podcast");
 
   return (
     <div style={{
@@ -22,7 +19,7 @@ export default function HealthSpotlights({ items }) {
           background: "rgba(62,207,142,0.12)", color: "#3ecf8e",
           padding: "4px 12px", borderRadius: 20,
           fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-        }}>🔬 Expert Spotlights</span>
+        }}>Expert Spotlights</span>
         <span style={{ color: "#4a5a75", fontSize: 12 }}>Influencers &amp; podcasts to follow</span>
       </div>
 
@@ -40,10 +37,6 @@ export default function HealthSpotlights({ items }) {
             display: "flex", flexDirection: "column", gap: 8,
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{
-                fontSize: 18,
-                lineHeight: 1,
-              }}>{item.type === "podcast" ? "🎙" : "👤"}</span>
               <div>
                 {item.url ? (
                   <a href={item.url} target="_blank" rel="noopener noreferrer"
