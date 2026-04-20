@@ -23,7 +23,7 @@ export default function MarketPulse({ text }) {
         fontSize: 18, lineHeight: 1.7,
         color: "var(--text-secondary)",
         fontWeight: 400,
-        fontFamily: "'Source Serif 4', Georgia, serif",
+        fontFamily: "'Inter', 'Helvetica Neue', Helvetica, sans-serif",
       }}>{text}</p>
     </div>
   );
