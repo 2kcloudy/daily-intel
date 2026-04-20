@@ -9,7 +9,7 @@ export default function WatchList({ items }) {
       marginTop: 48,
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-        <span style=={{
+        <span style={{
           background: "rgba(201,168,76,0.12)", color: "#c9a84c",
           padding: "4px 12px", borderRadius: 20,
           fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
