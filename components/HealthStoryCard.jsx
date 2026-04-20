@@ -1,3 +1,4 @@
+"use client";
 const TOPIC_COLORS = {
   "Sleep":           "#7b68ee",
   "Nutrition":       "#3ecf8e",
@@ -90,7 +91,7 @@ export default function HealthStoryCard({ rank, headline, summary, source, url, 
               fontSize: 12, color: "#3ecf8e", fontWeight: 600,
               display: "flex", alignItems: "center", gap: 4, textDecoration: "none",
             }}>
-            Read more →
+            Read more
           </a>
         )}
       </div>
