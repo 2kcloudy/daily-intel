@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 export default function SiteHeader({ currentDate }) {
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setMounted(true);
@@ -67,7 +69,7 @@ export default function SiteHeader({ currentDate }) {
 
         {/* Right side */}
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          {currentDate && (
+          {currentDate && !isMobile && (
             <span style={{
               color: "var(--text-muted)", fontSize: 14, fontWeight: 400,
             }}>
