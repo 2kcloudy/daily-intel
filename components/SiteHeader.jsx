@@ -56,10 +56,10 @@ export default function SiteHeader({ currentDate }) {
             boxShadow: "0 2px 8px rgba(184,146,26,0.3)",
           }}>DI</div>
           <span style={{
-            fontFamily: "'Source Serif 4', Georgia, serif",
-            fontSize: 21, fontWeight: 700,
+            fontFamily: "'Barlow', 'Helvetica Neue', Helvetica, sans-serif",
+            fontSize: 22, fontWeight: 800,
             color: "var(--text-primary)",
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.03em",
           }}>
             Daily Intel
           </span>
