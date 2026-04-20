@@ -15,14 +15,14 @@ export default function MarketPulse({ text }) {
         <span style={{
           background: "var(--gold-badge-bg)",
           color: "var(--gold)",
-          padding: "3px 10px", borderRadius: 20, fontSize: 11,
+          padding: "3px 10px", borderRadius: 20, fontSize: 12,
           fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
         }}>⚡ Market Pulse</span>
       </div>
       <p style={{
-        fontSize: 16.5, lineHeight: 1.7,
+        fontSize: 18, lineHeight: 1.7,
         color: "var(--text-secondary)",
-        fontStyle: "italic", fontWeight: 400,
+        fontWeight: 400,
         fontFamily: "'Playfair Display', serif",
       }}>{text}</p>
     </div>
