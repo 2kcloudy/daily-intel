@@ -17,26 +17,32 @@ export default function DigestView({ digest, allDates }) {
     <>
       <SiteHeader currentDate={digest?.date} allDates={allDates} />
 
-      <main style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 80px" }}>
-        {/* Page title */}
+      <main style={{ maxWidth: 1200, margin: "0 auto", padding: "44px 24px 80px" }}>
+
+        {/* Masthead */}
         <div style={{ marginBottom: 36 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 12, marginBottom: 6,
+            flexWrap: "wrap",
+          }}>
             <h1 style={{
               fontFamily: "'Playfair Display', serif",
-              fontSize: 32, fontWeight: 700, color: "#e8edf5",
-              letterSpacing: "-0.02em",
+              fontSize: 34, fontWeight: 700,
+              color: "var(--text-primary)",
+              letterSpacing: "-0.03em",
             }}>Daily Intel</h1>
             {digest?.date && (
               <span style={{
-                background: "rgba(201,168,76,0.1)", color: "#c9a84c",
+                background: "var(--gold-dim)",
+                color: "var(--gold)",
                 padding: "4px 12px", borderRadius: 20,
-                fontSize: 12, fontWeight: 600, letterSpacing: "0.05em",
+                fontSize: 12, fontWeight: 600, letterSpacing: "0.04em",
               }}>
                 {fmtDate(digest.date)}
               </span>
             )}
           </div>
-          <p style={{ color: "#4a5a75", fontSize: 14 }}>
+          <p style={{ color: "var(--text-muted)", fontSize: 13.5, fontWeight: 400 }}>
             Business &amp; investment intelligence — curated daily by AI
           </p>
         </div>
@@ -48,18 +54,24 @@ export default function DigestView({ digest, allDates }) {
             {/* Market Pulse */}
             <MarketPulse text={digest.marketPulse} />
 
-            {/* Story count badge */}
+            {/* Meta bar */}
             <div style={{
-              display: "flex", alignItems: "center", gap: 12, marginBottom: 24,
+              display: "flex", alignItems: "center", gap: 12,
+              marginBottom: 24, flexWrap: "wrap",
             }}>
-              <span style={{ color: "#4a5a75", fontSize: 13 }}>
-                {digest.stories.length} stories · Ranked by market importance
+              <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
+                <strong style={{ color: "var(--text-secondary)", fontWeight: 600 }}>
+                  {digest.stories.length}
+                </strong>{" "}
+                stories · Ranked by market importance
               </span>
               <span style={{
-                background: "#131929", border: "1px solid #1e2a42",
-                color: "#4a5a75", padding: "3px 10px", borderRadius: 20, fontSize: 11,
+                background: "var(--bg-card)",
+                border: "1px solid var(--border)",
+                color: "var(--text-muted)",
+                padding: "3px 10px", borderRadius: 20, fontSize: 11,
               }}>
-                Sources: WSJ · Bloomberg · FT · CNBC · Reuters · MarketWatch · +more
+                WSJ · Bloomberg · FT · CNBC · Reuters · MarketWatch · +more
               </span>
             </div>
 
@@ -67,7 +79,7 @@ export default function DigestView({ digest, allDates }) {
             <div style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))",
-              gap: 16,
+              gap: 14,
             }}>
               {digest.stories.map((story, i) => (
                 <StoryCard
@@ -87,16 +99,19 @@ export default function DigestView({ digest, allDates }) {
 
             {/* Footer */}
             <div style={{
-              marginTop: 60, paddingTop: 24, borderTop: "1px solid #1e2a42",
-              display: "flex", justifyContent: "space-between", alignItems: "center",
+              marginTop: 60, paddingTop: 24,
+              borderTop: "1px solid var(--footer-border)",
+              display: "flex", justifyContent: "space-between",
+              alignItems: "center", flexWrap: "wrap", gap: 8,
             }}>
-              <span style={{ color: "#4a5a75", fontSize: 12 }}>
+              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>
                 Daily Intel · AI-curated market intelligence
               </span>
               {digest.postedAt && (
-                <span style={{ color: "#4a5a75", fontSize: 12 }}>
-                  Posted {new Date(digest.postedAt).toLocaleTimeString("en-US", {
-                    hour: "2-digit", minute: "2-digit", timeZoneName: "short"
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>
+                  Posted{" "}
+                  {new Date(digest.postedAt).toLocaleTimeString("en-US", {
+                    hour: "2-digit", minute: "2-digit", timeZoneName: "short",
                   })}
                 </span>
               )}
