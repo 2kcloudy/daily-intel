@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 /* Topic color map */
 const TOPIC_COLORS = {
@@ -51,31 +51,41 @@ function seedFromString(str) {
   return Math.abs(hash);
 }
 
-/* Build a Pollinations.ai image URL from the story headline + topic */
-function buildImageUrl(headline, topic, summary) {
+/* Build a Pollinations.ai image URL */
+function buildImageUrl(headline, topic) {
   const prompt = `Financial news illustration, abstract editorial style: ${topic || "business"} - ${headline.slice(0, 80)}. Clean, minimal, professional, no text, photorealistic.`;
   const seed = seedFromString(headline);
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=600&height=220&nologo=true&seed=${seed}`;
 }
 
-/* AI image component with shimmer skeleton + emoji fallback */
-function StoryImage({ headline, topic, summary }) {
+/* AI image with shimmer skeleton + emoji fallback + 12s timeout */
+function StoryImage({ headline, topic }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
+  const timerRef = useRef(null);
 
-  const src = buildImageUrl(headline, topic, summary);
+  const src = buildImageUrl(headline, topic);
   const emoji = topicEmoji(topic);
+
+  useEffect(() => {
+    // Fall back to emoji if image doesn't load within 12 seconds
+    timerRef.current = setTimeout(() => {
+      if (!loaded) setError(true);
+    }, 12000);
+    return () => clearTimeout(timerRef.current);
+  }, [loaded]);
 
   if (error) {
     return (
       <div style={{
         height: 160,
-        background: "var(--bg-secondary)",
+        background: "var(--gold-dim)",
         borderRadius: 8,
         display: "flex", alignItems: "center", justifyContent: "center",
         fontSize: 48,
         marginBottom: 4,
         flexShrink: 0,
+        border: "1px solid var(--border)",
       }}>
         {emoji}
       </div>
@@ -84,21 +94,17 @@ function StoryImage({ headline, topic, summary }) {
 
   return (
     <div style={{ position: "relative", height: 160, marginBottom: 4, flexShrink: 0 }}>
-      {/* Shimmer skeleton shown while loading */}
       {!loaded && (
         <div
           className="shimmer"
-          style={{
-            position: "absolute", inset: 0,
-            borderRadius: 8,
-          }}
+          style={{ position: "absolute", inset: 0, borderRadius: 8 }}
         />
       )}
       <img
         src={src}
         alt={headline}
-        onLoad={() => setLoaded(true)}
-        onError={() => setError(true)}
+        onLoad={() => { clearTimeout(timerRef.current); setLoaded(true); }}
+        onError={() => { clearTimeout(timerRef.current); setError(true); }}
         style={{
           width: "100%", height: 160,
           objectFit: "cover",
@@ -122,20 +128,22 @@ export default function StoryCard({ rank, headline, summary, source, url, topic 
       onMouseLeave={() => setHovered(false)}
       style={{
         background: "var(--bg-card)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
         border: hovered
           ? "1px solid var(--gold-light)"
-          : "1px solid var(--border)",
-        borderRadius: 10,
+          : "1px solid var(--glass-border)",
+        borderRadius: 14,
         overflow: "hidden",
         padding: "18px 20px 20px",
         boxShadow: hovered ? "var(--shadow-card-hover)" : "var(--shadow-card)",
-        transition: "border-color 0.2s, box-shadow 0.2s",
+        transition: "border-color 0.2s, box-shadow 0.25s",
         display: "flex", flexDirection: "column", gap: 12,
         cursor: "default",
       }}
     >
       {/* AI Image */}
-      <StoryImage headline={headline} topic={topic} summary={summary} />
+      <StoryImage headline={headline} topic={topic} />
 
       {/* Top row: rank badge + topic tag */}
       <div style={{
