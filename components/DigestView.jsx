@@ -55,7 +55,7 @@ export default function DigestView({ digest, allDates }) {
 
   return (
     <>
-      <SiteHeader currentDate={digest?.date} />
+      <SiteHeader currentDate={digest?.date} allDates={allDates} />
 
       <div style={{
         maxWidth: 1200,
