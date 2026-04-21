@@ -10,15 +10,34 @@ function EmptyHealthState() {
       display: "flex", flexDirection: "column", alignItems: "center",
       justifyContent: "center", padding: "80px 24px", textAlign: "center",
     }}>
-      <div style={{ fontSize: 56, marginBottom: 20 }}>🌿</div>
+      <div style={{
+        width: 72, height: 72, borderRadius: 18,
+        background: "linear-gradient(135deg, #10b981, #059669)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 32, marginBottom: 24,
+        boxShadow: "0 4px 20px rgba(5,150,105,0.28)",
+      }}>🌿</div>
       <h2 style={{
-        fontFamily: "'Playfair Display', serif",
-        fontSize: 26, fontWeight: 700, color: "#e8edf5", marginBottom: 12,
+        fontSize: 24, fontWeight: 800,
+        color: "var(--text-primary)", marginBottom: 12,
+        fontFamily: "'Barlow', 'Helvetica Neue', sans-serif",
       }}>Health Digest Coming Soon</h2>
-      <p style={{ color: "#4a5a75", fontSize: 15, maxWidth: 440, lineHeight: 1.7 }}>
-        Your daily health intelligence digest will appear here — curated stories on sleep, nutrition,
-        longevity, exercise science, and more.
+      <p style={{
+        color: "var(--text-muted)", fontSize: 15,
+        maxWidth: 440, lineHeight: 1.75,
+      }}>
+        Your daily health intelligence digest will appear here — curated stories on sleep,
+        nutrition, longevity, exercise science, and more.
       </p>
+      <div style={{
+        background: "var(--empty-code-bg)",
+        border: "1px solid var(--border)",
+        borderRadius: 8, padding: "14px 24px", marginTop: 20,
+      }}>
+        <code style={{ color: "var(--health)", fontSize: 14 }}>
+          "Do the health digest for today"
+        </code>
+      </div>
     </div>
   );
 }
@@ -38,15 +57,17 @@ export default function HealthDigestView({ digest, allDates }) {
       <main style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 24px 80px" }}>
         {/* Page title */}
         <div style={{ marginBottom: 36 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
             <h1 style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: 32, fontWeight: 700, color: "#e8edf5",
+              fontFamily: "'Barlow', 'Helvetica Neue', Helvetica, sans-serif",
+              fontSize: 32, fontWeight: 800,
+              color: "var(--text-primary)",
               letterSpacing: "-0.02em",
             }}>Health Intel</h1>
             {digest?.date && (
               <span style={{
-                background: "rgba(62,207,142,0.1)", color: "#3ecf8e",
+                background: "var(--health-badge)",
+                color: "var(--health)",
                 padding: "4px 12px", borderRadius: 20,
                 fontSize: 12, fontWeight: 600, letterSpacing: "0.05em",
               }}>
@@ -54,7 +75,7 @@ export default function HealthDigestView({ digest, allDates }) {
               </span>
             )}
           </div>
-          <p style={{ color: "#4a5a75", fontSize: 14 }}>
+          <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
             Wellness &amp; longevity intelligence — curated daily by AI
           </p>
         </div>
@@ -71,12 +92,16 @@ export default function HealthDigestView({ digest, allDates }) {
               display: "flex", alignItems: "center", gap: 12, marginBottom: 24,
               flexWrap: "wrap",
             }}>
-              <span style={{ color: "#4a5a75", fontSize: 13 }}>
+              <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
                 {digest.stories.length} stories · Ranked by health relevance
               </span>
               <span style={{
-                background: "#0d1a10", border: "1px solid #1a2e1e",
-                color: "#4a5a75", padding: "3px 10px", borderRadius: 20, fontSize: 11,
+                background: "var(--bg-card)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                border: "1px solid var(--border)",
+                color: "var(--text-muted)",
+                padding: "3px 10px", borderRadius: 20, fontSize: 11,
               }}>
                 Sources: WSJ · NYT · Reuters Health · CNN Health · TIME · New Scientist · ABC Health · +more
               </span>
@@ -106,16 +131,18 @@ export default function HealthDigestView({ digest, allDates }) {
 
             {/* Footer */}
             <div style={{
-              marginTop: 60, paddingTop: 24, borderTop: "1px solid #1a2e1e",
+              marginTop: 60, paddingTop: 24,
+              borderTop: "1px solid var(--footer-border)",
               display: "flex", justifyContent: "space-between", alignItems: "center",
+              flexWrap: "wrap", gap: 8,
             }}>
-              <span style={{ color: "#4a5a75", fontSize: 12 }}>
+              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>
                 Daily Intel · AI-curated health intelligence
               </span>
               {digest.postedAt && (
-                <span style={{ color: "#4a5a75", fontSize: 12 }}>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>
                   Posted {new Date(digest.postedAt).toLocaleTimeString("en-US", {
-                    hour: "2-digit", minute: "2-digit", timeZoneName: "short"
+                    hour: "2-digit", minute: "2-digit", timeZoneName: "short",
                   })}
                 </span>
               )}
