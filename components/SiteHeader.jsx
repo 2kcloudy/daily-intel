@@ -28,7 +28,7 @@ export default function SiteHeader({ currentDate, allDates, tab }) {
         display: "flex", alignItems: "center", justifyContent: "space-between",
         height: 64,
       }}>
-        {*/ Logo */}
+        {/* Logo */}
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
           <div style={{
             width: 32, height: 32, borderRadius: 6,
@@ -51,7 +51,7 @@ export default function SiteHeader({ currentDate, allDates, tab }) {
             color: !isHealth ? "#c9a84c" : "#4a5a75",
             border: !isHealth ? "1px solid rgba(201,168,76,0.25)" : "1px solid transparent",
           }}>
-            <span>📈</span> Finance
+            <span>ð</span> Finance
           </Link>
           <Link href="/health" style={{
             display: "flex", alignItems: "center", gap: 6,
@@ -61,7 +61,7 @@ export default function SiteHeader({ currentDate, allDates, tab }) {
             color: isHealth ? "#3ecf8e" : "#4a5a75",
             border: isHealth ? "1px solid rgba(62,207,142,0.25)" : "1px solid transparent",
           }}>
-            <span>🌽</span> Health
+            <span>ð½</span> Health
           </Link>
         </div>
 
@@ -76,7 +76,7 @@ export default function SiteHeader({ currentDate, allDates, tab }) {
                 cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 6,
               }}
             >
-              Archive ☧
+              Archive â§
             </button>
             {open && (
               <div style={{
