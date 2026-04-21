@@ -5,11 +5,11 @@ export default function EmptyState() {
       display: "flex", flexDirection: "column", alignItems: "center", gap: 20,
     }}>
       <div style={{
-        width: 64, height: 64, borderRadius: 16,
-        background: "linear-gradient(135deg, #c9a84c, #8a6420)",
+        width: 72, height: 72, borderRadius: 18,
+        background: "var(--empty-icon-bg)",
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: 28,
-        boxShadow: "0 4px 16px rgba(184,146,26,0.25)",
+        fontSize: 32,
+        boxShadow: "0 4px 20px rgba(184,146,26,0.25)",
       }}>📰</div>
       <div>
         <h2 style={{
@@ -29,6 +29,8 @@ export default function EmptyState() {
       </div>
       <div style={{
         background: "var(--empty-code-bg)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
         border: "1px solid var(--border)",
         borderRadius: 8, padding: "14px 24px", marginTop: 8,
       }}>
