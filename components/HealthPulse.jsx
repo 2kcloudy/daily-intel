@@ -2,25 +2,30 @@ export default function HealthPulse({ text }) {
   if (!text) return null;
   return (
     <div style={{
-      background: "linear-gradient(135deg, #0f2218 0%, #091a12 100%)",
-      border: "1px solid rgba(62,207,142,0.25)",
-      borderLeft: "4px solid #3ecf8e",
+      background: "var(--pulse-bg)",
+      backdropFilter: "blur(20px) saturate(180%)",
+      WebkitBackdropFilter: "blur(20px) saturate(180%)",
+      border: "1px solid rgba(5,150,105,0.22)",
+      borderLeft: "4px solid var(--health)",
       borderRadius: 10,
-      padding: "20px 28px",
+      padding: "22px 28px",
       marginBottom: 36,
     }}>
       <div style={{
-        display: "flex", alignItems: "center", gap: 10, marginBottom: 10
+        display: "flex", alignItems: "center", gap: 10, marginBottom: 10,
       }}>
         <span style={{
-          background: "rgba(62,207,142,0.12)", color: "#3ecf8e",
-          padding: "3px 10px", borderRadius: 20, fontSize: 11,
+          background: "var(--health-badge)",
+          color: "var(--health)",
+          padding: "3px 10px", borderRadius: 20, fontSize: 12,
           fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
         }}>🌿 Health Pulse</span>
       </div>
       <p style={{
-        fontSize: 17, lineHeight: 1.65, color: "#d4dae8",
+        fontSize: 17, lineHeight: 1.7,
+        color: "var(--text-secondary)",
         fontStyle: "italic", fontWeight: 400,
+        fontFamily: "'Inter', 'Helvetica Neue', Helvetica, sans-serif",
       }}>{text}</p>
     </div>
   );
