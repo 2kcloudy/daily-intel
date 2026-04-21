@@ -74,7 +74,7 @@ export default function DigestView({ digest, allDates, prevTopics }) {
     if (!digest) return;
     const url = `${window.location.origin}/${digest.date}`;
     const top3 = digest.stories.slice(0, 3).map(s => `• ${s.headline}`).join("\n");
-    const text = `\uD83D\uDCCA Daily Intel — ${fmtDate(digest.date)}\n\n${top3}\n\n${url}`;
+    const text = `📊 Daily Intel — ${fmtDate(digest.date)}\n\n${top3}\n\n${url}`;
     try {
       if (navigator.share) { await navigator.share({ title: "Daily Intel", text, url }); setShareState("shared"); }
       else { await navigator.clipboard.writeText(text); setShareState("copied"); }
@@ -191,13 +191,13 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                     padding: "5px 12px", borderRadius: 7, cursor: "pointer",
                     fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
                   }}>
-                    {shareState === "copied" ? "\u2713 Copied!" : shareState === "shared" ? "\u2713 Shared!" : "\u238B Share"}
+                    {shareState === "copied" ? "✓ Copied!" : shareState === "shared" ? "✓ Shared!" : "⎋ Share"}
                   </button>
                   <button onClick={() => window.print()} style={{
                     background: "var(--btn-bg)", border: "1px solid var(--btn-border)",
                     color: "var(--btn-text)", padding: "5px 12px", borderRadius: 7,
                     cursor: "pointer", fontSize: 12, fontWeight: 600,
-                  }}>\uD83D\uDDB8 Print</button>
+                  }}>🖸 Print</button>
                 </div>
               )}
             </div>
@@ -212,9 +212,9 @@ export default function DigestView({ digest, allDates, prevTopics }) {
               {/* Search */}
               <div style={{ marginBottom: 16 }}>
                 <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                  <span style={{ position: "absolute", left: 14, color: "var(--text-muted)", fontSize: 15, pointerEvents: "none", lineHeight: 1 }}>\uD83D\uDD0D</span>
+                  <span style={{ position: "absolute", left: 14, color: "var(--text-muted)", fontSize: 15, pointerEvents: "none", lineHeight: 1 }}>🔍</span>
                   <input
-                    ref={searchRef} type="text" placeholder="Search stories\u2026"
+                    ref={searchRef} type="text" placeholder="Search stories…"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onFocus={() => setSearchFocused(true)}
@@ -231,7 +231,7 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                     <button onClick={() => setSearchQuery("")} style={{
                       position: "absolute", right: 12, background: "none", border: "none",
                       cursor: "pointer", color: "var(--text-muted)", fontSize: 16, lineHeight: 1, padding: 2,
-                    }}>\u00D7</button>
+                    }}>×</button>
                   )}
                 </div>
               </div>
@@ -240,13 +240,13 @@ export default function DigestView({ digest, allDates, prevTopics }) {
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
                 <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
                   <strong style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{filteredStories.length}</strong>{" "}
-                  {hasActiveFilter ? `of ${digest.stories.length} stories` : "stories \u00B7 Ranked by market importance"}
+                  {hasActiveFilter ? `of ${digest.stories.length} stories` : "stories · Ranked by market importance"}
                 </span>
                 {!isMobile && (
                   <span style={{
                     background: "var(--bg-card)", border: "1px solid var(--border)",
                     color: "var(--text-muted)", padding: "3px 10px", borderRadius: 20, fontSize: 11,
-                  }}>WSJ \u00B7 Bloomberg \u00B7 FT \u00B7 CNBC \u00B7 Reuters \u00B7 MarketWatch \u00B7 +more</span>
+                  }}>WSJ · Bloomberg · FT · CNBC · Reuters · MarketWatch · +more</span>
                 )}
                 <button onClick={() => setCompact(!compact)} className="no-print" style={{
                   marginLeft: "auto",
@@ -255,7 +255,7 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                   color: compact ? "var(--gold)" : "var(--text-muted)",
                   padding: "3px 10px", borderRadius: 20, cursor: "pointer",
                   fontSize: 11, fontWeight: 600,
-                }}>{compact ? "\u229E Cards" : "\u2630 Compact"}</button>
+                }}>{compact ? "⊞ Cards" : "☰ Compact"}</button>
               </div>
 
               {/* Topic pills */}
@@ -336,14 +336,14 @@ export default function DigestView({ digest, allDates, prevTopics }) {
               }} className="no-print">
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
-                    \uD83D\uDCEC Get Daily Intel in your inbox
+                    📬 Get Daily Intel in your inbox
                   </div>
                   <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
                     Finance, health, tech &amp; more — curated by AI every morning.
                   </div>
                 </div>
                 {subState === "done" ? (
-                  <span style={{ color: "var(--gold)", fontWeight: 600, fontSize: 14 }}>\u2713 You&apos;re subscribed!</span>
+                  <span style={{ color: "var(--gold)", fontWeight: 600, fontSize: 14 }}>✓ You&apos;re subscribed!</span>
                 ) : (
                   <form onSubmit={handleSubscribe} style={{ display: "flex", gap: 8, width: isMobile ? "100%" : "auto" }}>
                     <input
@@ -360,7 +360,7 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                       padding: "8px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600,
                       cursor: subState === "loading" ? "default" : "pointer",
                       opacity: subState === "loading" ? 0.7 : 1,
-                    }}>{subState === "loading" ? "\u2026" : "Subscribe"}</button>
+                    }}>{subState === "loading" ? "…" : "Subscribe"}</button>
                   </form>
                 )}
               </div>
@@ -372,7 +372,7 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                 alignItems: "center", flexWrap: "wrap", gap: 8,
                 flexDirection: isMobile ? "column" : "row",
               }}>
-                <span style={{ color: "var(--text-muted)", fontSize: 13 }}>Daily Intel \u00B7 AI-curated market intelligence</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 13 }}>Daily Intel · AI-curated market intelligence</span>
                 <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
                   <a href="/api/rss" target="_blank" rel="noopener noreferrer"
                     style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>RSS Feed</a>
