@@ -6,81 +6,122 @@
   padding: 0;
 }
 
-/* ─── Light Mode (default) ─── */
+/* ─── Apple Liquid Glass — Light Mode (default) ─── */
 :root {
-  --bg-primary: #faf9f7;
-  --bg-secondary: #f2ede6;
-  --bg-card: #ffffff;
-  --bg-card-hover: #fdfcfa;
-  --bg-header: rgba(250, 249, 247, 0.96);
-  --bg-header-border: #e8e2d9;
-  --border: #e8e2d9;
-  --border-light: #d4cec5;
-  --gold: #b8921a;
-  --gold-light: #c9a84c;
-  --gold-dim: rgba(184, 146, 26, 0.10);
-  --gold-badge-bg: rgba(184, 146, 26, 0.08);
-  --text-primary: #1c1917;
-  --text-secondary: #44403c;
-  --text-muted: #78716c;
-  --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04);
-  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.04);
-  --shadow-dropdown: 0 8px 32px rgba(0,0,0,0.12);
-  --pulse-bg: linear-gradient(135deg, #fffdf5 0%, #fff8e8 100%);
-  --pulse-border: rgba(184, 146, 26, 0.25);
-  --pulse-accent: #b8921a;
-  --watch-bg: linear-gradient(135deg, #fffdf7 0%, #fff8e8 100%);
-  --watch-border: rgba(184, 146, 26, 0.2);
-  --watch-item-bg: #faf8f3;
-  --footer-border: #e8e2d9;
-  --code-bg: #f5f0e8;
-  --scrollbar-track: #f0ece6;
-  --scrollbar-thumb: #d4cec5;
-  --empty-icon-bg: linear-gradient(135deg, #c9a84c, #8a6420);
-  --empty-code-bg: #f5f0e8;
-  --btn-bg: #ffffff;
-  --btn-border: #e8e2d9;
-  --btn-text: #44403c;
+  --bg-primary: #f0f4fa;
+  --bg-gradient: radial-gradient(ellipse at 15% 50%, rgba(110, 170, 255, 0.14) 0%, transparent 55%),
+                 radial-gradient(ellipse at 85% 12%, rgba(168, 120, 255, 0.11) 0%, transparent 55%),
+                 radial-gradient(ellipse at 60% 88%, rgba(60, 210, 165, 0.09) 0%, transparent 55%),
+                 #f0f4fa;
+
+  /* Glass surfaces */
+  --bg-card:        rgba(255, 255, 255, 0.72);
+  --bg-card-hover:  rgba(255, 255, 255, 0.90);
+  --bg-header:      rgba(255, 255, 255, 0.80);
+  --bg-elevated:    rgba(255, 255, 255, 0.88);
+
+  /* Borders */
+  --bg-header-border: rgba(0, 0, 0, 0.07);
+  --border:           rgba(0, 0, 0, 0.07);
+  --border-light:     rgba(0, 0, 0, 0.04);
+  --glass-border:     rgba(255, 255, 255, 0.88);
+
+  /* Brand */
+  --gold:           #b8921a;
+  --gold-light:     #c9a84c;
+  --gold-dim:       rgba(184, 146, 26, 0.10);
+  --gold-badge-bg:  rgba(184, 146, 26, 0.09);
+
+  /* Health */
+  --health:         #059669;
+  --health-light:   #10b981;
+  --health-dim:     rgba(5, 150, 105, 0.08);
+  --health-badge:   rgba(5, 150, 105, 0.10);
+
+  /* Typography */
+  --text-primary:   #0f172a;
+  --text-secondary: #334155;
+  --text-muted:     #64748b;
+
+  /* Shadows — soft, layered like Apple */
+  --shadow-card:       0 2px 8px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.95);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.08), 0 16px 48px rgba(0,0,0,0.09), inset 0 1px 0 rgba(255,255,255,1);
+  --shadow-dropdown:   0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-header:     0 1px 0 rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+
+  /* Components */
+  --pulse-bg:       rgba(255, 255, 255, 0.75);
+  --pulse-border:   rgba(184, 146, 26, 0.25);
+  --pulse-accent:   #b8921a;
+  --watch-bg:       rgba(255, 255, 255, 0.75);
+  --watch-border:   rgba(184, 146, 26, 0.18);
+  --watch-item-bg:  rgba(255, 255, 255, 0.65);
+  --footer-border:  rgba(0, 0, 0, 0.07);
+  --code-bg:        rgba(240, 246, 255, 0.8);
+  --empty-code-bg:  rgba(240, 246, 255, 0.8);
+  --empty-icon-bg:  linear-gradient(135deg, #c9a84c, #8a6420);
+  --btn-bg:         rgba(255, 255, 255, 0.85);
+  --btn-border:     rgba(0, 0, 0, 0.09);
+  --btn-text:       #334155;
+
+  /* Scrollbar */
+  --scrollbar-track: rgba(0,0,0,0.04);
+  --scrollbar-thumb: rgba(0,0,0,0.14);
 }
 
 /* ─── Dark Mode ─── */
 [data-theme="dark"] {
   --bg-primary: #0a0e1a;
-  --bg-secondary: #0f1525;
-  --bg-card: #131929;
-  --bg-card-hover: #182035;
-  --bg-header: rgba(7, 11, 20, 0.96);
+  --bg-gradient: #0a0e1a;
+  --bg-card:        #131929;
+  --bg-card-hover:  #182035;
+  --bg-header:      rgba(7, 11, 20, 0.96);
+  --bg-elevated:    #1a2035;
   --bg-header-border: #1e2a42;
-  --border: #1e2a42;
-  --border-light: #253349;
-  --gold: #c9a84c;
-  --gold-light: #e8c76a;
-  --gold-dim: rgba(201, 168, 76, 0.12);
-  --gold-badge-bg: rgba(201, 168, 76, 0.10);
-  --text-primary: #e8edf5;
+  --border:           #1e2a42;
+  --border-light:     #253349;
+  --glass-border:     rgba(255,255,255,0.06);
+  --gold:           #c9a84c;
+  --gold-light:     #e8c76a;
+  --gold-dim:       rgba(201, 168, 76, 0.12);
+  --gold-badge-bg:  rgba(201, 168, 76, 0.10);
+  --health:         #10b981;
+  --health-light:   #34d399;
+  --health-dim:     rgba(16, 185, 129, 0.10);
+  --health-badge:   rgba(16, 185, 129, 0.12);
+  --text-primary:   #e8edf5;
   --text-secondary: #8a9ab5;
-  --text-muted: #4a5a75;
-  --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
+  --text-muted:     #4a5a75;
+  --shadow-card:       0 2px 8px rgba(0,0,0,0.3);
   --shadow-card-hover: 0 8px 32px rgba(0,0,0,0.5);
-  --shadow-dropdown: 0 8px 32px rgba(0,0,0,0.6);
-  --pulse-bg: linear-gradient(135deg, #1a2540 0%, #0f1a30 100%);
-  --pulse-border: rgba(201, 168, 76, 0.3);
-  --pulse-accent: #c9a84c;
-  --watch-bg: linear-gradient(135deg, #131929 0%, #0f1a2e 100%);
-  --watch-border: rgba(201, 168, 76, 0.2);
-  --watch-item-bg: #0a0e1a;
-  --footer-border: #1e2a42;
-  --code-bg: #131929;
+  --shadow-dropdown:   0 8px 32px rgba(0,0,0,0.6);
+  --shadow-header:     0 1px 0 rgba(0,0,0,0.4);
+  --pulse-bg:       linear-gradient(135deg, #1a2540 0%, #0f1a30 100%);
+  --pulse-border:   rgba(201, 168, 76, 0.3);
+  --pulse-accent:   #c9a84c;
+  --watch-bg:       linear-gradient(135deg, #131929 0%, #0f1a2e 100%);
+  --watch-border:   rgba(201, 168, 76, 0.2);
+  --watch-item-bg:  #0a0e1a;
+  --footer-border:  #1e2a42;
+  --code-bg:        #131929;
+  --empty-code-bg:  #131929;
+  --empty-icon-bg:  linear-gradient(135deg, #c9a84c, #8a6420);
+  --btn-bg:         #131929;
+  --btn-border:     #1e2a42;
+  --btn-text:       #8a9ab5;
   --scrollbar-track: #0a0e1a;
   --scrollbar-thumb: #1e2a42;
-  --empty-icon-bg: linear-gradient(135deg, #c9a84c, #8a6420);
-  --empty-code-bg: #131929;
-  --btn-bg: #131929;
-  --btn-border: #1e2a42;
-  --btn-text: #8a9ab5;
 }
 
-/* ─── Shimmer animation for AI image loading skeleton ─── */
+/* ─── Glass utility class ─── */
+.glass {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+}
+
+/* ─── Shimmer animation for image loading skeleton ─── */
 @keyframes shimmer {
   0%   { background-position: -600px 0; }
   100% { background-position: 600px 0; }
@@ -89,12 +130,22 @@
 .shimmer {
   background: linear-gradient(
     90deg,
+    rgba(0,0,0,0.04) 25%,
+    rgba(255,255,255,0.6) 50%,
+    rgba(0,0,0,0.04) 75%
+  );
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+[data-theme="dark"] .shimmer {
+  background: linear-gradient(
+    90deg,
     var(--border) 25%,
     var(--bg-card-hover) 50%,
     var(--border) 75%
   );
   background-size: 600px 100%;
-  animation: shimmer 1.4s infinite linear;
 }
 
 html {
@@ -103,12 +154,13 @@ html {
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  background-color: var(--bg-primary);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.6;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition: background-color 0.3s ease, color 0.25s ease;
 }
 
 a {
@@ -125,4 +177,4 @@ a:hover {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+::-webkit-scrollbar-thumb:hover { background: var(--border); }
