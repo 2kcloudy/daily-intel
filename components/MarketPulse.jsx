@@ -3,6 +3,8 @@ export default function MarketPulse({ text }) {
   return (
     <div style={{
       background: "var(--pulse-bg)",
+      backdropFilter: "blur(20px) saturate(180%)",
+      WebkitBackdropFilter: "blur(20px) saturate(180%)",
       border: "1px solid var(--pulse-border)",
       borderLeft: "4px solid var(--pulse-accent)",
       borderRadius: 10,
