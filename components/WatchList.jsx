@@ -3,6 +3,8 @@ export default function WatchList({ items }) {
   return (
     <div style={{
       background: "var(--watch-bg)",
+      backdropFilter: "blur(20px) saturate(180%)",
+      WebkitBackdropFilter: "blur(20px) saturate(180%)",
       border: "1px solid var(--watch-border)",
       borderRadius: 10,
       padding: "24px 28px",
@@ -30,6 +32,8 @@ export default function WatchList({ items }) {
         {items.map((item, i) => (
           <div key={i} style={{
             background: "var(--watch-item-bg)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
             border: "1px solid var(--border)",
             borderRadius: 8,
             padding: "14px 18px",
