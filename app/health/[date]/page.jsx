@@ -15,6 +15,10 @@ export default async function HealthDatePage({ params }) {
 }
 
 export async function generateStaticParams() {
-  const dates = await getAllHealthDates();
-  return dates.map((date) => ({ date }));
+  try {
+    const dates = await getAllHealthDates();
+    return dates.map((date) => ({ date }));
+  } catch {
+    return [];
+  }
 }
