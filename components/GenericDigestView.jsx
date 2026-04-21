@@ -26,7 +26,7 @@ function GenericPulse({ text, config }) {
           color: accentColor, marginBottom: 10,
           display: "flex", alignItems: "center", gap: 6,
         }}>
-          <span style={{ fontSize: 14 }}>\u26A1</span> {pulseTitle}
+          <span style={{ fontSize: 14 }}>⚡</span> {pulseTitle}
         </div>
       )}
       <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.7, fontStyle: "italic" }}>{text}</p>
@@ -54,7 +54,7 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
     accentColorLight = "#c9a84c",
     accentDim = "rgba(184,146,26,0.10)",
     accentBadgeBg = "rgba(184,146,26,0.09)",
-    placeholder = "Search stories\u2026",
+    placeholder = "Search stories…",
     sources = "Various sources",
     rankingLabel = "Ranked by importance",
     path = "/",
@@ -111,8 +111,8 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
   const handleShare = async () => {
     if (!digest) return;
     const url = `${window.location.origin}${path}/${digest.date}`;
-    const top3 = digest.stories.slice(0, 3).map(s => `\u2022 ${s.headline}`).join("\n");
-    const text = `${config.emoji || ""} ${label} Intel \u2014 ${fmtDate(digest.date)}\n\n${top3}\n\n${url}`;
+    const top3 = digest.stories.slice(0, 3).map(s => `• ${s.headline}`).join("\n");
+    const text = `${config.emoji || ""} ${label} Intel — ${fmtDate(digest.date)}\n\n${top3}\n\n${url}`;
     try {
       if (navigator.share) { await navigator.share({ title: `${label} Intel`, text, url }); setShareState("shared"); }
       else { await navigator.clipboard.writeText(text); setShareState("copied"); }
@@ -220,7 +220,7 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               <p style={{ color: "var(--text-muted)", fontSize: isMobile ? 13 : 14.5, fontWeight: 400 }}>
-                {label} intelligence \u2014 curated daily by AI
+                {label} intelligence — curated daily by AI
               </p>
               {digest && (
                 <div style={{ display: "flex", gap: 6, marginLeft: "auto" }} className="no-print">
@@ -230,13 +230,13 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
                     padding: "5px 12px", borderRadius: 7, cursor: "pointer",
                     fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
                   }}>
-                    {shareState === "copied" ? "\u2713 Copied!" : shareState === "shared" ? "\u2713 Shared!" : "\u238B Share"}
+                    {shareState === "copied" ? "✓ Copied!" : shareState === "shared" ? "✓ Shared!" : "⎋ Share"}
                   </button>
                   <button onClick={() => window.print()} style={{
                     background: "var(--btn-bg)", border: "1px solid var(--btn-border)",
                     color: "var(--btn-text)", padding: "5px 12px", borderRadius: 7,
                     cursor: "pointer", fontSize: 12, fontWeight: 600,
-                  }}>\uD83D\uDDB8 Print</button>
+                  }}>🖸 Print</button>
                 </div>
               )}
             </div>
@@ -251,7 +251,7 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
               {/* Search */}
               <div style={{ marginBottom: 16 }}>
                 <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                  <span style={{ position: "absolute", left: 14, color: "var(--text-muted)", fontSize: 15, pointerEvents: "none", lineHeight: 1 }}>\uD83D\uDD0D</span>
+                  <span style={{ position: "absolute", left: 14, color: "var(--text-muted)", fontSize: 15, pointerEvents: "none", lineHeight: 1 }}>🔍</span>
                   <input
                     ref={searchRef} type="text" placeholder={placeholder}
                     value={searchQuery}
@@ -270,7 +270,7 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
                     <button onClick={() => setSearchQuery("")} style={{
                       position: "absolute", right: 12, background: "none", border: "none",
                       cursor: "pointer", color: "var(--text-muted)", fontSize: 16, lineHeight: 1, padding: 2,
-                    }}>\u00D7</button>
+                    }}>×</button>
                   )}
                 </div>
               </div>
@@ -279,7 +279,7 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
                 <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
                   <strong style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{filteredStories.length}</strong>{" "}
-                  {hasActiveFilter ? `of ${digest.stories.length} stories` : `stories \u00B7 ${rankingLabel}`}
+                  {hasActiveFilter ? `of ${digest.stories.length} stories` : `stories · ${rankingLabel}`}
                 </span>
                 {!isMobile && (
                   <span style={{
@@ -293,7 +293,7 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
                   border: compact ? `1px solid ${accentColor}` : "1px solid var(--border)",
                   color: compact ? accentColor : "var(--text-muted)",
                   padding: "3px 10px", borderRadius: 20, cursor: "pointer", fontSize: 11, fontWeight: 600,
-                }}>{compact ? "\u229E Cards" : "\u2630 Compact"}</button>
+                }}>{compact ? "⊞ Cards" : "☰ Compact"}</button>
               </div>
 
               {/* Topic pills */}
@@ -371,14 +371,14 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
               }} className="no-print">
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
-                    \uD83D\uDCEC Get {label} Intel in your inbox
+                    📬 Get {label} Intel in your inbox
                   </div>
                   <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
                     AI-curated {label.toLowerCase()} intelligence delivered daily.
                   </div>
                 </div>
                 {subState === "done" ? (
-                  <span style={{ color: accentColor, fontWeight: 600, fontSize: 14 }}>\u2713 You&apos;re subscribed!</span>
+                  <span style={{ color: accentColor, fontWeight: 600, fontSize: 14 }}>✓ You&apos;re subscribed!</span>
                 ) : (
                   <form onSubmit={handleSubscribe} style={{ display: "flex", gap: 8, width: isMobile ? "100%" : "auto" }}>
                     <input
@@ -395,7 +395,7 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
                       padding: "8px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600,
                       cursor: subState === "loading" ? "default" : "pointer",
                       opacity: subState === "loading" ? 0.7 : 1,
-                    }}>{subState === "loading" ? "\u2026" : "Subscribe"}</button>
+                    }}>{subState === "loading" ? "…" : "Subscribe"}</button>
                   </form>
                 )}
               </div>
@@ -408,7 +408,7 @@ export default function GenericDigestView({ digest, allDates, prevTopics, config
                 flexDirection: isMobile ? "column" : "row",
               }}>
                 <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
-                  Daily Intel \u00B7 {label} Intelligence
+                  Daily Intel · {label} Intelligence
                 </span>
                 {digest.postedAt && (
                   <span style={{ color: "var(--text-muted)", fontSize: 13 }}>

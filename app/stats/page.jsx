@@ -77,7 +77,7 @@ export default async function StatsPage() {
             fontFamily: "'Barlow', sans-serif", fontSize: 36, fontWeight: 800,
             color: "var(--text-primary)", letterSpacing: "-0.04em", marginBottom: 8,
           }}>
-            \uD83D\uDCCA Stats &amp; Trends
+            📊 Stats &amp; Trends
           </h1>
           <p style={{ fontSize: 15, color: "var(--text-muted)" }}>
             Meta-intelligence across all Daily Intel digests
@@ -91,10 +91,10 @@ export default async function StatsPage() {
           gap: 16, marginBottom: 48,
         }}>
           {[
-            { label: "Finance Digests", value: financeValid.length, color: "#b8921a", emoji: "\uD83D\uDCC8" },
-            { label: "Finance Stories", value: fTotal, color: "#b8921a", emoji: "\uD83D\uDCF0" },
-            { label: "Health Digests", value: healthValid.length, color: "#059669", emoji: "\uD83C\uDF3F" },
-            { label: "Health Stories", value: hTotal, color: "#059669", emoji: "\uD83D\uDC9A" },
+            { label: "Finance Digests", value: financeValid.length, color: "#b8921a", emoji: "📈" },
+            { label: "Finance Stories", value: fTotal, color: "#b8921a", emoji: "📰" },
+            { label: "Health Digests", value: healthValid.length, color: "#059669", emoji: "🌿" },
+            { label: "Health Stories", value: hTotal, color: "#059669", emoji: "💚" },
           ].map(item => (
             <div key={item.label} style={{
               background: "var(--bg-card)", border: "1px solid var(--border)",
@@ -210,7 +210,7 @@ export default async function StatsPage() {
 
         {/* Footer */}
         <div style={{ marginTop: 48, paddingTop: 24, borderTop: "1px solid var(--footer-border)" }}>
-          <Link href="/" style={{ fontSize: 13, color: "var(--text-muted)" }}>\u2190 Back to Daily Intel</Link>
+          <Link href="/" style={{ fontSize: 13, color: "var(--text-muted)" }}>← Back to Daily Intel</Link>
         </div>
       </div>
     </>
