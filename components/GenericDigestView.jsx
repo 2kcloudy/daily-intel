@@ -3,13 +3,38 @@ import { useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SiteHeader from "./SiteHeader";
-import MarketPulse from "./MarketPulse";
-import StoryCard from "./StoryCard";
-import WatchList from "./WatchList";
+import GenericStoryCard from "./GenericStoryCard";
 import EmptyState from "./EmptyState";
 import { useIsMobile } from "../hooks/useIsMobile";
 
-export default function DigestView({ digest, allDates, prevTopics }) {
+/* Generic Pulse component */
+function GenericPulse({ text, config }) {
+  if (!text) return null;
+  const { pulseTitle, accentColor } = config;
+  return (
+    <div style={{
+      background: "var(--bg-card)",
+      backdropFilter: "blur(20px) saturate(180%)",
+      WebkitBackdropFilter: "blur(20px) saturate(180%)",
+      border: `1px solid ${accentColor}40`,
+      borderLeft: `3px solid ${accentColor}`,
+      borderRadius: 10, padding: "18px 22px", marginBottom: 28,
+    }}>
+      {pulseTitle && (
+        <div style={{
+          fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase",
+          color: accentColor, marginBottom: 10,
+          display: "flex", alignItems: "center", gap: 6,
+        }}>
+          <span style={{ fontSize: 14 }}>\u26A1</span> {pulseTitle}
+        </div>
+      )}
+      <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.7, fontStyle: "italic" }}>{text}</p>
+    </div>
+  );
+}
+
+export default function GenericDigestView({ digest, allDates, prevTopics, config }) {
   const [activeTag, setActiveTag] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
@@ -21,6 +46,19 @@ export default function DigestView({ digest, allDates, prevTopics }) {
   const searchRef = useRef(null);
   const touchStartX = useRef(null);
   const router = useRouter();
+
+  const {
+    key = "finance",
+    label = "Intel",
+    accentColor = "#b8921a",
+    accentColorLight = "#c9a84c",
+    accentDim = "rgba(184,146,26,0.10)",
+    accentBadgeBg = "rgba(184,146,26,0.09)",
+    placeholder = "Search stories\u2026",
+    sources = "Various sources",
+    rankingLabel = "Ranked by importance",
+    path = "/",
+  } = config || {};
 
   const fmtDate = (d) => {
     if (!d) return "";
@@ -72,11 +110,11 @@ export default function DigestView({ digest, allDates, prevTopics }) {
 
   const handleShare = async () => {
     if (!digest) return;
-    const url = `${window.location.origin}/${digest.date}`;
-    const top3 = digest.stories.slice(0, 3).map(s => `• ${s.headline}`).join("\n");
-    const text = `\uD83D\uDCCA Daily Intel — ${fmtDate(digest.date)}\n\n${top3}\n\n${url}`;
+    const url = `${window.location.origin}${path}/${digest.date}`;
+    const top3 = digest.stories.slice(0, 3).map(s => `\u2022 ${s.headline}`).join("\n");
+    const text = `${config.emoji || ""} ${label} Intel \u2014 ${fmtDate(digest.date)}\n\n${top3}\n\n${url}`;
     try {
-      if (navigator.share) { await navigator.share({ title: "Daily Intel", text, url }); setShareState("shared"); }
+      if (navigator.share) { await navigator.share({ title: `${label} Intel`, text, url }); setShareState("shared"); }
       else { await navigator.clipboard.writeText(text); setShareState("copied"); }
       setTimeout(() => setShareState("idle"), 2500);
     } catch {}
@@ -90,7 +128,7 @@ export default function DigestView({ digest, allDates, prevTopics }) {
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), tab: "finance" }),
+        body: JSON.stringify({ email: email.trim(), tab: key }),
       });
       setSubState(res.ok ? "done" : "error");
     } catch { setSubState("error"); }
@@ -102,15 +140,17 @@ export default function DigestView({ digest, allDates, prevTopics }) {
     const delta = e.changedTouches[0].clientX - touchStartX.current;
     if (Math.abs(delta) > 80) {
       const idx = allDates.indexOf(digest.date);
-      if (delta < 0 && idx > 0) router.push(`/${allDates[idx - 1]}`);
-      else if (delta > 0 && idx < allDates.length - 1) router.push(`/${allDates[idx + 1]}`);
+      if (delta < 0 && idx > 0) router.push(`${path}/${allDates[idx - 1]}`);
+      else if (delta > 0 && idx < allDates.length - 1) router.push(`${path}/${allDates[idx + 1]}`);
     }
     touchStartX.current = null;
   };
 
+  const pulseText = digest?.pulse || digest?.marketPulse || digest?.healthPulse || null;
+
   return (
     <>
-      <SiteHeader currentDate={digest?.date} allDates={allDates} />
+      <SiteHeader currentDate={digest?.date} allDates={allDates} tab={key} />
 
       <div
         style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "flex-start" }}
@@ -129,12 +169,11 @@ export default function DigestView({ digest, allDates, prevTopics }) {
               textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12,
             }}>Archive</div>
             {allDates.map((d) => (
-              <Link key={d} href={`/${d}`} style={{
-                display: "block", padding: "7px 10px", borderRadius: 7, marginBottom: 2,
-                fontSize: 13,
+              <Link key={d} href={`${path}/${d}`} style={{
+                display: "block", padding: "7px 10px", borderRadius: 7, marginBottom: 2, fontSize: 13,
                 fontWeight: d === digest?.date ? 600 : 400,
-                color: d === digest?.date ? "var(--gold)" : "var(--text-secondary)",
-                background: d === digest?.date ? "var(--gold-badge-bg)" : "transparent",
+                color: d === digest?.date ? accentColor : "var(--text-secondary)",
+                background: d === digest?.date ? accentBadgeBg : "transparent",
                 textDecoration: "none", transition: "background 0.15s, color 0.15s", lineHeight: 1.4,
               }}>{fmtDateShort(d)}</Link>
             ))}
@@ -150,13 +189,13 @@ export default function DigestView({ digest, allDates, prevTopics }) {
               paddingBottom: 4, scrollbarWidth: "none", WebkitOverflowScrolling: "touch",
             }}>
               {allDates.map((d) => (
-                <Link key={d} href={`/${d}`} style={{
+                <Link key={d} href={`${path}/${d}`} style={{
                   display: "inline-block", whiteSpace: "nowrap",
                   padding: "6px 12px", borderRadius: 20, fontSize: 12,
                   fontWeight: d === digest?.date ? 600 : 400,
-                  color: d === digest?.date ? "var(--gold)" : "var(--text-secondary)",
-                  background: d === digest?.date ? "var(--gold-badge-bg)" : "var(--bg-card)",
-                  border: d === digest?.date ? "1px solid var(--gold)" : "1px solid var(--border)",
+                  color: d === digest?.date ? accentColor : "var(--text-secondary)",
+                  background: d === digest?.date ? accentBadgeBg : "var(--bg-card)",
+                  border: d === digest?.date ? `1px solid ${accentColor}` : "1px solid var(--border)",
                   textDecoration: "none", flexShrink: 0,
                 }}>{fmtDateShort(d)}</Link>
               ))}
@@ -170,10 +209,10 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                 fontFamily: "'Barlow', 'Helvetica Neue', Helvetica, sans-serif",
                 fontSize: isMobile ? 28 : 38, fontWeight: 800,
                 color: "var(--text-primary)", letterSpacing: "-0.04em",
-              }}>Daily Intel</h1>
+              }}>{label} Intel</h1>
               {digest?.date && (
                 <span style={{
-                  background: "var(--gold-dim)", color: "var(--gold)",
+                  background: accentDim, color: accentColor,
                   padding: "4px 12px", borderRadius: 20,
                   fontSize: isMobile ? 11 : 13, fontWeight: 600, letterSpacing: "0.04em",
                 }}>{fmtDate(digest.date)}</span>
@@ -181,13 +220,13 @@ export default function DigestView({ digest, allDates, prevTopics }) {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               <p style={{ color: "var(--text-muted)", fontSize: isMobile ? 13 : 14.5, fontWeight: 400 }}>
-                Business &amp; investment intelligence — curated daily by AI
+                {label} intelligence \u2014 curated daily by AI
               </p>
               {digest && (
                 <div style={{ display: "flex", gap: 6, marginLeft: "auto" }} className="no-print">
                   <button onClick={handleShare} style={{
                     background: "var(--btn-bg)", border: "1px solid var(--btn-border)",
-                    color: shareState !== "idle" ? "var(--gold)" : "var(--btn-text)",
+                    color: shareState !== "idle" ? accentColor : "var(--btn-text)",
                     padding: "5px 12px", borderRadius: 7, cursor: "pointer",
                     fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
                   }}>
@@ -207,24 +246,24 @@ export default function DigestView({ digest, allDates, prevTopics }) {
             <EmptyState />
           ) : (
             <>
-              <MarketPulse text={digest.marketPulse} />
+              <GenericPulse text={pulseText} config={config} />
 
               {/* Search */}
               <div style={{ marginBottom: 16 }}>
                 <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
                   <span style={{ position: "absolute", left: 14, color: "var(--text-muted)", fontSize: 15, pointerEvents: "none", lineHeight: 1 }}>\uD83D\uDD0D</span>
                   <input
-                    ref={searchRef} type="text" placeholder="Search stories\u2026"
+                    ref={searchRef} type="text" placeholder={placeholder}
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onFocus={() => setSearchFocused(true)}
                     onBlur={() => setSearchFocused(false)}
                     style={{
                       width: "100%", padding: "10px 40px 10px 40px", borderRadius: 10,
-                      border: searchFocused ? "1px solid var(--gold)" : "1px solid var(--border)",
+                      border: searchFocused ? `1px solid ${accentColor}` : "1px solid var(--border)",
                       background: "var(--bg-card)", color: "var(--text-primary)", fontSize: 14, outline: "none",
                       fontFamily: "'Inter', 'Helvetica Neue', sans-serif", transition: "border-color 0.2s",
-                      boxShadow: searchFocused ? "0 0 0 3px rgba(184,146,26,0.12)" : "none",
+                      boxShadow: searchFocused ? `0 0 0 3px ${accentColor}20` : "none",
                     }}
                   />
                   {searchQuery && (
@@ -240,48 +279,44 @@ export default function DigestView({ digest, allDates, prevTopics }) {
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, flexWrap: "wrap" }}>
                 <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
                   <strong style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{filteredStories.length}</strong>{" "}
-                  {hasActiveFilter ? `of ${digest.stories.length} stories` : "stories \u00B7 Ranked by market importance"}
+                  {hasActiveFilter ? `of ${digest.stories.length} stories` : `stories \u00B7 ${rankingLabel}`}
                 </span>
                 {!isMobile && (
                   <span style={{
                     background: "var(--bg-card)", border: "1px solid var(--border)",
                     color: "var(--text-muted)", padding: "3px 10px", borderRadius: 20, fontSize: 11,
-                  }}>WSJ \u00B7 Bloomberg \u00B7 FT \u00B7 CNBC \u00B7 Reuters \u00B7 MarketWatch \u00B7 +more</span>
+                  }}>Sources: {sources}</span>
                 )}
                 <button onClick={() => setCompact(!compact)} className="no-print" style={{
                   marginLeft: "auto",
-                  background: compact ? "var(--gold-badge-bg)" : "var(--bg-card)",
-                  border: compact ? "1px solid var(--gold)" : "1px solid var(--border)",
-                  color: compact ? "var(--gold)" : "var(--text-muted)",
-                  padding: "3px 10px", borderRadius: 20, cursor: "pointer",
-                  fontSize: 11, fontWeight: 600,
+                  background: compact ? accentBadgeBg : "var(--bg-card)",
+                  border: compact ? `1px solid ${accentColor}` : "1px solid var(--border)",
+                  color: compact ? accentColor : "var(--text-muted)",
+                  padding: "3px 10px", borderRadius: 20, cursor: "pointer", fontSize: 11, fontWeight: 600,
                 }}>{compact ? "\u229E Cards" : "\u2630 Compact"}</button>
               </div>
 
               {/* Topic pills */}
               {topics.length > 0 && (
                 <div style={{
-                  display: "flex", gap: 6,
-                  flexWrap: isMobile ? "nowrap" : "wrap",
-                  marginBottom: 22,
-                  overflowX: isMobile ? "auto" : "visible",
-                  paddingBottom: isMobile ? 4 : 0,
-                  scrollbarWidth: "none", WebkitOverflowScrolling: "touch",
+                  display: "flex", gap: 6, flexWrap: isMobile ? "nowrap" : "wrap",
+                  marginBottom: 22, overflowX: isMobile ? "auto" : "visible",
+                  paddingBottom: isMobile ? 4 : 0, scrollbarWidth: "none", WebkitOverflowScrolling: "touch",
                 }}>
                   <button onClick={() => setActiveTag(null)} style={{
                     padding: "5px 14px", borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                    border: activeTag === null ? "1px solid var(--gold)" : "1px solid var(--border)",
-                    background: activeTag === null ? "var(--gold-badge-bg)" : "var(--bg-card)",
-                    color: activeTag === null ? "var(--gold)" : "var(--text-muted)",
+                    border: activeTag === null ? `1px solid ${accentColor}` : "1px solid var(--border)",
+                    background: activeTag === null ? accentBadgeBg : "var(--bg-card)",
+                    color: activeTag === null ? accentColor : "var(--text-muted)",
                     transition: "all 0.15s", letterSpacing: "0.02em",
                     fontFamily: "'Inter', 'Helvetica Neue', sans-serif", flexShrink: 0, whiteSpace: "nowrap",
                   }}>All</button>
                   {topics.map(t => (
                     <button key={t} onClick={() => setActiveTag(activeTag === t ? null : t)} style={{
                       padding: "5px 14px", borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                      border: activeTag === t ? "1px solid var(--gold)" : "1px solid var(--border)",
-                      background: activeTag === t ? "var(--gold-badge-bg)" : "var(--bg-card)",
-                      color: activeTag === t ? "var(--gold)" : "var(--text-muted)",
+                      border: activeTag === t ? `1px solid ${accentColor}` : "1px solid var(--border)",
+                      background: activeTag === t ? accentBadgeBg : "var(--bg-card)",
+                      color: activeTag === t ? accentColor : "var(--text-muted)",
                       transition: "all 0.15s", letterSpacing: "0.02em",
                       fontFamily: "'Inter', 'Helvetica Neue', sans-serif", flexShrink: 0, whiteSpace: "nowrap",
                     }}>
@@ -294,12 +329,13 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                 </div>
               )}
 
-              {/* Stories grid */}
+              {/* Stories */}
               {filteredStories.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "60px 24px", color: "var(--text-muted)", fontSize: 15 }}>
                   No stories match your search.{" "}
                   <button onClick={() => { setSearchQuery(""); setActiveTag(null); }} style={{
-                    background: "none", border: "none", color: "var(--gold)", cursor: "pointer", fontSize: 15, fontWeight: 600,
+                    background: "none", border: "none",
+                    color: accentColor, cursor: "pointer", fontSize: 15, fontWeight: 600,
                   }}>Clear filters</button>
                 </div>
               ) : (
@@ -310,7 +346,7 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                   gap: compact ? 6 : (isMobile ? 12 : 14),
                 }}>
                   {filteredStories.map((story, i) => (
-                    <StoryCard
+                    <GenericStoryCard
                       key={i}
                       rank={digest.stories.indexOf(story) + 1}
                       headline={story.headline}
@@ -320,12 +356,11 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                       topic={story.topic}
                       compact={compact}
                       isTrending={trendingTopics.has(story.topic)}
+                      config={config}
                     />
                   ))}
                 </div>
               )}
-
-              <WatchList items={digest.watchList} />
 
               {/* Email subscribe */}
               <div style={{
@@ -336,14 +371,14 @@ export default function DigestView({ digest, allDates, prevTopics }) {
               }} className="no-print">
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
-                    \uD83D\uDCEC Get Daily Intel in your inbox
+                    \uD83D\uDCEC Get {label} Intel in your inbox
                   </div>
                   <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
-                    Finance, health, tech &amp; more — curated by AI every morning.
+                    AI-curated {label.toLowerCase()} intelligence delivered daily.
                   </div>
                 </div>
                 {subState === "done" ? (
-                  <span style={{ color: "var(--gold)", fontWeight: 600, fontSize: 14 }}>\u2713 You&apos;re subscribed!</span>
+                  <span style={{ color: accentColor, fontWeight: 600, fontSize: 14 }}>\u2713 You&apos;re subscribed!</span>
                 ) : (
                   <form onSubmit={handleSubscribe} style={{ display: "flex", gap: 8, width: isMobile ? "100%" : "auto" }}>
                     <input
@@ -356,7 +391,7 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                       }}
                     />
                     <button type="submit" disabled={subState === "loading"} style={{
-                      background: "var(--gold)", color: "#fff", border: "none",
+                      background: accentColor, color: "#fff", border: "none",
                       padding: "8px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600,
                       cursor: subState === "loading" ? "default" : "pointer",
                       opacity: subState === "loading" ? 0.7 : 1,
@@ -372,19 +407,17 @@ export default function DigestView({ digest, allDates, prevTopics }) {
                 alignItems: "center", flexWrap: "wrap", gap: 8,
                 flexDirection: isMobile ? "column" : "row",
               }}>
-                <span style={{ color: "var(--text-muted)", fontSize: 13 }}>Daily Intel \u00B7 AI-curated market intelligence</span>
-                <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                  <a href="/api/rss" target="_blank" rel="noopener noreferrer"
-                    style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 500 }}>RSS Feed</a>
-                  {digest.postedAt && (
-                    <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
-                      Posted{" "}
-                      {new Date(digest.postedAt).toLocaleTimeString("en-US", {
-                        hour: "2-digit", minute: "2-digit", timeZoneName: "short",
-                      })}
-                    </span>
-                  )}
-                </div>
+                <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
+                  Daily Intel \u00B7 {label} Intelligence
+                </span>
+                {digest.postedAt && (
+                  <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
+                    Posted{" "}
+                    {new Date(digest.postedAt).toLocaleTimeString("en-US", {
+                      hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+                    })}
+                  </span>
+                )}
               </div>
             </>
           )}

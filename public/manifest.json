@@ -1,0 +1,29 @@
+{
+  "name": "Daily Intel",
+  "short_name": "Daily Intel",
+  "description": "AI-curated daily market, health, and technology intelligence",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f4fa",
+  "theme_color": "#b8921a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Finance", "url": "/", "description": "Finance & Markets" },
+    { "name": "Health", "url": "/health", "description": "Health & Wellness" },
+    { "name": "Tech", "url": "/tech", "description": "Technology" }
+  ]
+}

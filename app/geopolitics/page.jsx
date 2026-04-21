@@ -1,0 +1,26 @@
+import { getLatestTabDigest, getAllTabDates, getTabDigest } from "@/lib/storage";
+import GenericDigestView from "@/components/GenericDigestView";
+import { TAB_CONFIGS } from "@/components/TabConfig";
+
+export const revalidate = 300;
+
+export const metadata = {
+  title: TAB_CONFIGS["geopolitics"].metaTitle,
+  description: TAB_CONFIGS["geopolitics"].metaDescription,
+};
+
+export default async function GeopoliticsPage() {
+  const [digest, allDates] = await Promise.all([
+    getLatestTabDigest("geopolitics"),
+    getAllTabDates("geopolitics"),
+  ]);
+
+  // Get previous digest topics for trending indicator
+  let prevTopics = [];
+  if (allDates.length > 1) {
+    const prev = await getTabDigest("geopolitics", allDates[1]);
+    if (prev?.stories) prevTopics = [...new Set(prev.stories.map(s => s.topic).filter(Boolean))];
+  }
+
+  return <GenericDigestView digest={digest} allDates={allDates} prevTopics={prevTopics} config={TAB_CONFIGS["geopolitics"]} />;
+}
