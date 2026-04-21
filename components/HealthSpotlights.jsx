@@ -22,9 +22,9 @@ export default function HealthSpotlights({ items }) {
           padding: "4px 12px", borderRadius: 20,
           fontSize: 12, fontWeight: 700,
           letterSpacing: "0.08em", textTransform: "uppercase",
-        }}>\u{1F33F} Expert Spotlights</span>
+        }}>🌿 Expert Spotlights</span>
         <span style={{ color: "var(--text-muted)", fontSize: 13 }}>
-          Influencers & podcasts to follow
+          Influencers &amp; podcasts to follow
         </span>
       </div>
       <div style={{
