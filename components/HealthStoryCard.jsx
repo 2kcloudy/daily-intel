@@ -57,7 +57,7 @@ function buildImageUrl(headline, topic) {
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=600&height=220&nologo=true&seed=${seed}`;
 }
 
-function StoryImage({ headline, topic }) {
+function StoryImage({ headline, topic, ready }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const timerRef = useRef(null);
@@ -66,11 +66,12 @@ function StoryImage({ headline, topic }) {
   const emoji = topicEmoji(topic);
 
   useEffect(() => {
+    if (!ready) return;
     timerRef.current = setTimeout(() => {
       if (!loaded) setError(true);
     }, 12000);
     return () => clearTimeout(timerRef.current);
-  }, [loaded]);
+  }, [loaded, ready]);
 
   if (error) {
     return (
@@ -115,9 +116,15 @@ function StoryImage({ headline, topic }) {
   );
 }
 
-export default function HealthStoryCard({ rank, headline, summary, source, url, topic }) {
+export default function HealthStoryCard({ rank = 1, headline, summary, source, url, topic }) {
   const [hovered, setHovered] = useState(false);
+  const [ready, setReady] = useState(false);
   const { text: topicText, bg: topicBg } = topicStyle(topic);
+
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), (rank - 1) * 900);
+    return () => clearTimeout(t);
+  }, [rank]);
 
   return (
     <article
@@ -140,7 +147,7 @@ export default function HealthStoryCard({ rank, headline, summary, source, url, 
       }}
     >
       {/* AI Image */}
-      <StoryImage headline={headline} topic={topic} />
+      <StoryImage headline={headline} topic={topic} ready={ready} />
 
       {/* Top row: rank badge + topic tag */}
       <div style={{

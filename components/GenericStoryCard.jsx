@@ -55,7 +55,7 @@ function seedFromString(str) {
 }
 
 /* AI image with shimmer + emoji fallback + 12s timeout */
-function StoryImage({ headline, topic, accentColor, accentDim, imagePromptStyle }) {
+function StoryImage({ headline, topic, accentColor, accentDim, imagePromptStyle, ready }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const timerRef = useRef(null);
@@ -64,9 +64,10 @@ function StoryImage({ headline, topic, accentColor, accentDim, imagePromptStyle 
   const src = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=600&height=220&nologo=true&seed=${seedFromString(headline || "")}`;
 
   useEffect(() => {
+    if (!ready) return;
     timerRef.current = setTimeout(() => { if (!loaded) setError(true); }, 12000);
     return () => clearTimeout(timerRef.current);
-  }, [loaded]);
+  }, [loaded, ready]);
 
   if (error) {
     return (
@@ -97,13 +98,14 @@ function StoryImage({ headline, topic, accentColor, accentDim, imagePromptStyle 
 }
 
 export default function GenericStoryCard({
-  rank, headline, summary, source, url, topic,
+  rank = 1, headline, summary, source, url, topic,
   compact = false, isTrending = false,
   config = {},
 }) {
   const [hovered, setHovered] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [ready, setReady] = useState(false);
   const sentiment = inferSentiment(headline, summary);
   const faviconUrl = getFaviconUrl(source);
 
@@ -114,6 +116,11 @@ export default function GenericStoryCard({
     accentBadgeBg = "rgba(184,146,26,0.09)",
     imagePromptStyle,
   } = config;
+
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), (rank - 1) * 900);
+    return () => clearTimeout(t);
+  }, [rank]);
 
   const borderOpacity = rankBorderOpacity(rank);
   const rankBorderColor = accentColor.startsWith("#")
@@ -202,6 +209,7 @@ export default function GenericStoryCard({
         headline={headline} topic={topic}
         accentColor={accentColor} accentDim={accentDim}
         imagePromptStyle={imagePromptStyle}
+        ready={ready}
       />
 
       {/* Top row: rank + topic + sentiment + trending */}

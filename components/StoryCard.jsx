@@ -59,7 +59,7 @@ function buildImageUrl(headline, topic) {
 }
 
 /* AI image with shimmer skeleton + emoji fallback + 12s timeout */
-function StoryImage({ headline, topic }) {
+function StoryImage({ headline, topic, ready }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const timerRef = useRef(null);
@@ -68,12 +68,13 @@ function StoryImage({ headline, topic }) {
   const emoji = topicEmoji(topic);
 
   useEffect(() => {
+    if (!ready) return;
     // Fall back to emoji if image doesn't load within 12 seconds
     timerRef.current = setTimeout(() => {
       if (!loaded) setError(true);
     }, 12000);
     return () => clearTimeout(timerRef.current);
-  }, [loaded]);
+  }, [loaded, ready]);
 
   if (error) {
     return (
@@ -118,9 +119,15 @@ function StoryImage({ headline, topic }) {
   );
 }
 
-export default function StoryCard({ rank, headline, summary, source, url, topic }) {
+export default function StoryCard({ rank = 1, headline, summary, source, url, topic }) {
   const [hovered, setHovered] = useState(false);
+  const [ready, setReady] = useState(false);
   const { text: topicText, bg: topicBg } = topicStyle(topic);
+
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), (rank - 1) * 900);
+    return () => clearTimeout(t);
+  }, [rank]);
 
   return (
     <article
@@ -143,7 +150,7 @@ export default function StoryCard({ rank, headline, summary, source, url, topic 
       }}
     >
       {/* AI Image */}
-      <StoryImage headline={headline} topic={topic} />
+      <StoryImage headline={headline} topic={topic} ready={ready} />
 
       {/* Top row: rank badge + topic tag */}
       <div style={{
