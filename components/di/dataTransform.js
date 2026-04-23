@@ -42,20 +42,23 @@ const TAG_THEMES = {
 };
 
 /**
- * Generate a Pollinations.ai image URL.
- * Keeps prompts short and uses stable seed for consistency.
+ * Generate an image URL for a story.
+ *
+ * Uses the /api/image proxy which:
+ *  1. Serves the permanent Blob URL instantly if already cached.
+ *  2. Generates via Pollinations, uploads to Blob, and redirects on first hit.
+ *
+ * Falls back to direct Pollinations if called server-side (no window).
  */
 export function storyImg(story, w = 600, h = 400) {
   const tag = (story.tag || story.topic || "markets").toLowerCase().replace(/[\s/+]+/g, "");
   const theme = TAG_THEMES[tag] || "business news editorial illustration";
-  // Keep prompt tight — Pollinations chokes on long URLs
   const words = (story.headline || "").split(" ").slice(0, 6).join(" ");
-  const rawPrompt = `${words}, ${theme}, editorial illustration, professional photography, muted tones`;
   const seed = story.seed || strHash(story.headline || String(story.rank || 0));
-  return (
-    `https://image.pollinations.ai/prompt/${encodeURIComponent(rawPrompt)}` +
-    `?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`
-  );
+
+  // Use the caching API route in browser
+  const headline = encodeURIComponent((story.headline || "").slice(0, 120));
+  return `/api/image?seed=${seed}&tag=${encodeURIComponent(tag)}&headline=${headline}&w=${w}&h=${h}`;
 }
 
 /**

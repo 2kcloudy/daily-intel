@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { saveHealthDigest, getLatestHealthDigest, getAllHealthDates } from "@/lib/storage";
+import { pregenerateDigestImages } from "@/lib/imageCache";
 
 /**
  * POST /api/health-digest
@@ -68,10 +69,15 @@ export async function POST(request) {
 
   await saveHealthDigest(date, digest);
 
+  pregenerateDigestImages(stories).then(r =>
+    console.log(`[images] Health ${date}: ${r.done} generated, ${r.failed} failed`)
+  ).catch(() => {});
+
   return NextResponse.json({
     success: true,
     digest: { date, storyCount: stories.length },
     url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/health/${date}`,
+    images: "generating in background",
   });
 }
 

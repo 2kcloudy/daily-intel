@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { saveDigest, getLatestDigest, getAllDates } from "@/lib/storage";
+import { pregenerateDigestImages } from "@/lib/imageCache";
 
 // POST /api/digest — Claude posts a new digest here
 export async function POST(request) {
@@ -35,10 +36,17 @@ export async function POST(request) {
 
   await saveDigest(date, digest);
 
+  // Pre-generate images in the background (non-blocking)
+  // waitUntil isn't available in all environments, so we fire-and-forget
+  pregenerateDigestImages(stories).then(r =>
+    console.log(`[images] Finance ${date}: ${r.done} generated, ${r.failed} failed`)
+  ).catch(() => {});
+
   return NextResponse.json({
     success: true,
     digest: { date, storyCount: stories.length },
     url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/${date}`,
+    images: "generating in background",
   });
 }
 

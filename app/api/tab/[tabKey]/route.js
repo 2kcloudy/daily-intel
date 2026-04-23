@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { saveTabDigest, getLatestTabDigest, getAllTabDates } from "@/lib/storage";
+import { pregenerateDigestImages } from "@/lib/imageCache";
 
 const VALID_TABS = ["tech", "geopolitics", "energy", "real-estate", "startups", "crypto", "science", "longevity", "policy", "performance"];
 
@@ -36,10 +37,15 @@ export async function POST(request, { params }) {
 
   await saveTabDigest(tabKey, date, digest);
 
+  pregenerateDigestImages(stories).then(r =>
+    console.log(`[images] ${tabKey} ${date}: ${r.done} generated, ${r.failed} failed`)
+  ).catch(() => {});
+
   return NextResponse.json({
     success: true,
     digest: { date, storyCount: stories.length },
     url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/${tabKey}/${date}`,
+    images: "generating in background",
   });
 }
 
