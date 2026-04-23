@@ -70,18 +70,26 @@ async function fetchTwelveData(apiKey) {
     Object.assign(bySymbol, json);
   }
 
+  // Debug: show per-symbol result in response
+  const symbolResults = {};
   const results = TD_SYMBOLS.map(({ sym, label, type }) => {
     const q = bySymbol[sym];
     if (!q || q.status === "error") {
-      console.log(`[market-data] TD symbol ${sym} error:`, q?.message || "not found");
+      symbolResults[sym] = `ERROR: ${q?.message || "not found"}`;
       return null;
     }
     const price = q.close || q.price || 0;
-    const pct   = q.percent_change || 0;
+    symbolResults[sym] = `OK: ${price}`;
+    const pct = q.percent_change || 0;
     return { label, ...formatValue(price, pct, type) };
   }).filter(Boolean);
 
-  console.log(`[market-data] TD parsed ${results.length}/${TD_SYMBOLS.length} symbols`);
+  console.log(`[market-data] TD parsed ${results.length}/${TD_SYMBOLS.length}:`, JSON.stringify(symbolResults));
+  // Temporarily attach debug info to thrown error if < 5
+  if (results.length < 5) {
+    const err = new Error(`Only ${results.length} instruments. Symbols: ${JSON.stringify(symbolResults)}`);
+    throw err;
+  }
   return results;
 }
 
