@@ -113,6 +113,7 @@ async function fetchMarketData() {
   console.log(`[market-data] TWELVE_DATA_KEY: ${keyStatus}`);
 
   // Strategy 1: Twelve Data (if API key configured)
+  let tdError = null;
   if (tdKey) {
     try {
       const indices = await fetchTwelveData(tdKey);
@@ -125,9 +126,11 @@ async function fetchMarketData() {
           if (btcIdx >= 0) indices[btcIdx] = btc;
           else indices.push(btc);
         } catch {}
-        return { indices, source: "twelvedata" };
+        return { indices, source: "twelvedata", tdError: null };
       }
+      tdError = `Only ${indices?.length ?? 0} instruments returned (need ≥5)`;
     } catch (e) {
+      tdError = e.message;
       console.error("[market-data] Twelve Data error:", e.message);
     }
   }
@@ -138,11 +141,11 @@ async function fetchMarketData() {
     const partial = STATIC_FALLBACK.map(item =>
       item.label === "BTC" ? btc : item
     );
-    return { indices: partial, source: "partial-coingecko" };
+    return { indices: partial, source: "partial-coingecko", tdError };
   } catch {}
 
   // Strategy 3: Return static "—" placeholders (better than fake data)
-  return { indices: STATIC_FALLBACK, source: "static" };
+  return { indices: STATIC_FALLBACK, source: "static", tdError };
 }
 
 /**
@@ -192,6 +195,7 @@ export async function GET(request) {
       hasKey: !!process.env.TWELVE_DATA_KEY,
       keyPreview: process.env.TWELVE_DATA_KEY
         ? `${process.env.TWELVE_DATA_KEY.slice(0,4)}...` : "NOT SET",
+      tdError: result.tdError || null,
     };
     return NextResponse.json({ ...payload, fromCache: false, debug }, {
       headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
