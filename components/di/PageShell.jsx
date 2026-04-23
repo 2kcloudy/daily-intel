@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import { TickerBar, Masthead, CategoryNav, Bulletin, Footer } from "./Chrome";
@@ -8,6 +8,36 @@ import Rail from "./Rail";
 import { StoryDetail, SearchOverlay, CategoryStrip } from "./Extras";
 import { useTweaks, TweaksPanel } from "./Tweaks";
 import { CATEGORIES, PLACEHOLDER_INDICES } from "./dataTransform";
+
+/** Fetch live market data from our API route, fall back to placeholders */
+function useLiveMarketData() {
+  const [indices, setIndices] = useState(PLACEHOLDER_INDICES);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const timerRef = useRef(null);
+
+  async function fetchData() {
+    try {
+      const res = await fetch("/api/market-data", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data?.indices?.length) {
+        setIndices(data.indices);
+        setLastUpdated(data.updatedAt ? new Date(data.updatedAt) : new Date());
+      }
+    } catch {
+      // silently keep last known data
+    }
+  }
+
+  useEffect(() => {
+    fetchData(); // initial load
+    // Refresh every 90 seconds
+    timerRef.current = setInterval(fetchData, 90_000);
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  return { indices, lastUpdated };
+}
 
 // Tab key → display name map
 const CAT_META = {
@@ -44,6 +74,9 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
   const [openStory, setOpenStory] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeTag, setActiveTag] = useState("all");
+
+  // Live market data (auto-refreshes every 90s)
+  const { indices: liveIndices, lastUpdated: marketUpdatedAt } = useLiveMarketData();
 
   // Initialise theme from localStorage
   useEffect(() => {
@@ -121,7 +154,8 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
   const watchlist = (mode === "finance" ? financeData?.watchlist : tabData?.watchlist) || [];
   const archive   = data?.archive || [];
   const pulse     = data?.pulse || "";
-  const indices   = financeData?.indices || PLACEHOLDER_INDICES;
+  // Use live indices from Yahoo Finance (auto-refreshed), fall back to digest data or static placeholders
+  const indices = liveIndices?.length ? liveIndices : (financeData?.indices || PLACEHOLDER_INDICES);
   const sources   = data?.sources || [];
   const dateShort = financeData?.dateShort || "";
 
@@ -227,6 +261,7 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
           archive={archive}
           onNav={handleNav}
           showIndices={mode === "finance" && tweaks.showIndices}
+          marketUpdatedAt={marketUpdatedAt}
         />
       </main>
 

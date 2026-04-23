@@ -72,14 +72,25 @@ function Subscribe() {
   );
 }
 
-export default function Rail({ indices, watchlist, archive, onNav, showIndices = true }) {
+export default function Rail({ indices, watchlist, archive, onNav, showIndices = true, marketUpdatedAt }) {
+  const updatedLabel = marketUpdatedAt
+    ? marketUpdatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : null;
+
   return (
     <aside className="di-rail">
       {showIndices && indices?.length > 0 && (
         <section className="di-rail-section">
           <h4 className="di-rail-title">
             Markets
-            <span className="meta">Indicative</span>
+            <span className="meta" style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              {updatedLabel ? (
+                <>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--di-pos)", display: "inline-block", animation: "pulse 2s infinite" }} />
+                  {updatedLabel}
+                </>
+              ) : "Live"}
+            </span>
           </h4>
           <IndicesGrid indices={indices} />
         </section>
