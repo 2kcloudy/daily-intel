@@ -46,6 +46,8 @@ export async function POST(request) {
   const targetTab  = searchParams.get("tab") || null;
   const checkOnly  = searchParams.get("check") === "true";
   const imgLimit   = Math.min(parseInt(searchParams.get("limit") || "200", 10), 969);
+  // ?force=1 rewrites existing entries (use to migrate flux→turbo URLs)
+  const force      = searchParams.get("force") === "1";
 
   const tabs     = targetTab ? [targetTab] : ALL_TABS;
   const startMs  = Date.now();
@@ -79,7 +81,9 @@ export async function POST(request) {
 
         for (const [w, h] of IMAGE_SIZES) {
           const cached = await getCachedImageUrl(seed, w, h).catch(() => null);
-          if (cached) { totalCached++; continue; }
+          // In force mode, rewrite existing flux URLs with turbo URLs
+          if (cached && !force) { totalCached++; continue; }
+          if (cached && force && !cached.includes("model=flux")) { totalCached++; continue; }
           pending.push({ seed, headline, tag, w, h });
         }
       }
