@@ -51,25 +51,37 @@ async function fetchTwelveData(apiKey) {
   const url = `https://api.twelvedata.com/quote?symbol=${symbols}&apikey=${apiKey}`;
 
   const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
-  if (!res.ok) throw new Error(`Twelve Data HTTP ${res.status}`);
-  const json = await res.json();
+  const rawText = await res.text();
+  console.log("[market-data] TD raw (first 500):", rawText.slice(0, 500));
+  if (!res.ok) throw new Error(`Twelve Data HTTP ${res.status}: ${rawText.slice(0,200)}`);
+  const json = JSON.parse(rawText);
+
+  // Check for top-level API error (auth failure, plan restriction, etc.)
+  if (json.code && json.status === "error") {
+    throw new Error(`Twelve Data API error ${json.code}: ${json.message}`);
+  }
 
   // Response is either a single object or a map keyed by symbol
   const bySymbol = {};
   if (json.symbol) {
-    // Single symbol response
     bySymbol[json.symbol] = json;
   } else {
     Object.assign(bySymbol, json);
   }
 
-  return TD_SYMBOLS.map(({ sym, label, type }) => {
+  const results = TD_SYMBOLS.map(({ sym, label, type }) => {
     const q = bySymbol[sym];
-    if (!q || q.status === "error") return null;
+    if (!q || q.status === "error") {
+      console.log(`[market-data] TD symbol ${sym} error:`, q?.message || "not found");
+      return null;
+    }
     const price = q.close || q.price || 0;
     const pct   = q.percent_change || 0;
     return { label, ...formatValue(price, pct, type) };
   }).filter(Boolean);
+
+  console.log(`[market-data] TD parsed ${results.length}/${TD_SYMBOLS.length} symbols`);
+  return results;
 }
 
 // ── CoinGecko for BTC (free, no key needed) ───────────────────────────────────
@@ -134,6 +146,7 @@ async function fetchMarketData() {
       console.error("[market-data] Twelve Data error:", e.message);
     }
   }
+  console.log("[market-data] tdError:", tdError);
 
   // Strategy 2: CoinGecko for BTC only (always free) + partial static for rest
   try {
