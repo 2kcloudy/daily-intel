@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
 
 const CACHE_KEY = "market-data:live";
-const CACHE_TTL = 300; // 5 minutes
+const CACHE_TTL = 900; // 15 minutes (free tier: 8 credits/min, 800/day)
 
 // ── Data sources ──────────────────────────────────────────────────────────────
 // Priority order:
@@ -11,17 +11,18 @@ const CACHE_TTL = 300; // 5 minutes
 //   3. Cached last-known values
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Twelve Data symbol map — verified working symbols
+// Twelve Data symbol map — 8 symbols max (free tier: 8 credits/min)
+// BTC comes from CoinGecko separately (no credit used)
 const TD_SYMBOLS = [
   { sym: "SPX",     label: "S&P 500", type: "index" },
   { sym: "IXIC",    label: "NASDAQ",  type: "index" },
   { sym: "DJI",     label: "DOW",     type: "index" },
-  { sym: "XTI/USD", label: "WTI",     type: "oil"   },  // WTI crude (not "WTI")
+  { sym: "XTI/USD", label: "WTI",     type: "oil"   },  // WTI crude oil
   { sym: "XBR/USD", label: "BRENT",   type: "oil"   },  // Brent crude
   { sym: "XAU/USD", label: "GOLD",    type: "metal" },  // Gold spot
   { sym: "VIX",     label: "VIX",     type: "vol"   },
-  { sym: "US10Y",   label: "10Y",     type: "bond"  },  // US 10-Year yield
   { sym: "DXY",     label: "DXY",     type: "fx"    },  // US Dollar Index
+  // Total: 8 symbols = 8 credits = exactly the free tier per-minute limit
 ];
 
 function formatValue(price, pct, type) {
@@ -106,16 +107,15 @@ async function fetchBtcFromCoinGecko() {
 
 // ── Fallback static data (shows last known state from digest) ─────────────────
 const STATIC_FALLBACK = [
-  { label: "S&P 500", value: "—",    pct: "—",       dir: "up"   },
-  { label: "NASDAQ",  value: "—",    pct: "—",       dir: "up"   },
-  { label: "DOW",     value: "—",    pct: "—",       dir: "up"   },
-  { label: "WTI",     value: "—",    pct: "—",       dir: "up"   },
-  { label: "BRENT",   value: "—",    pct: "—",       dir: "up"   },
-  { label: "GOLD",    value: "—",    pct: "—",       dir: "up"   },
-  { label: "BTC",     value: "—",    pct: "—",       dir: "up"   },
-  { label: "10Y",     value: "—",    pct: "—",       dir: "down" },
-  { label: "VIX",     value: "—",    pct: "—",       dir: "down" },
-  { label: "DXY",     value: "—",    pct: "—",       dir: "down" },
+  { label: "S&P 500", value: "—", pct: "—", dir: "up"   },
+  { label: "NASDAQ",  value: "—", pct: "—", dir: "up"   },
+  { label: "DOW",     value: "—", pct: "—", dir: "up"   },
+  { label: "WTI",     value: "—", pct: "—", dir: "up"   },
+  { label: "BRENT",   value: "—", pct: "—", dir: "up"   },
+  { label: "GOLD",    value: "—", pct: "—", dir: "up"   },
+  { label: "BTC",     value: "—", pct: "—", dir: "up"   },
+  { label: "VIX",     value: "—", pct: "—", dir: "down" },
+  { label: "DXY",     value: "—", pct: "—", dir: "down" },
 ];
 
 // ── Main fetch logic ──────────────────────────────────────────────────────────
