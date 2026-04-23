@@ -11,30 +11,33 @@ const CACHE_TTL = 900; // 15 minutes (free tier: 8 credits/min, 800/day)
 //   3. Cached last-known values
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Twelve Data symbol map — 8 symbols max (free tier: 8 credits/min)
-// BTC comes from CoinGecko separately (no credit used)
+// Twelve Data symbol map — ETF proxies work on free tier; major indices do not.
+// BTC comes from CoinGecko (no credits used).
+// Free tier note: SPX/DJI/IXIC require paid plan; use ETFs instead.
 const TD_SYMBOLS = [
-  { sym: "SPX",     label: "S&P 500", type: "index" },
-  { sym: "IXIC",    label: "NASDAQ",  type: "index" },
-  { sym: "DJI",     label: "DOW",     type: "index" },
-  { sym: "XTI/USD", label: "WTI",     type: "oil"   },  // WTI crude oil
-  { sym: "XBR/USD", label: "BRENT",   type: "oil"   },  // Brent crude
-  { sym: "XAU/USD", label: "GOLD",    type: "metal" },  // Gold spot
-  { sym: "VIX",     label: "VIX",     type: "vol"   },
-  { sym: "DXY",     label: "DXY",     type: "fx"    },  // US Dollar Index
-  // Total: 8 symbols = 8 credits = exactly the free tier per-minute limit
+  { sym: "SPY",     label: "S&P 500", type: "etf"   },  // S&P 500 ETF (~SPX/10)
+  { sym: "QQQ",     label: "NASDAQ",  type: "etf"   },  // Nasdaq 100 ETF
+  { sym: "DIA",     label: "DOW",     type: "etf"   },  // Dow Jones ETF (~DJI/100)
+  { sym: "USO",     label: "WTI",     type: "etf"   },  // WTI Oil ETF
+  { sym: "GLD",     label: "GOLD",    type: "etf"   },  // Gold ETF (~XAU/10)
+  { sym: "TLT",     label: "10Y",     type: "bond"  },  // 20Y+ Treasury ETF (proxy)
+  { sym: "UVXY",    label: "VIX",     type: "vol"   },  // Short-term VIX ETF
+  { sym: "UUP",     label: "DXY",     type: "fx"    },  // Dollar Bullish ETF
+  // Total: 8 symbols = 8 credits/request = exactly the free tier per-minute limit
 ];
 
 function formatValue(price, pct, type) {
   if (!price) return { value: "—", pct: "—", dir: "up" };
   let value;
-  if (type === "crypto") value = `$${Number(price) >= 10000 ? Number(price).toLocaleString("en-US", { maximumFractionDigits: 0 }) : Number(price).toFixed(2)}`;
-  else if (type === "bond") value = `${Number(price).toFixed(2)}%`;
-  else if (type === "oil" || type === "metal") value = `$${Number(price).toFixed(2)}`;
-  else if (type === "index") value = Number(price) >= 10000
-    ? Number(price).toLocaleString("en-US", { maximumFractionDigits: 0 })
-    : Number(price).toLocaleString("en-US", { maximumFractionDigits: 2 });
-  else value = Number(price).toFixed(2);
+  const n = Number(price);
+  if (type === "crypto") value = `$${n >= 10000 ? n.toLocaleString("en-US", { maximumFractionDigits: 0 }) : n.toFixed(2)}`;
+  else if (type === "bond") value = `$${n.toFixed(2)}`; // TLT price
+  else if (type === "etf" || type === "vol" || type === "fx") value = `$${n.toFixed(2)}`;
+  else if (type === "oil" || type === "metal") value = `$${n.toFixed(2)}`;
+  else if (type === "index") value = n >= 10000
+    ? n.toLocaleString("en-US", { maximumFractionDigits: 0 })
+    : n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+  else value = n.toFixed(2);
 
   const pctNum = Number(pct) || 0;
   return {
@@ -119,9 +122,9 @@ const STATIC_FALLBACK = [
   { label: "NASDAQ",  value: "—", pct: "—", dir: "up"   },
   { label: "DOW",     value: "—", pct: "—", dir: "up"   },
   { label: "WTI",     value: "—", pct: "—", dir: "up"   },
-  { label: "BRENT",   value: "—", pct: "—", dir: "up"   },
   { label: "GOLD",    value: "—", pct: "—", dir: "up"   },
   { label: "BTC",     value: "—", pct: "—", dir: "up"   },
+  { label: "10Y",     value: "—", pct: "—", dir: "down" },
   { label: "VIX",     value: "—", pct: "—", dir: "down" },
   { label: "DXY",     value: "—", pct: "—", dir: "down" },
 ];
