@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
-import { pregenerateDigestImages, storyImageSeed, getCachedImageUrl } from "@/lib/imageCache";
+import { getCachedImageUrl, generateAndCacheImage, storyImageSeed } from "@/lib/imageCache";
 
 const ALL_TABS = [
   "finance", "health", "tech", "geopolitics", "energy",
@@ -8,33 +8,32 @@ const ALL_TABS = [
 ];
 
 const TAB_KV_KEYS = {
-  finance:      { dates: "digest:dates",                getDigest: (d) => `digest:${d}` },
-  health:       { dates: "health-digest:dates",         getDigest: (d) => `health-digest:${d}` },
-  tech:         { dates: "tech-digest:dates",           getDigest: (d) => `tech-digest:${d}` },
-  geopolitics:  { dates: "geopolitics-digest:dates",    getDigest: (d) => `geopolitics-digest:${d}` },
-  energy:       { dates: "energy-digest:dates",         getDigest: (d) => `energy-digest:${d}` },
-  "real-estate":{ dates: "real-estate-digest:dates",    getDigest: (d) => `real-estate-digest:${d}` },
-  startups:     { dates: "startups-digest:dates",       getDigest: (d) => `startups-digest:${d}` },
-  crypto:       { dates: "crypto-digest:dates",         getDigest: (d) => `crypto-digest:${d}` },
-  science:      { dates: "science-digest:dates",        getDigest: (d) => `science-digest:${d}` },
-  longevity:    { dates: "longevity-digest:dates",      getDigest: (d) => `longevity-digest:${d}` },
-  policy:       { dates: "policy-digest:dates",         getDigest: (d) => `policy-digest:${d}` },
-  performance:  { dates: "performance-digest:dates",    getDigest: (d) => `performance-digest:${d}` },
+  finance:       { dates: "digest:dates",             getDigest: (d) => `digest:${d}` },
+  health:        { dates: "health-digest:dates",      getDigest: (d) => `health-digest:${d}` },
+  tech:          { dates: "tech-digest:dates",        getDigest: (d) => `tech-digest:${d}` },
+  geopolitics:   { dates: "geopolitics-digest:dates", getDigest: (d) => `geopolitics-digest:${d}` },
+  energy:        { dates: "energy-digest:dates",      getDigest: (d) => `energy-digest:${d}` },
+  "real-estate": { dates: "real-estate-digest:dates", getDigest: (d) => `real-estate-digest:${d}` },
+  startups:      { dates: "startups-digest:dates",    getDigest: (d) => `startups-digest:${d}` },
+  crypto:        { dates: "crypto-digest:dates",      getDigest: (d) => `crypto-digest:${d}` },
+  science:       { dates: "science-digest:dates",     getDigest: (d) => `science-digest:${d}` },
+  longevity:     { dates: "longevity-digest:dates",   getDigest: (d) => `longevity-digest:${d}` },
+  policy:        { dates: "policy-digest:dates",      getDigest: (d) => `policy-digest:${d}` },
+  performance:   { dates: "performance-digest:dates", getDigest: (d) => `performance-digest:${d}` },
 };
 
 const IMAGE_SIZES = [[900, 700], [300, 300], [1600, 800]];
 
 /**
  * POST /api/admin/backfill-images
- * Headers: x-api-key: di-k9x4m2p7n8q1r5s3t6v0w
+ *
+ * Generates and caches images for all archive stories.
+ * Fully idempotent — already-cached images are skipped instantly.
  *
  * Query params:
- *   tab=finance          (optional — backfill a single tab; default: all tabs)
- *   check=true           (optional — dry run: just count pending images, don't generate)
- *   limit=20             (optional — max stories to process per call; default: 50)
- *
- * This endpoint is designed to be called repeatedly (idempotent).
- * Already-cached images are skipped instantly.
+ *   tab=finance     — process a single tab (default: all)
+ *   check=true      — dry-run count only, no generation
+ *   limit=12        — max IMAGES to generate per call (default: 12)
  */
 export async function POST(request) {
   const apiKey = request.headers.get("x-api-key");
@@ -43,14 +42,17 @@ export async function POST(request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const targetTab = searchParams.get("tab") || null;  // null = all tabs
-  const checkOnly = searchParams.get("check") === "true";
-  const limit     = Math.min(parseInt(searchParams.get("limit") || "50", 10), 200);
+  const targetTab  = searchParams.get("tab") || null;
+  const checkOnly  = searchParams.get("check") === "true";
+  const imgLimit   = Math.min(parseInt(searchParams.get("limit") || "12", 10), 60);
 
   const tabs = targetTab ? [targetTab] : ALL_TABS;
   const results = {};
-  let totalStories = 0, totalImages = 0, skipped = 0, processed = 0, failed = 0;
+  let totalCached = 0, totalPending = 0, totalGenerated = 0, totalFailed = 0;
+  let imagesGenerated = 0;
+  const startMs = Date.now();
 
+  outer:
   for (const tab of tabs) {
     const cfg = TAB_KV_KEYS[tab];
     if (!cfg) continue;
@@ -58,105 +60,88 @@ export async function POST(request) {
     let dates = [];
     try {
       dates = await kv.zrange(cfg.dates, 0, -1, { rev: true });
-      if (!dates || !dates.length) { results[tab] = { dates: 0 }; continue; }
+      if (!dates?.length) { results[tab] = { dates: 0, cached: 0, pending: 0 }; continue; }
     } catch (e) {
       results[tab] = { error: e.message }; continue;
     }
 
-    let tabStories = 0, tabSkipped = 0, tabProcessed = 0, tabFailed = 0;
+    let tabCached = 0, tabPending = 0, tabGenerated = 0, tabFailed = 0;
 
     for (const date of dates) {
-      if (processed >= limit) break;
-
       let digest;
       try {
         const raw = await kv.get(cfg.getDigest(date));
         digest = typeof raw === "string" ? JSON.parse(raw) : raw;
       } catch { continue; }
-
       if (!digest?.stories?.length) continue;
 
       for (const story of digest.stories) {
-        if (processed >= limit) break;
-        tabStories++;
-        totalStories++;
+        if (Date.now() - startMs > 25000) break outer; // hard safety cutoff
 
         const headline = story.headline || "";
-        const tag = story.topic || story.tag || "markets";
-        const seed = storyImageSeed(headline, story.rank || 0);
+        const tag      = story.topic || story.tag || "markets";
+        const seed     = storyImageSeed(headline, story.rank || 0);
 
-        // Check if all sizes are already cached
-        const checks = await Promise.all(
-          IMAGE_SIZES.map(([w, h]) => getCachedImageUrl(seed, w, h))
-        );
-        const allCached = checks.every(Boolean);
+        for (const [w, h] of IMAGE_SIZES) {
+          // Check KV cache
+          const cached = await getCachedImageUrl(seed, w, h).catch(() => null);
+          if (cached) {
+            tabCached++; totalCached++;
+            continue;
+          }
 
-        if (allCached) {
-          tabSkipped++; skipped++;
-          continue;
-        }
+          tabPending++; totalPending++;
+          if (checkOnly) continue;
+          if (imagesGenerated >= imgLimit) break outer;
 
-        totalImages += IMAGE_SIZES.length - checks.filter(Boolean).length;
-
-        if (checkOnly) continue;
-
-        // Generate missing sizes
-        for (let i = 0; i < IMAGE_SIZES.length; i++) {
-          if (checks[i]) continue;
-          const [w, h] = IMAGE_SIZES[i];
-          const { generateAndCacheImage } = await import("@/lib/imageCache");
+          // Generate + cache via the proven pipeline
           try {
-            await generateAndCacheImage(seed, headline, tag, w, h);
-            tabProcessed++; processed++;
+            const url = await generateAndCacheImage(seed, headline, tag, w, h);
+            if (url) {
+              tabGenerated++; totalGenerated++; imagesGenerated++;
+            } else {
+              tabFailed++; totalFailed++;
+            }
           } catch {
-            tabFailed++; failed++;
+            tabFailed++; totalFailed++;
           }
         }
       }
     }
 
     results[tab] = {
-      dates: dates.length,
-      stories: tabStories,
-      skipped: tabSkipped,
-      processed: tabProcessed,
-      failed: tabFailed,
+      dates:     dates.length,
+      cached:    tabCached,
+      pending:   tabPending,
+      generated: tabGenerated,
+      failed:    tabFailed,
     };
   }
 
   return NextResponse.json({
-    mode: checkOnly ? "check" : "generate",
-    summary: { totalStories, totalImages, skipped, processed, failed },
+    mode:    checkOnly ? "check" : "generate",
+    summary: {
+      cached:    totalCached,
+      pending:   totalPending,
+      generated: totalGenerated,
+      failed:    totalFailed,
+      elapsedMs: Date.now() - startMs,
+    },
     tabs: results,
-    note: processed >= limit
-      ? `Hit limit of ${limit}. Call again to continue — already-cached images are skipped.`
-      : "Done.",
+    note: imagesGenerated >= imgLimit
+      ? `Limit of ${imgLimit} images reached. Call again — cached images are skipped instantly.`
+      : "Done for this pass.",
   });
 }
 
-/**
- * GET /api/admin/backfill-images
- * Returns current image cache stats.
- */
 export async function GET(request) {
   const apiKey = request.headers.get("x-api-key");
   if (apiKey !== process.env.DIGEST_API_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  // Count cached image keys
-  let cachedCount = 0;
-  try {
-    // KV scan isn't available on all plans, so we use a prefix scan
-    let cursor = 0;
-    do {
-      const [nextCursor, keys] = await kv.scan(cursor, { match: "img:*", count: 100 });
-      cachedCount += keys.length;
-      cursor = nextCursor;
-    } while (cursor !== 0);
-  } catch (e) {
-    return NextResponse.json({ cachedImages: "unknown", error: e.message });
-  }
-
-  return NextResponse.json({ cachedImages: cachedCount });
+  // Forward to check mode
+  const url = new URL(request.url);
+  url.searchParams.set("check", "true");
+  const fakeReq = new Request(url.toString(), { method: "POST", headers: request.headers });
+  return POST(fakeReq);
 }
