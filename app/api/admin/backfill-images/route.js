@@ -23,7 +23,7 @@ const TAB_KV_KEYS = {
 };
 
 const IMAGE_SIZES = [[900, 700], [300, 300], [1600, 800]];
-const CONCURRENT = 4;   // parallel image generations
+const CONCURRENT = 2;   // parallel image generations (avoid Pollinations rate limit)
 const MAX_MS = 240000;  // 4-minute wall-clock limit (Pro: 300s timeout)
 
 /**
