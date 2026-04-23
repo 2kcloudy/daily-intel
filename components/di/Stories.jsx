@@ -27,11 +27,26 @@ function tagGradient(tag) {
   return TAG_GRADIENTS[key] || TAG_GRADIENTS.default;
 }
 
-/** An image that gracefully falls back to a gradient + initials placeholder */
+/** An image that retries once on failure, then falls back to a gradient */
 function StoryImg({ story, width, height, className, style }) {
+  const [retryCount, setRetryCount] = useState(0);
   const [failed, setFailed] = useState(false);
   const gradient = tagGradient(story.tag || story.topic);
   const initials = (story.tag || "?").slice(0, 2).toUpperCase();
+
+  function handleError() {
+    if (retryCount < 2) {
+      // Retry after a short delay — Pollinations is sometimes slow on first hit
+      setTimeout(() => setRetryCount(c => c + 1), 2000 * (retryCount + 1));
+    } else {
+      setFailed(true);
+    }
+  }
+
+  // Build URL — add cache-buster on retries so the browser re-requests
+  const src = retryCount === 0
+    ? storyImg(story, width, height)
+    : `${storyImg(story, width, height)}&_retry=${retryCount}`;
 
   if (failed) {
     return (
@@ -53,12 +68,13 @@ function StoryImg({ story, width, height, className, style }) {
 
   return (
     <img
-      src={storyImg(story, width, height)}
+      key={retryCount}  // remount on retry to force fresh request
+      src={src}
       alt=""
       loading="lazy"
       className={className}
       style={style}
-      onError={() => setFailed(true)}
+      onError={handleError}
     />
   );
 }
