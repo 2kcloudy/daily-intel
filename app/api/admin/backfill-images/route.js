@@ -23,17 +23,18 @@ const TAB_KV_KEYS = {
 };
 
 const IMAGE_SIZES = [[900, 700], [300, 300], [1600, 800]];
+const CONCURRENT = 4;   // parallel image generations
+const MAX_MS = 240000;  // 4-minute wall-clock limit (Pro: 300s timeout)
 
 /**
  * POST /api/admin/backfill-images
- *
- * Generates and caches images for all archive stories.
- * Fully idempotent — already-cached images are skipped instantly.
+ * Generates all missing story images across all 12 tabs.
+ * Concurrent generation (4 at once), idempotent, safe to call repeatedly.
  *
  * Query params:
- *   tab=finance     — process a single tab (default: all)
- *   check=true      — dry-run count only, no generation
- *   limit=12        — max IMAGES to generate per call (default: 12)
+ *   tab=finance     — single tab only
+ *   check=true      — count only, no generation
+ *   limit=32        — max images to generate this call (default 32 = ~2 min)
  */
 export async function POST(request) {
   const apiKey = request.headers.get("x-api-key");
@@ -44,15 +45,15 @@ export async function POST(request) {
   const { searchParams } = new URL(request.url);
   const targetTab  = searchParams.get("tab") || null;
   const checkOnly  = searchParams.get("check") === "true";
-  const imgLimit   = Math.min(parseInt(searchParams.get("limit") || "12", 10), 60);
+  const imgLimit   = Math.min(parseInt(searchParams.get("limit") || "32", 10), 120);
 
-  const tabs = targetTab ? [targetTab] : ALL_TABS;
-  const results = {};
-  let totalCached = 0, totalPending = 0, totalGenerated = 0, totalFailed = 0;
-  let imagesGenerated = 0;
-  const startMs = Date.now();
+  const tabs     = targetTab ? [targetTab] : ALL_TABS;
+  const startMs  = Date.now();
 
-  outer:
+  // ── Collect all pending jobs ───────────────────────────────────────────────
+  const pending = [];   // { seed, headline, tag, w, h }
+  let totalCached = 0;
+
   for (const tab of tabs) {
     const cfg = TAB_KV_KEYS[tab];
     if (!cfg) continue;
@@ -60,12 +61,8 @@ export async function POST(request) {
     let dates = [];
     try {
       dates = await kv.zrange(cfg.dates, 0, -1, { rev: true });
-      if (!dates?.length) { results[tab] = { dates: 0, cached: 0, pending: 0 }; continue; }
-    } catch (e) {
-      results[tab] = { error: e.message }; continue;
-    }
-
-    let tabCached = 0, tabPending = 0, tabGenerated = 0, tabFailed = 0;
+      if (!dates?.length) continue;
+    } catch { continue; }
 
     for (const date of dates) {
       let digest;
@@ -76,61 +73,62 @@ export async function POST(request) {
       if (!digest?.stories?.length) continue;
 
       for (const story of digest.stories) {
-        if (Date.now() - startMs > 25000) break outer; // hard safety cutoff
-
         const headline = story.headline || "";
         const tag      = story.topic || story.tag || "markets";
         const seed     = storyImageSeed(headline, story.rank || 0);
 
         for (const [w, h] of IMAGE_SIZES) {
-          // Check KV cache
           const cached = await getCachedImageUrl(seed, w, h).catch(() => null);
-          if (cached) {
-            tabCached++; totalCached++;
-            continue;
-          }
-
-          tabPending++; totalPending++;
-          if (checkOnly) continue;
-          if (imagesGenerated >= imgLimit) break outer;
-
-          // Generate + cache via the proven pipeline
-          try {
-            const url = await generateAndCacheImage(seed, headline, tag, w, h);
-            if (url) {
-              tabGenerated++; totalGenerated++; imagesGenerated++;
-            } else {
-              tabFailed++; totalFailed++;
-            }
-          } catch {
-            tabFailed++; totalFailed++;
-          }
+          if (cached) { totalCached++; continue; }
+          pending.push({ seed, headline, tag, w, h });
         }
       }
     }
-
-    results[tab] = {
-      dates:     dates.length,
-      cached:    tabCached,
-      pending:   tabPending,
-      generated: tabGenerated,
-      failed:    tabFailed,
-    };
   }
 
+  if (checkOnly) {
+    return NextResponse.json({
+      mode: "check",
+      summary: { cached: totalCached, pending: pending.length },
+      tabs: tabs.reduce((a, t) => ({ ...a, [t]: "see summary" }), {}),
+    });
+  }
+
+  // ── Generate in concurrent batches ─────────────────────────────────────────
+  const toProcess = pending.slice(0, imgLimit);
+  let generated = 0, failed = 0;
+
+  for (let i = 0; i < toProcess.length; i += CONCURRENT) {
+    if (Date.now() - startMs > MAX_MS) break;
+
+    const batch = toProcess.slice(i, i + CONCURRENT);
+    const results = await Promise.allSettled(
+      batch.map(({ seed, headline, tag, w, h }) =>
+        generateAndCacheImage(seed, headline, tag, w, h)
+      )
+    );
+
+    for (const r of results) {
+      if (r.status === "fulfilled" && r.value) generated++;
+      else failed++;
+    }
+  }
+
+  const remaining = pending.length - toProcess.length;
+
   return NextResponse.json({
-    mode:    checkOnly ? "check" : "generate",
+    mode:    "generate",
     summary: {
-      cached:    totalCached,
-      pending:   totalPending,
-      generated: totalGenerated,
-      failed:    totalFailed,
+      cachedBefore: totalCached,
+      pendingFound: pending.length,
+      generated,
+      failed,
+      remaining,
       elapsedMs: Date.now() - startMs,
     },
-    tabs: results,
-    note: imagesGenerated >= imgLimit
-      ? `Limit of ${imgLimit} images reached. Call again — cached images are skipped instantly.`
-      : "Done for this pass.",
+    note: remaining > 0
+      ? `${remaining} images still pending — call again to continue.`
+      : "All images cached!",
   });
 }
 
@@ -139,9 +137,7 @@ export async function GET(request) {
   if (apiKey !== process.env.DIGEST_API_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  // Forward to check mode
   const url = new URL(request.url);
   url.searchParams.set("check", "true");
-  const fakeReq = new Request(url.toString(), { method: "POST", headers: request.headers });
-  return POST(fakeReq);
+  return POST(new Request(url.toString(), { method: "POST", headers: request.headers }));
 }
