@@ -1,83 +1,74 @@
 import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
+import yahooFinance from "yahoo-finance2";
 
 const CACHE_KEY = "market-data:live";
-const CACHE_TTL = 300; // 5 minutes
+const CACHE_TTL = 300; // 5-minute KV cache
 
-// Symbols to fetch from Yahoo Finance
+// Suppress the yahoo-finance2 survey notice
+yahooFinance.suppressNotices(["yahooSurvey"]);
+
 const SYMBOLS = [
   { sym: "^GSPC",    label: "S&P 500",  type: "index"  },
   { sym: "^IXIC",    label: "NASDAQ",   type: "index"  },
   { sym: "^DJI",     label: "DOW",      type: "index"  },
-  { sym: "CL=F",     label: "WTI",      type: "oil",   prefix: "$" },
-  { sym: "BZ=F",     label: "BRENT",    type: "oil",   prefix: "$" },
-  { sym: "GC=F",     label: "GOLD",     type: "metal", prefix: "$" },
-  { sym: "BTC-USD",  label: "BTC",      type: "crypto",prefix: "$" },
-  { sym: "^TNX",     label: "10Y",      type: "bond",  suffix: "%" },
-  { sym: "^VIX",     label: "VIX",      type: "vol"   },
-  { sym: "DX-Y.NYB", label: "DXY",      type: "fx"    },
+  { sym: "CL=F",     label: "WTI",      type: "oil"    },
+  { sym: "BZ=F",     label: "BRENT",    type: "oil"    },
+  { sym: "GC=F",     label: "GOLD",     type: "metal"  },
+  { sym: "BTC-USD",  label: "BTC",      type: "crypto" },
+  { sym: "^TNX",     label: "10Y",      type: "bond"   },
+  { sym: "^VIX",     label: "VIX",      type: "vol"    },
+  { sym: "DX-Y.NYB", label: "DXY",      type: "fx"     },
 ];
 
-function formatPrice(price, type, prefix, suffix) {
+function formatPrice(price, type) {
+  if (!price) return "—";
   if (type === "crypto") return `$${price >= 1000 ? price.toLocaleString("en-US", { maximumFractionDigits: 0 }) : price.toFixed(2)}`;
   if (type === "bond")   return `${price.toFixed(2)}%`;
   if (type === "oil" || type === "metal") return `$${price.toFixed(2)}`;
-  if (type === "index")  return price >= 1000 ? price.toLocaleString("en-US", { maximumFractionDigits: 0 }) : price.toFixed(2);
-  if (suffix) return `${price.toFixed(2)}${suffix}`;
-  if (prefix) return `${prefix}${price.toFixed(2)}`;
+  if (type === "index")  return price >= 10000
+    ? price.toLocaleString("en-US", { maximumFractionDigits: 0 })
+    : price >= 1000
+      ? price.toLocaleString("en-US", { maximumFractionDigits: 2 })
+      : price.toFixed(2);
   return price.toFixed(2);
 }
 
-async function fetchYahooFinance() {
-  const symbolList = SYMBOLS.map(s => encodeURIComponent(s.sym)).join(",");
-  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbolList}&fields=regularMarketPrice,regularMarketChangePercent,regularMarketChange`;
+async function fetchMarketData() {
+  const symList = SYMBOLS.map(s => s.sym);
 
-  const headers = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "application/json",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Origin": "https://finance.yahoo.com",
-    "Referer": "https://finance.yahoo.com/",
-  };
-
-  const res = await fetch(url, {
-    headers,
-    signal: AbortSignal.timeout(8000),
+  // yahoo-finance2 handles crumb, cookies, and retries automatically
+  const results = await yahooFinance.quote(symList, {
+    fields: ["regularMarketPrice", "regularMarketChangePercent", "regularMarketChange"],
   });
 
-  if (!res.ok) throw new Error(`Yahoo Finance HTTP ${res.status}`);
-  const json = await res.json();
-  const quotes = json?.quoteResponse?.result;
-  if (!quotes?.length) throw new Error("No quotes returned");
-
-  // Build a lookup by symbol
+  // Results can be a single object or an array
+  const quotes = Array.isArray(results) ? results : [results];
   const bySymbol = {};
-  for (const q of quotes) bySymbol[q.symbol] = q;
+  for (const q of quotes) if (q?.symbol) bySymbol[q.symbol] = q;
 
-  return SYMBOLS.map(({ sym, label, type, prefix, suffix }) => {
+  return SYMBOLS.map(({ sym, label, type }) => {
     const q = bySymbol[sym];
-    if (!q) return null;
-    const price  = q.regularMarketPrice ?? 0;
-    const pct    = q.regularMarketChangePercent ?? 0;
-    const dir    = pct >= 0 ? "up" : "down";
-    const sign   = pct >= 0 ? "+" : "";
+    if (!q?.regularMarketPrice) return null;
+    const price = q.regularMarketPrice;
+    const pct   = q.regularMarketChangePercent ?? 0;
+    const dir   = pct >= 0 ? "up" : "down";
+    const sign  = pct >= 0 ? "+" : "";
     return {
       label,
-      value:  formatPrice(price, type, prefix, suffix),
-      pct:    `${sign}${Math.abs(pct).toFixed(2)}%`,
+      value: formatPrice(price, type),
+      pct:   `${sign}${Math.abs(pct).toFixed(2)}%`,
       dir,
-      raw:    { price, pct },
     };
   }).filter(Boolean);
 }
 
 /**
  * GET /api/market-data
- * Returns live market indices, served from KV cache (5 min TTL).
- * Falls back to last known good data on error.
+ * Returns live market data, KV-cached for 5 minutes.
  */
 export async function GET() {
-  // Try cache first
+  // Fast path: serve from KV cache
   try {
     const cached = await kv.get(CACHE_KEY);
     if (cached) {
@@ -88,12 +79,11 @@ export async function GET() {
     }
   } catch {}
 
-  // Fetch live data
+  // Slow path: fetch live
   try {
-    const indices = await fetchYahooFinance();
+    const indices = await fetchMarketData();
     const payload = { indices, updatedAt: new Date().toISOString() };
 
-    // Cache in KV
     try {
       await kv.set(CACHE_KEY, JSON.stringify(payload), { ex: CACHE_TTL });
     } catch {}
@@ -102,10 +92,10 @@ export async function GET() {
       headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
     });
   } catch (err) {
-    // Return error so client can use its fallback
+    console.error("[market-data] fetch error:", err.message);
     return NextResponse.json(
       { error: err.message, indices: null },
-      { status: 503, headers: { "Cache-Control": "no-store" } }
+      { status: 503 }
     );
   }
 }
