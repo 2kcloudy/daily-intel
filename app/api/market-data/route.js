@@ -11,18 +11,17 @@ const CACHE_TTL = 300; // 5 minutes
 //   3. Cached last-known values
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Twelve Data symbol map
+// Twelve Data symbol map — verified working symbols
 const TD_SYMBOLS = [
-  { sym: "SPX",   label: "S&P 500", type: "index",  outputKey: "price"  },
-  { sym: "IXIC",  label: "NASDAQ",  type: "index",  outputKey: "price"  },
-  { sym: "DJI",   label: "DOW",     type: "index",  outputKey: "price"  },
-  { sym: "WTI",   label: "WTI",     type: "oil",    outputKey: "price"  },
-  { sym: "XBR/USD", label: "BRENT", type: "oil",    outputKey: "price"  },
-  { sym: "XAU/USD", label: "GOLD",  type: "metal",  outputKey: "price"  },
-  { sym: "XAG/USD", label: "SILVER",type: "metal",  outputKey: "price"  },
-  { sym: "TNX",   label: "10Y",     type: "bond"                        },
-  { sym: "VIX",   label: "VIX",     type: "vol"                         },
-  { sym: "DXY",   label: "DXY",     type: "fx"                          },
+  { sym: "SPX",     label: "S&P 500", type: "index" },
+  { sym: "IXIC",    label: "NASDAQ",  type: "index" },
+  { sym: "DJI",     label: "DOW",     type: "index" },
+  { sym: "XTI/USD", label: "WTI",     type: "oil"   },  // WTI crude (not "WTI")
+  { sym: "XBR/USD", label: "BRENT",   type: "oil"   },  // Brent crude
+  { sym: "XAU/USD", label: "GOLD",    type: "metal" },  // Gold spot
+  { sym: "VIX",     label: "VIX",     type: "vol"   },
+  { sym: "US10Y",   label: "10Y",     type: "bond"  },  // US 10-Year yield
+  { sym: "DXY",     label: "DXY",     type: "fx"    },  // US Dollar Index
 ];
 
 function formatValue(price, pct, type) {
@@ -110,11 +109,14 @@ const STATIC_FALLBACK = [
 // ── Main fetch logic ──────────────────────────────────────────────────────────
 async function fetchMarketData() {
   const tdKey = process.env.TWELVE_DATA_KEY;
+  const keyStatus = tdKey ? `set (${tdKey.slice(0,4)}...)` : "NOT SET";
+  console.log(`[market-data] TWELVE_DATA_KEY: ${keyStatus}`);
 
   // Strategy 1: Twelve Data (if API key configured)
   if (tdKey) {
     try {
       const indices = await fetchTwelveData(tdKey);
+      console.log(`[market-data] Twelve Data returned ${indices?.length} instruments`);
       if (indices?.length >= 5) {
         // Also try to get fresh BTC from CoinGecko
         try {
