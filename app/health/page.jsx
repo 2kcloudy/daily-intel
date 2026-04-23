@@ -1,11 +1,11 @@
 import { getLatestHealthDigest, getAllHealthDates } from "@/lib/storage";
-import HealthDigestView from "@/components/HealthDigestView";
+import GenericDigestView from "@/components/GenericDigestView";
 
 export const revalidate = 300;
 
 export const metadata = {
   title: "Health Intel — Daily Intel",
-  description: "Daily health & wellness intelligence curated by AI — sleep, nutrition, longevity, exercise, and more.",
+  description: "Daily health & wellness intelligence curated by AI.",
 };
 
 export default async function HealthPage() {
@@ -13,5 +13,11 @@ export default async function HealthPage() {
     getLatestHealthDigest(),
     getAllHealthDates(),
   ]);
-  return <HealthDigestView digest={digest} allDates={allDates} />;
+  return (
+    <GenericDigestView
+      digest={digest}
+      allDates={allDates}
+      tabKey="health"
+    />
+  );
 }

@@ -12,13 +12,50 @@ function strHash(s) {
   return Math.abs(h);
 }
 
-/** Generate a Pollinations.ai image URL for a story */
+// Tag → terse visual theme for image prompts
+const TAG_THEMES = {
+  markets:      "financial district skyscrapers candlestick chart abstract",
+  ai:           "artificial intelligence neural network circuit board glowing",
+  tech:         "technology circuit silicon futuristic blue",
+  earnings:     "corporate boardroom quarterly report bar chart",
+  energy:       "oil derrick solar panels wind turbines energy",
+  crypto:       "bitcoin blockchain digital coin gold",
+  defense:      "military drone aircraft defense technology",
+  macro:        "global economy world map currency",
+  policy:       "government capitol building gavel legislation",
+  health:       "medical laboratory dna helix science green",
+  world:        "globe map geopolitics diplomacy",
+  commodities:  "commodity wheat gold crude oil markets",
+  startups:     "startup launch rocket venture capital",
+  science:      "laboratory microscope discovery space telescope",
+  longevity:    "dna aging cells longevity science",
+  performance:  "athlete training performance metrics wearable",
+  research:     "scientific research laboratory",
+  exercise:     "athlete training fitness sport",
+  nutrition:    "healthy food nutrition",
+  sleep:        "sleep rest calm dark bedroom",
+  supplements:  "supplements vitamins pills health",
+  wearables:    "smartwatch wearable health technology",
+  gut:          "gut microbiome health biology",
+  mental:       "mental health brain meditation",
+  inflation:    "inflation economics money currency",
+};
+
+/**
+ * Generate a Pollinations.ai image URL.
+ * Keeps prompts short and uses stable seed for consistency.
+ */
 export function storyImg(story, w = 600, h = 400) {
-  const prompt = encodeURIComponent(
-    `editorial news illustration for: ${(story.headline || "").slice(0, 80)}, ${story.tag || story.topic || ""}, desaturated, newspaper style`
-  );
+  const tag = (story.tag || story.topic || "markets").toLowerCase().replace(/[\s/+]+/g, "");
+  const theme = TAG_THEMES[tag] || "business news editorial illustration";
+  // Keep prompt tight — Pollinations chokes on long URLs
+  const words = (story.headline || "").split(" ").slice(0, 6).join(" ");
+  const rawPrompt = `${words}, ${theme}, editorial illustration, professional photography, muted tones`;
   const seed = story.seed || strHash(story.headline || String(story.rank || 0));
-  return `https://image.pollinations.ai/prompt/${prompt}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
+  return (
+    `https://image.pollinations.ai/prompt/${encodeURIComponent(rawPrompt)}` +
+    `?width=${w}&height=${h}&seed=${seed}&nologo=true&model=flux`
+  );
 }
 
 /**

@@ -1,5 +1,67 @@
 "use client";
+import { useState } from "react";
 import { storyImg } from "./dataTransform";
+
+// Gradient fallbacks keyed by tag — show a beautiful colour field when image fails
+const TAG_GRADIENTS = {
+  markets:     "linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)",
+  ai:          "linear-gradient(135deg, #1a0533 0%, #4a148c 50%, #7b1fa2 100%)",
+  tech:        "linear-gradient(135deg, #0d1b2a 0%, #1a3a5c 50%, #1e5799 100%)",
+  earnings:    "linear-gradient(135deg, #1a1200 0%, #4a3500 50%, #7a5800 100%)",
+  energy:      "linear-gradient(135deg, #0a1628 0%, #1b3a2c 50%, #2e7d32 100%)",
+  crypto:      "linear-gradient(135deg, #1a0e00 0%, #4a2800 50%, #c56a00 100%)",
+  defense:     "linear-gradient(135deg, #1a1a1a 0%, #2a3a2a 50%, #3a4a3a 100%)",
+  macro:       "linear-gradient(135deg, #0c1445 0%, #1a2a6c 50%, #2e4490 100%)",
+  policy:      "linear-gradient(135deg, #0a0e2e 0%, #1a2050 50%, #243b8a 100%)",
+  health:      "linear-gradient(135deg, #001a0e 0%, #003d1f 50%, #00693a 100%)",
+  world:       "linear-gradient(135deg, #1a0a00 0%, #3d1a00 50%, #7a3a00 100%)",
+  startups:    "linear-gradient(135deg, #001a2c 0%, #00405c 50%, #006a8a 100%)",
+  science:     "linear-gradient(135deg, #001a2e 0%, #002d50 50%, #005c8a 100%)",
+  longevity:   "linear-gradient(135deg, #001a14 0%, #003326 50%, #00543e 100%)",
+  performance: "linear-gradient(135deg, #1a1400 0%, #3d3000 50%, #6b5400 100%)",
+  default:     "linear-gradient(135deg, #111827 0%, #1f2937 50%, #374151 100%)",
+};
+
+function tagGradient(tag) {
+  const key = (tag || "").toLowerCase().replace(/[\s/+]+/g, "");
+  return TAG_GRADIENTS[key] || TAG_GRADIENTS.default;
+}
+
+/** An image that gracefully falls back to a gradient + initials placeholder */
+function StoryImg({ story, width, height, className, style }) {
+  const [failed, setFailed] = useState(false);
+  const gradient = tagGradient(story.tag || story.topic);
+  const initials = (story.tag || "?").slice(0, 2).toUpperCase();
+
+  if (failed) {
+    return (
+      <div style={{
+        width: "100%", height: "100%",
+        background: gradient,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        position: "relative",
+        ...style,
+      }}>
+        <span style={{
+          fontFamily: "var(--di-font-ui)", fontSize: "clamp(11px, 2vw, 13px)",
+          fontWeight: 700, letterSpacing: "0.12em",
+          color: "rgba(255,255,255,0.35)", textTransform: "uppercase",
+        }}>{initials}</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={storyImg(story, width, height)}
+      alt=""
+      loading="lazy"
+      className={className}
+      style={style}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 function TickerChips({ tickers = [] }) {
   if (!tickers.length) return null;
@@ -31,7 +93,7 @@ export function HeroStory({ story, onOpen }) {
   return (
     <div className="di-hero">
       <div className="di-hero-img" onClick={() => onOpen && onOpen(story)} style={{ cursor: "pointer" }}>
-        <img src={storyImg(story, 900, 700)} alt="" loading="lazy" />
+        <StoryImg story={story} width={900} height={700} />
       </div>
       <div className="di-hero-body">
         <StoryMeta rank={story.rank} tag={story.tag} />
@@ -61,7 +123,7 @@ export function HeroFull({ story, onOpen }) {
       <h2 className="di-hero-head">{story.headline}</h2>
       <p className="di-hero-sub">{story.sub}</p>
       <div className="di-hero-full-img">
-        <img src={storyImg(story, 1400, 600)} alt="" loading="lazy" />
+        <StoryImg story={story} width={1400} height={600} />
       </div>
     </div>
   );
@@ -137,7 +199,7 @@ export function StoryCard({ story, compact, onOpen }) {
       </div>
       {!compact && (
         <div className="di-story-thumb">
-          <img src={storyImg(story, 300, 300)} alt="" loading="lazy" />
+          <StoryImg story={story} width={300} height={300} />
         </div>
       )}
       {compact && (

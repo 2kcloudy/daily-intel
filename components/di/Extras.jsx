@@ -2,6 +2,46 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { storyImg } from "./dataTransform";
 
+const TAG_GRADIENTS = {
+  markets:"linear-gradient(135deg,#0f2027,#2c5364)",
+  ai:"linear-gradient(135deg,#1a0533,#7b1fa2)",
+  tech:"linear-gradient(135deg,#0d1b2a,#1e5799)",
+  earnings:"linear-gradient(135deg,#1a1200,#7a5800)",
+  energy:"linear-gradient(135deg,#0a1628,#2e7d32)",
+  crypto:"linear-gradient(135deg,#1a0e00,#c56a00)",
+  defense:"linear-gradient(135deg,#1a1a1a,#3a4a3a)",
+  macro:"linear-gradient(135deg,#0c1445,#2e4490)",
+  policy:"linear-gradient(135deg,#0a0e2e,#243b8a)",
+  health:"linear-gradient(135deg,#001a0e,#00693a)",
+  world:"linear-gradient(135deg,#1a0a00,#7a3a00)",
+  startups:"linear-gradient(135deg,#001a2c,#006a8a)",
+  science:"linear-gradient(135deg,#001a2e,#005c8a)",
+  longevity:"linear-gradient(135deg,#001a14,#00543e)",
+  performance:"linear-gradient(135deg,#1a1400,#6b5400)",
+  default:"linear-gradient(135deg,#111827,#374151)",
+};
+function tagGradient(tag) {
+  return TAG_GRADIENTS[(tag||"").toLowerCase().replace(/[\s/+]+/g,"")] || TAG_GRADIENTS.default;
+}
+
+function ModalImg({ story }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <div style={{ width:"100%", height:420, background:tagGradient(story.tag||story.topic), display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <span style={{ fontFamily:"var(--di-font-ui)", fontSize:13, fontWeight:700, letterSpacing:"0.12em", color:"rgba(255,255,255,0.3)", textTransform:"uppercase" }}>
+          {(story.tag||"?").slice(0,2).toUpperCase()}
+        </span>
+      </div>
+    );
+  }
+  return (
+    <img src={storyImg(story, 1600, 800)} alt="" loading="eager"
+      style={{ width:"100%", height:420, objectFit:"cover", display:"block" }}
+      onError={() => setFailed(true)} />
+  );
+}
+
 // ── WHY IT MATTERS copy by tag ────────────────────────────────────────────────
 const WHY = {
   Crypto:       "Structural demand from regulated products is reshaping crypto's marginal bid. ETF approvals and institutional custody frameworks now drive near-term flows more than on-chain activity.",
@@ -60,7 +100,7 @@ export function StoryDetail({ story, onClose, dateShort }) {
         </header>
 
         <figure className="di-detail-fig">
-          <img src={storyImg(story, 1600, 800)} alt="" loading="eager" />
+          <ModalImg story={story} />
           <figcaption>{tag} · Editorial illustration — Daily Intel</figcaption>
         </figure>
 
