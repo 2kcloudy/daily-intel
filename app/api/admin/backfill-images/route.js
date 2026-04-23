@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
-import { getCachedImageUrl, generateAndCacheImage, storyImageSeed } from "@/lib/imageCache";
+import { getCachedImageUrl, cachePollinationsUrl, storyImageSeed } from "@/lib/imageCache";
 
 const ALL_TABS = [
   "finance", "health", "tech", "geopolitics", "energy",
@@ -23,8 +23,8 @@ const TAB_KV_KEYS = {
 };
 
 const IMAGE_SIZES = [[900, 700], [300, 300], [1600, 800]];
-const CONCURRENT = 2;   // parallel image generations (avoid Pollinations rate limit)
-const MAX_MS = 240000;  // 4-minute wall-clock limit (Pro: 300s timeout)
+const CONCURRENT = 20;  // KV writes are fast — no download needed
+const MAX_MS = 25000;   // 25s wall-clock (KV writes take ms, not seconds)
 
 /**
  * POST /api/admin/backfill-images
@@ -45,7 +45,7 @@ export async function POST(request) {
   const { searchParams } = new URL(request.url);
   const targetTab  = searchParams.get("tab") || null;
   const checkOnly  = searchParams.get("check") === "true";
-  const imgLimit   = Math.min(parseInt(searchParams.get("limit") || "32", 10), 120);
+  const imgLimit   = Math.min(parseInt(searchParams.get("limit") || "200", 10), 969);
 
   const tabs     = targetTab ? [targetTab] : ALL_TABS;
   const startMs  = Date.now();
@@ -104,7 +104,7 @@ export async function POST(request) {
     const batch = toProcess.slice(i, i + CONCURRENT);
     const results = await Promise.allSettled(
       batch.map(({ seed, headline, tag, w, h }) =>
-        generateAndCacheImage(seed, headline, tag, w, h)
+        cachePollinationsUrl(seed, headline, tag, w, h)
       )
     );
 
