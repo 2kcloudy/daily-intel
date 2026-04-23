@@ -156,9 +156,12 @@ async function fetchMarketData() {
  * Free tier: 800 requests/day, 8/minute — more than enough.
  * With 5-min KV cache: ~288 requests/day used.
  */
-export async function GET() {
-  // Fast path: KV cache
-  try {
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const nocache = searchParams.get("nocache") === "1";
+
+  // Fast path: KV cache (skip with ?nocache=1)
+  if (!nocache) try {
     const cached = await kv.get(CACHE_KEY);
     if (cached) {
       const data = typeof cached === "string" ? JSON.parse(cached) : cached;
