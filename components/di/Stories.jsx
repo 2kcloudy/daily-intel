@@ -194,7 +194,26 @@ export function StoryCard({ story, compact, onOpen }) {
         <p className="di-story-body-text">{story.body}</p>
         <div className="di-story-footer">
           <span className="di-source">{story.source}</span>
-          <TickerChips tickers={(story.tickers || []).slice(0, 2)} />
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            {story.publishedAt && (
+              <span style={{
+                fontFamily: "var(--di-font-ui)", fontSize: 10, fontWeight: 600,
+                color: "var(--di-accent)", textTransform: "uppercase", letterSpacing: "0.08em",
+              }}>
+                {(() => {
+                  try {
+                    const d = new Date(story.publishedAt);
+                    const h = (Date.now() - d) / 3600000;
+                    if (h < 6)  return `${Math.round(h)}h ago`;
+                    if (h < 24) return "Today";
+                    if (h < 48) return "Yesterday";
+                    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  } catch { return null; }
+                })()}
+              </span>
+            )}
+            <TickerChips tickers={(story.tickers || []).slice(0, 2)} />
+          </div>
         </div>
       </div>
       {!compact && (

@@ -82,12 +82,13 @@ export function transformFinanceStory(s, index) {
     rank,
     tag:      s.topic || "Markets",
     source:   s.source || "",
-    url:      s.url || "#",
-    headline: s.headline || "",
-    sub:      extractSub(s.summary),
-    body:     s.summary || "",
-    tickers:  [],
-    seed:     strHash(s.headline || String(rank)),
+    url:         s.url || "#",
+    headline:    s.headline || "",
+    sub:         extractSub(s.summary),
+    body:        s.summary || "",
+    tickers:     [],
+    seed:        strHash(s.headline || String(rank)),
+    publishedAt: s.publishedAt || null,
   };
 }
 
@@ -98,14 +99,15 @@ export function transformTabStory(s, index) {
   const rank = s.rank || index + 1;
   return {
     rank,
-    tag:      s.topic || "News",
-    source:   s.source || "",
-    url:      s.url || "#",
-    headline: s.headline || "",
-    sub:      extractSub(s.summary),
-    body:     s.summary || "",
-    tickers:  [],
-    seed:     strHash(s.headline || String(rank)),
+    tag:         s.topic || "News",
+    source:      s.source || "",
+    url:         s.url || "#",
+    headline:    s.headline || "",
+    sub:         extractSub(s.summary),
+    body:        s.summary || "",
+    tickers:     [],
+    seed:        strHash(s.headline || String(rank)),
+    publishedAt: s.publishedAt || null,
   };
 }
 

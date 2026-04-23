@@ -65,6 +65,36 @@ const WHY = {
 const DEFAULT_WHY = "Monitor how this story affects the sectors it touches. Second-order effects on supply chains, capital allocation, and regulatory frameworks often move faster than the headline.";
 
 // ── STORY DETAIL MODAL ────────────────────────────────────────────────────────
+/** Format a date string into a human-readable freshness label */
+function freshnessLabel(publishedAt) {
+  if (!publishedAt) return null;
+  try {
+    const pub = new Date(publishedAt);
+    const now = new Date();
+    const diffMs = now - pub;
+    const diffH  = diffMs / (1000 * 60 * 60);
+    const diffD  = diffMs / (1000 * 60 * 60 * 24);
+    if (diffH < 1)  return "Just published";
+    if (diffH < 6)  return `${Math.round(diffH)}h ago`;
+    if (diffH < 24) return "Today";
+    if (diffD < 2)  return "Yesterday";
+    if (diffD < 7)  return `${Math.floor(diffD)} days ago`;
+    // Fall back to formatted date
+    return pub.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch { return null; }
+}
+
+/** Determine if an article URL points to an actual article (not a homepage/section page) */
+function isArticleUrl(url) {
+  if (!url || url === "#") return false;
+  try {
+    const u = new URL(url);
+    // Homepages and section pages have short paths (0-1 segments)
+    const segments = u.pathname.split("/").filter(Boolean);
+    return segments.length >= 2;
+  } catch { return false; }
+}
+
 export function StoryDetail({ story, onClose, dateShort }) {
   useEffect(() => {
     function onKey(e) { if (e.key === "Escape") onClose(); }
@@ -93,7 +123,25 @@ export function StoryDetail({ story, onClose, dateShort }) {
             <span className={"di-cat-label " + tagClass}>— {tag}</span>
             <span className="di-detail-sep">·</span>
             <span>{story.source}</span>
-            {dateShort && <><span className="di-detail-sep">·</span><span>{dateShort}</span></>}
+            <span className="di-detail-sep">·</span>
+            {/* Show article publish date if available, otherwise digest date */}
+            {story.publishedAt ? (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <span style={{
+                  background: "var(--di-accent)", color: "#fff",
+                  fontSize: 9, fontWeight: 700, letterSpacing: "0.1em",
+                  textTransform: "uppercase", padding: "2px 6px", borderRadius: 3,
+                  fontFamily: "var(--di-font-ui)",
+                }}>
+                  {freshnessLabel(story.publishedAt)}
+                </span>
+                <span style={{ fontFamily: "var(--di-font-ui)", fontSize: 11, color: "var(--di-ink-3)" }}>
+                  {new Date(story.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </span>
+              </span>
+            ) : (
+              <span>{dateShort}</span>
+            )}
           </div>
           <h1 className="di-detail-head-title">{story.headline}</h1>
           <p className="di-detail-head-sub">{story.sub}</p>
@@ -131,12 +179,29 @@ export function StoryDetail({ story, onClose, dateShort }) {
           </div>
 
           <div className="di-detail-footer">
-            <a className="di-detail-source" href={story.url} target="_blank" rel="noopener noreferrer">
-              Read on {story.source} →
-            </a>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {/* Direct article link */}
+              {isArticleUrl(story.url) ? (
+                <a className="di-detail-source" href={story.url} target="_blank" rel="noopener noreferrer">
+                  Read full article on {story.source} →
+                </a>
+              ) : (
+                <span style={{ fontFamily: "var(--di-font-ui)", fontSize: 13, color: "var(--di-ink-3)" }}>
+                  Source: <a href={`https://www.google.com/search?q=${encodeURIComponent(story.headline)}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--di-ink)", fontWeight: 600, borderBottom: "1px solid var(--di-ink)", paddingBottom: 1 }}>
+                    Find on Google →
+                  </a>
+                </span>
+              )}
+              {/* Source domain label */}
+              {story.url && story.url !== "#" && (
+                <span style={{ fontFamily: "var(--di-font-ui)", fontSize: 10, color: "var(--di-ink-4)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {(() => { try { return new URL(story.url).hostname.replace("www.", ""); } catch { return story.source; } })()}
+                </span>
+              )}
+            </div>
             <div className="di-detail-share">
-              <button onClick={() => navigator.clipboard?.writeText(story.url || window.location.href)}>Copy link</button>
-              <button onClick={() => window.open(`mailto:?subject=${encodeURIComponent(story.headline)}&body=${encodeURIComponent(story.url || "")}`)}>Email</button>
+              <button onClick={() => { if (story.url && story.url !== "#") navigator.clipboard?.writeText(story.url); }}>Copy link</button>
+              <button onClick={() => window.open(`mailto:?subject=${encodeURIComponent(story.headline)}&body=${encodeURIComponent((story.url && story.url !== "#") ? story.url : story.headline)}`)}>Email</button>
             </div>
           </div>
         </div>
