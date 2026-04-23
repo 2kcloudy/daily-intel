@@ -187,7 +187,13 @@ export async function GET(request) {
       await kv.set(CACHE_KEY, JSON.stringify(payload), { ex: CACHE_TTL });
     } catch {}
 
-    return NextResponse.json({ ...payload, fromCache: false }, {
+    // Include key status in debug output (safe — only shows first 4 chars)
+    const debug = {
+      hasKey: !!process.env.TWELVE_DATA_KEY,
+      keyPreview: process.env.TWELVE_DATA_KEY
+        ? `${process.env.TWELVE_DATA_KEY.slice(0,4)}...` : "NOT SET",
+    };
+    return NextResponse.json({ ...payload, fromCache: false, debug }, {
       headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
     });
   } catch (err) {
