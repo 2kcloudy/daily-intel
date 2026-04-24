@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { saveTabDigest, getLatestTabDigest, getAllTabDates } from "@/lib/storage";
-import { pregenerateDigestImages } from "@/lib/imageCache";
+import { attachImagesToStories, pregenerateDigestImages } from "@/lib/imageCache";
 
 const VALID_TABS = ["tech", "geopolitics", "energy", "real-estate", "startups", "crypto", "science", "longevity", "policy", "performance"];
 
@@ -27,15 +28,24 @@ export async function POST(request, { params }) {
     );
   }
 
+  // Attach deterministic Pollinations turbo URLs to every story before saving.
+  attachImagesToStories(stories);
+
   const digest = {
     date,
     pulse: pulse || "",
     stories,
     postedAt: new Date().toISOString(),
     ...body, // allow extra fields
+    stories, // keep image-augmented stories even though body is spread after
   };
 
   await saveTabDigest(tabKey, date, digest);
+
+  try {
+    revalidatePath(`/${tabKey}`);
+    revalidatePath(`/${tabKey}/${date}`);
+  } catch {}
 
   pregenerateDigestImages(stories).then(r =>
     console.log(`[images] ${tabKey} ${date}: ${r.done} generated, ${r.failed} failed`)
@@ -45,7 +55,7 @@ export async function POST(request, { params }) {
     success: true,
     digest: { date, storyCount: stories.length },
     url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/${tabKey}/${date}`,
-    images: "generating in background",
+    images: "attached-inline",
   });
 }
 

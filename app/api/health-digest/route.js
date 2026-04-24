@@ -1,34 +1,11 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { saveHealthDigest, getLatestHealthDigest, getAllHealthDates } from "@/lib/storage";
-import { pregenerateDigestImages } from "@/lib/imageCache";
+import { attachImagesToStories, pregenerateDigestImages } from "@/lib/imageCache";
 
 /**
  * POST /api/health-digest
  * Claude posts a new health digest here.
- *
- * Body: {
- *   date: "YYYY-MM-DD",
- *   healthPulse: "One-sentence wellness summary...",
- *   stories: [
- *     {
- *       headline: "...",
- *       summary: "65-85 word summary",
- *       source: "NYT",
- *       url: "https://...",
- *       topic: "Sleep" | "Nutrition" | "Exercise" | "Longevity" | "Heart" |
- *              "Gut" | "Mental" | "Supplements" | "Research" | "Wearables" |
- *              "Peptides" | "Hormones" | "Inflammation" | "Breathing"
- *     }
- *   ],
- *   spotlights: [
- *     {
- *       name: "Peter Attia",
- *       type: "influencer",   // or "podcast"
- *       insight: "This week's key insight from their content...",
- *       url: "https://..."
- *     }
- *   ]
- * }
  */
 export async function POST(request) {
   const apiKey = request.headers.get("x-api-key");
@@ -59,6 +36,9 @@ export async function POST(request) {
     );
   }
 
+  // Attach deterministic Pollinations turbo URLs to every story before saving.
+  attachImagesToStories(stories);
+
   const digest = {
     date,
     healthPulse: healthPulse || "",
@@ -69,6 +49,11 @@ export async function POST(request) {
 
   await saveHealthDigest(date, digest);
 
+  try {
+    revalidatePath("/health");
+    revalidatePath(`/health/${date}`);
+  } catch {}
+
   pregenerateDigestImages(stories).then(r =>
     console.log(`[images] Health ${date}: ${r.done} generated, ${r.failed} failed`)
   ).catch(() => {});
@@ -77,7 +62,7 @@ export async function POST(request) {
     success: true,
     digest: { date, storyCount: stories.length },
     url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/health/${date}`,
-    images: "generating in background",
+    images: "attached-inline",
   });
 }
 

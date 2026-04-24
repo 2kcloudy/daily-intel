@@ -3,7 +3,7 @@ import GenericDigestView from "@/components/GenericDigestView";
 import { TAB_CONFIGS } from "@/components/TabConfig";
 import { notFound } from "next/navigation";
 
-export const revalidate = 3600;
+export const revalidate = 120;
 
 export async function generateStaticParams() {
   const dates = await getAllTabDates("real-estate");

@@ -41,7 +41,7 @@ function topicEmoji(topic) {
   return TOPIC_EMOJI.default;
 }
 
-/* Generate a stable numeric seed from a string */
+/* Generate a stable numeric seed from a string (legacy fallback) */
 function seedFromString(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -51,30 +51,31 @@ function seedFromString(str) {
   return Math.abs(hash);
 }
 
-/* Build a Pollinations.ai image URL */
-function buildImageUrl(headline, topic) {
-  const prompt = `Financial news illustration, abstract editorial style: ${topic || "business"} - ${headline.slice(0, 80)}. Clean, minimal, professional, no text, photorealistic.`;
-  const seed = seedFromString(headline);
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=600&height=220&nologo=true&seed=${seed}`;
+/* Fallback URL builder — only used for legacy stories stored before
+   the server started attaching story.image at POST time.
+   Uses the turbo model (2-3s) to match the server-side builder. */
+function buildFallbackImageUrl(headline, topic) {
+  const prompt = `${topic || "business"} news editorial illustration, ${(headline || "").split(" ").slice(0, 6).join(" ")}, muted professional tones, no text`;
+  const seed = seedFromString(headline || "");
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=900&height=700&seed=${seed}&nologo=true&model=turbo`;
 }
 
-/* AI image with shimmer skeleton + emoji fallback + 12s timeout */
-function StoryImage({ headline, topic, ready }) {
+/* AI image with shimmer skeleton + emoji fallback + 20s timeout */
+function StoryImage({ headline, topic, image }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const timerRef = useRef(null);
 
-  const src = buildImageUrl(headline, topic);
+  const src = image || buildFallbackImageUrl(headline, topic);
   const emoji = topicEmoji(topic);
 
   useEffect(() => {
-    if (!ready) return;
-    // Fall back to emoji if image doesn't load within 12 seconds
+    // 20s timeout for first Pollinations fetch; after that it's CDN-cached.
     timerRef.current = setTimeout(() => {
       if (!loaded) setError(true);
-    }, 12000);
+    }, 20000);
     return () => clearTimeout(timerRef.current);
-  }, [loaded, ready]);
+  }, [loaded]);
 
   if (error) {
     return (
@@ -119,15 +120,9 @@ function StoryImage({ headline, topic, ready }) {
   );
 }
 
-export default function StoryCard({ rank = 1, headline, summary, source, url, topic }) {
+export default function StoryCard({ rank = 1, headline, summary, source, url, topic, image }) {
   const [hovered, setHovered] = useState(false);
-  const [ready, setReady] = useState(false);
   const { text: topicText, bg: topicBg } = topicStyle(topic);
-
-  useEffect(() => {
-    const t = setTimeout(() => setReady(true), (rank - 1) * 900);
-    return () => clearTimeout(t);
-  }, [rank]);
 
   return (
     <article
@@ -150,7 +145,7 @@ export default function StoryCard({ rank = 1, headline, summary, source, url, to
       }}
     >
       {/* AI Image */}
-      <StoryImage headline={headline} topic={topic} ready={ready} />
+      <StoryImage headline={headline} topic={topic} image={image} />
 
       {/* Top row: rank badge + topic tag */}
       <div style={{

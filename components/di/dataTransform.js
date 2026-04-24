@@ -51,10 +51,13 @@ const TAG_THEMES = {
  * Falls back to direct Pollinations if called server-side (no window).
  */
 export function storyImg(story, w = 600, h = 400) {
+  // Prefer the server-generated URL attached at POST time (instant, turbo model).
+  if (story && story.image) return story.image;
+
   const tag = (story.tag || story.topic || "markets").toLowerCase().replace(/[\s/+]+/g, "");
   const theme = TAG_THEMES[tag] || "business news editorial illustration";
   const words = (story.headline || "").split(" ").slice(0, 6).join(" ");
-  const seed = story.seed || strHash(story.headline || String(story.rank || 0));
+  const seed = story.imageSeed || story.seed || strHash(story.headline || String(story.rank || 0));
 
   // Use the caching API route in browser
   const headline = encodeURIComponent((story.headline || "").slice(0, 120));
@@ -87,7 +90,8 @@ export function transformFinanceStory(s, index) {
     sub:         extractSub(s.summary),
     body:        s.summary || "",
     tickers:     [],
-    seed:        strHash(s.headline || String(rank)),
+    seed:        s.imageSeed || strHash(s.headline || String(rank)),
+    image:       s.image || null,
     publishedAt: s.publishedAt || null,
   };
 }
@@ -106,7 +110,8 @@ export function transformTabStory(s, index) {
     sub:         extractSub(s.summary),
     body:        s.summary || "",
     tickers:     [],
-    seed:        strHash(s.headline || String(rank)),
+    seed:        s.imageSeed || strHash(s.headline || String(rank)),
+    image:       s.image || null,
     publishedAt: s.publishedAt || null,
   };
 }

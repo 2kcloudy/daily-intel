@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { saveDigest, getLatestDigest, getAllDates } from "@/lib/storage";
-import { pregenerateDigestImages } from "@/lib/imageCache";
+import { attachImagesToStories, pregenerateDigestImages } from "@/lib/imageCache";
 
 // POST /api/digest — Claude posts a new digest here
 export async function POST(request) {
@@ -26,6 +27,11 @@ export async function POST(request) {
     );
   }
 
+  // Attach a deterministic Pollinations turbo image URL to every story
+  // BEFORE saving. The client renders story.image directly — no client-side
+  // URL building, no dimension mismatch, no flux latency.
+  attachImagesToStories(stories);
+
   const digest = {
     date,
     marketPulse: marketPulse || "",
@@ -36,8 +42,16 @@ export async function POST(request) {
 
   await saveDigest(date, digest);
 
-  // Pre-generate images in the background (non-blocking)
-  // waitUntil isn't available in all environments, so we fire-and-forget
+  // On-demand revalidation — update the list page and this date's page
+  // immediately so readers don't wait for ISR to regenerate.
+  try {
+    revalidatePath("/");
+    revalidatePath(`/${date}`);
+  } catch {}
+
+  // Best-effort Blob upload for permanent CDN copies (non-blocking).
+  // Even if this fails, story.image already points to a stable Pollinations
+  // URL that works forever for the same seed.
   pregenerateDigestImages(stories).then(r =>
     console.log(`[images] Finance ${date}: ${r.done} generated, ${r.failed} failed`)
   ).catch(() => {});
@@ -46,7 +60,7 @@ export async function POST(request) {
     success: true,
     digest: { date, storyCount: stories.length },
     url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/${date}`,
-    images: "generating in background",
+    images: "attached-inline",
   });
 }
 
