@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 import { TickerBar, Masthead, CategoryNav, Bulletin, Footer } from "./Chrome";
-import { HeroStory, HeroFull, HeroTop3, MarketPanel, StoryList, TagFilter } from "./Stories";
+import { StoryList, TagFilter } from "./Stories";
 import Rail from "./Rail";
 import { StoryDetail, SearchOverlay, CategoryStrip } from "./Extras";
 import { useTweaks, TweaksPanel } from "./Tweaks";
@@ -142,8 +142,7 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
     return stories.filter(s => (s.tag || "").toLowerCase() === activeTag);
   }, [activeTag, stories, mode]);
 
-  const hero = filtered[0] || stories[0];
-  const rest = filtered.slice(1);
+  // Hero story removed — every story now renders in the standard StoryList grid below.
 
   // All stories for search (finance + current tab)
   const allStories = useMemo(() => {
@@ -209,34 +208,12 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
 
       <main className={`di-main ${densityClass}`}>
         <div>
-          {/* Hero section */}
-          {hero && (
-            <>
-              {tweaks.heroVariant === "editorial" && <HeroStory story={hero} onOpen={setOpenStory} />}
-              {tweaks.heroVariant === "full"       && <HeroFull  story={hero} onOpen={setOpenStory} />}
-              {tweaks.heroVariant === "dashboard"  && (
-                <div className="di-hero-dash">
-                  <div className="di-hero-dash-left">
-                    <HeroTop3 stories={filtered.slice(0, 3)} onOpen={setOpenStory} />
-                  </div>
-                  <div><MarketPanel indices={indices} /></div>
-                </div>
-              )}
-              {tweaks.heroVariant === "terminal" && (
-                <div className="di-hero-dash">
-                  <HeroStory story={hero} onOpen={setOpenStory} />
-                  <MarketPanel indices={indices} />
-                </div>
-              )}
-            </>
-          )}
-
           {/* Section header */}
           <div className="di-section-head">
             <div className="di-section-title">
               {mode === "finance" ? "Today's Brief" : `More in ${catLabel}`}
               <span className="count">
-                {mode === "finance" ? "Ranked by market importance" : `${rest.length} stories`}
+                {mode === "finance" ? "Ranked by market importance" : `${filtered.length} stories`}
               </span>
             </div>
             <div className="di-section-sources">{sources.slice(0, 4).join(" · ")}</div>
@@ -247,9 +224,9 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
             <TagFilter tags={tags} active={activeTag} onSelect={setActiveTag} />
           )}
 
-          {/* Story list */}
+          {/* Story list — every story rendered in the same grid format */}
           <StoryList
-            stories={tweaks.heroVariant === "dashboard" ? filtered : rest}
+            stories={filtered}
             compact={tweaks.density === "compact"}
             onOpen={setOpenStory}
           />

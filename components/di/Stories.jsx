@@ -206,7 +206,6 @@ export function StoryCard({ story, compact, onOpen }) {
             {story.headline}
           </a>
         </h3>
-        <p className="di-story-sub">{story.sub}</p>
         <p className="di-story-body-text">{story.body}</p>
         <div className="di-story-footer">
           <span className="di-source">{story.source}</span>
