@@ -95,12 +95,12 @@ function TickerChips({ tickers = [] }) {
   );
 }
 
-function StoryMeta({ rank, tag }) {
+function StoryMeta({ tag }) {
+  if (!tag) return null;
   const tagClass = (tag || "").toLowerCase().replace(/[\s/+]+/g, "");
   return (
     <div className="di-hero-meta">
-      <span className="di-rank">№ {String(rank).padStart(2, "0")}</span>
-      <span className={"di-cat-label " + tagClass}>— {tag}</span>
+      <span className={"di-cat-label " + tagClass}>{tag}</span>
     </div>
   );
 }
@@ -112,7 +112,7 @@ export function HeroStory({ story, onOpen }) {
         <StoryImg story={story} width={900} height={700} />
       </div>
       <div className="di-hero-body">
-        <StoryMeta rank={story.rank} tag={story.tag} />
+        <StoryMeta tag={story.tag} />
         <h2 className="di-hero-head">
           <a href={story.url} target="_blank" rel="noopener" onClick={e => { e.preventDefault(); onOpen && onOpen(story); }}>
             {story.headline}
@@ -135,7 +135,7 @@ export function HeroStory({ story, onOpen }) {
 export function HeroFull({ story, onOpen }) {
   return (
     <div className="di-hero-full" onClick={() => onOpen && onOpen(story)}>
-      <StoryMeta rank={story.rank} tag={story.tag} />
+      <StoryMeta tag={story.tag} />
       <h2 className="di-hero-head">{story.headline}</h2>
       <p className="di-hero-sub">{story.sub}</p>
       <div className="di-hero-full-img">
@@ -223,7 +223,7 @@ export function StoryCard({ story, compact, onOpen, layout = "side-thumb" }) {
           <StoryImg story={story} width={900} height={isShort ? 260 : 500} />
         </div>
         <div className="di-story-body">
-          <StoryMeta rank={story.rank} tag={story.tag} />
+          <StoryMeta tag={story.tag} />
           <h3 className="di-story-head">
             <a href={story.url} target="_blank" rel="noopener"
                onClick={e => { e.preventDefault(); onOpen && onOpen(story); }}>
@@ -245,14 +245,8 @@ export function StoryCard({ story, compact, onOpen, layout = "side-thumb" }) {
 
   return (
     <article className="di-story" onClick={() => onOpen && onOpen(story)}>
-      {compact && <div className="di-rank-big">{String(story.rank).padStart(2, "0")}</div>}
       <div className="di-story-body">
-        {!compact && <StoryMeta rank={story.rank} tag={story.tag} />}
-        {compact && (
-          <div className="di-hero-meta" style={{ marginBottom: 2 }}>
-            <span className={"di-cat-label " + (story.tag || "").toLowerCase()}>{story.tag}</span>
-          </div>
-        )}
+        <StoryMeta tag={story.tag} />
         <h3 className="di-story-head">
           <a href={story.url} target="_blank" rel="noopener"
              onClick={e => { e.preventDefault(); onOpen && onOpen(story); }}>

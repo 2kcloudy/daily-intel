@@ -66,7 +66,7 @@ const CAT_META = {
  *   mode="category"  categoryId="tech"
  *   tabData={buildTabData(...)}  financeData={buildFinanceData(...)}
  */
-export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [], cardLayout = "side-thumb" }) {
+export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [], cardLayout = "image-top" }) {
   const router = useRouter();
   const [tweaks, updateTweaks] = useTweaks();
   const [showTweaks, setShowTweaks] = useState(false);
@@ -185,29 +185,19 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
         active={activeNavId}
         onSelect={handleNav}
       />
-      <Bulletin
-        text={pulse}
-        postedAt={dateShort}
-        storyCount={stories.length}
-        sources={sources}
-      />
-
-      {/* Category pages share the same compact header as Finance — the active
-          tab in the nav already conveys which desk we're on. */}
+      {/* Market Pulse banner removed on Finance per editorial decision; other
+          desks keep it because their pulse line gives the desk's daily theme. */}
+      {mode !== "finance" && (
+        <Bulletin
+          text={pulse}
+          postedAt={dateShort}
+          storyCount={stories.length}
+          sources={sources}
+        />
+      )}
 
       <main className={`di-main ${densityClass}`}>
         <div>
-          {/* Section header */}
-          <div className="di-section-head">
-            <div className="di-section-title">
-              {mode === "finance" ? "Today's Brief" : `More in ${catLabel}`}
-              <span className="count">
-                {mode === "finance" ? "Ranked by market importance" : `${filtered.length} stories`}
-              </span>
-            </div>
-            <div className="di-section-sources">{sources.slice(0, 4).join(" · ")}</div>
-          </div>
-
           {/* Tag filter — finance homepage only */}
           {mode === "finance" && (
             <TagFilter tags={tags} active={activeTag} onSelect={setActiveTag} />
@@ -227,7 +217,7 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
           watchlist={watchlist}
           archive={archive}
           onNav={handleNav}
-          showIndices={mode === "finance" && tweaks.showIndices}
+          showIndices={false}
           marketUpdatedAt={marketUpdatedAt}
         />
       </main>
