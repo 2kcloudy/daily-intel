@@ -189,7 +189,57 @@ export function MarketPanel({ indices = [] }) {
   );
 }
 
-export function StoryCard({ story, compact, onOpen }) {
+function PublishedAtPill({ publishedAt }) {
+  if (!publishedAt) return null;
+  return (
+    <span style={{
+      fontFamily: "var(--di-font-ui)", fontSize: 10, fontWeight: 600,
+      color: "var(--di-accent)", textTransform: "uppercase", letterSpacing: "0.08em",
+    }}>
+      {(() => {
+        try {
+          const d = new Date(publishedAt);
+          const h = (Date.now() - d) / 3600000;
+          if (h < 6)  return `${Math.round(h)}h ago`;
+          if (h < 24) return "Today";
+          if (h < 48) return "Yesterday";
+          return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        } catch { return null; }
+      })()}
+    </span>
+  );
+}
+
+export function StoryCard({ story, compact, onOpen, layout = "side-thumb" }) {
+  const useImageTop = layout === "image-top" && !compact;
+
+  if (useImageTop) {
+    return (
+      <article className="di-story di-story-image-top" onClick={() => onOpen && onOpen(story)}>
+        <div className="di-story-image-top-thumb">
+          <StoryImg story={story} width={900} height={500} />
+        </div>
+        <div className="di-story-body">
+          <StoryMeta rank={story.rank} tag={story.tag} />
+          <h3 className="di-story-head">
+            <a href={story.url} target="_blank" rel="noopener"
+               onClick={e => { e.preventDefault(); onOpen && onOpen(story); }}>
+              {story.headline}
+            </a>
+          </h3>
+          <p className="di-story-body-text">{story.body}</p>
+          <div className="di-story-footer">
+            <span className="di-source">{story.source}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <PublishedAtPill publishedAt={story.publishedAt} />
+              <TickerChips tickers={(story.tickers || []).slice(0, 2)} />
+            </div>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   return (
     <article className="di-story" onClick={() => onOpen && onOpen(story)}>
       {compact && <div className="di-rank-big">{String(story.rank).padStart(2, "0")}</div>}
@@ -210,23 +260,7 @@ export function StoryCard({ story, compact, onOpen }) {
         <div className="di-story-footer">
           <span className="di-source">{story.source}</span>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {story.publishedAt && (
-              <span style={{
-                fontFamily: "var(--di-font-ui)", fontSize: 10, fontWeight: 600,
-                color: "var(--di-accent)", textTransform: "uppercase", letterSpacing: "0.08em",
-              }}>
-                {(() => {
-                  try {
-                    const d = new Date(story.publishedAt);
-                    const h = (Date.now() - d) / 3600000;
-                    if (h < 6)  return `${Math.round(h)}h ago`;
-                    if (h < 24) return "Today";
-                    if (h < 48) return "Yesterday";
-                    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                  } catch { return null; }
-                })()}
-              </span>
-            )}
+            <PublishedAtPill publishedAt={story.publishedAt} />
             <TickerChips tickers={(story.tickers || []).slice(0, 2)} />
           </div>
         </div>
@@ -245,11 +279,11 @@ export function StoryCard({ story, compact, onOpen }) {
   );
 }
 
-export function StoryList({ stories = [], compact, onOpen }) {
+export function StoryList({ stories = [], compact, onOpen, layout = "side-thumb" }) {
   return (
-    <div className="di-stories">
+    <div className={"di-stories" + (layout === "image-top" ? " di-stories-image-top" : "")}>
       {stories.map((s, i) => (
-        <StoryCard key={s.rank || i} story={s} compact={compact} onOpen={onOpen} />
+        <StoryCard key={s.rank || i} story={s} compact={compact} onOpen={onOpen} layout={layout} />
       ))}
     </div>
   );

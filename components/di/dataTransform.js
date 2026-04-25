@@ -64,6 +64,19 @@ export function storyImg(story, w = 600, h = 400) {
 }
 
 /**
+ * Strip the legacy "💡 Trade Angle:" / "Trade Angle:" tail from a summary so
+ * older digests render clean alongside new ones. Matches the lightbulb emoji
+ * and any plain-text variant, with or without surrounding asterisks/markdown.
+ */
+function stripTradeAngle(text = "") {
+  if (!text) return "";
+  return text
+    .replace(/\s*[\r\n]+\s*\**\s*(?:💡\s*)?Trade\s*Angle\s*:[\s\S]*$/i, "")
+    .replace(/\s*\**\s*💡\s*Trade\s*Angle\s*:[\s\S]*$/i, "")
+    .trim();
+}
+
+/**
  * Extract a short sub-headline from a longer summary.
  * Returns the first 1-2 sentences, max ~120 chars.
  */
@@ -80,14 +93,15 @@ function extractSub(text = "") {
  */
 export function transformFinanceStory(s, index) {
   const rank = s.rank || index + 1;
+  const body = stripTradeAngle(s.summary || "");
   return {
     rank,
     tag:      s.topic || "Markets",
     source:   s.source || "",
     url:         s.url || "#",
     headline:    s.headline || "",
-    sub:         extractSub(s.summary),
-    body:        s.summary || "",
+    sub:         extractSub(body),
+    body,
     tickers:     [],
     seed:        s.imageSeed || strHash(s.headline || String(rank)),
     image:       s.image || null,
@@ -100,14 +114,15 @@ export function transformFinanceStory(s, index) {
  */
 export function transformTabStory(s, index) {
   const rank = s.rank || index + 1;
+  const body = stripTradeAngle(s.summary || "");
   return {
     rank,
     tag:         s.topic || "News",
     source:      s.source || "",
     url:         s.url || "#",
     headline:    s.headline || "",
-    sub:         extractSub(s.summary),
-    body:        s.summary || "",
+    sub:         extractSub(body),
+    body,
     tickers:     [],
     seed:        s.imageSeed || strHash(s.headline || String(rank)),
     image:       s.image || null,

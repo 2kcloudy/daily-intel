@@ -66,7 +66,7 @@ const CAT_META = {
  *   mode="category"  categoryId="tech"
  *   tabData={buildTabData(...)}  financeData={buildFinanceData(...)}
  */
-export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [] }) {
+export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [], cardLayout = "side-thumb" }) {
   const router = useRouter();
   const [tweaks, updateTweaks] = useTweaks();
   const [showTweaks, setShowTweaks] = useState(false);
@@ -192,14 +192,8 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
         sources={sources}
       />
 
-      {/* Category page header — category strip removed per editorial decision */}
-      {mode === "category" && (
-        <div className="di-cat-hero">
-          <div className="di-cat-hero-kicker">{catMeta.kicker} · {dateShort}</div>
-          <h1 className="di-cat-hero-title">{catGlyph} {catLabel}</h1>
-          <p className="di-cat-hero-desc">{catMeta.desc}</p>
-        </div>
-      )}
+      {/* Category pages share the same compact header as Finance — the active
+          tab in the nav already conveys which desk we're on. */}
 
       <main className={`di-main ${densityClass}`}>
         <div>
@@ -224,6 +218,7 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
             stories={filtered}
             compact={tweaks.density === "compact"}
             onOpen={setOpenStory}
+            layout={cardLayout}
           />
         </div>
 
