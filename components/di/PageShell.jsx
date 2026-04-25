@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-import { TickerBar, Masthead, CategoryNav, Bulletin, Footer } from "./Chrome";
+import { TickerBar, Masthead, CategoryNav, Footer } from "./Chrome";
 import { StoryList, TagFilter } from "./Stories";
 import Rail from "./Rail";
 import { StoryDetail, SearchOverlay } from "./Extras";
@@ -185,16 +185,7 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
         active={activeNavId}
         onSelect={handleNav}
       />
-      {/* Market Pulse banner removed on Finance per editorial decision; other
-          desks keep it because their pulse line gives the desk's daily theme. */}
-      {mode !== "finance" && (
-        <Bulletin
-          text={pulse}
-          postedAt={dateShort}
-          storyCount={stories.length}
-          sources={sources}
-        />
-      )}
+      {/* Market Pulse banner removed site-wide per editorial decision. */}
 
       <main className={`di-main ${densityClass}`}>
         <div>
