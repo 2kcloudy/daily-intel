@@ -486,6 +486,11 @@ html[data-theme="dark"] .di-story-image-top-thumb img {
   .di-stories-image-top { grid-template-columns: 1fr; gap: 24px; }
 }
 
+/* image-top-short — same layout as image-top, image at half the height
+   (used by /finance3). 32:9 is exactly half the height of 16:9 at the
+   same width. */
+.di-stories-image-top-short .di-story-image-top-thumb { aspect-ratio: 32 / 9; }
+
 /* Compact mode */
 .di-main.compact .di-story { grid-template-columns: 60px minmax(0, 1fr) 80px; padding: 14px 0; gap: 16px; }
 .di-main.compact .di-story-thumb { display: none; }

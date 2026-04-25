@@ -211,13 +211,16 @@ function PublishedAtPill({ publishedAt }) {
 }
 
 export function StoryCard({ story, compact, onOpen, layout = "side-thumb" }) {
-  const useImageTop = layout === "image-top" && !compact;
+  const useImageTop = (layout === "image-top" || layout === "image-top-short") && !compact;
+  const isShort = layout === "image-top-short";
 
   if (useImageTop) {
+    const articleClass =
+      "di-story di-story-image-top" + (isShort ? " di-story-image-top-short" : "");
     return (
-      <article className="di-story di-story-image-top" onClick={() => onOpen && onOpen(story)}>
+      <article className={articleClass} onClick={() => onOpen && onOpen(story)}>
         <div className="di-story-image-top-thumb">
-          <StoryImg story={story} width={900} height={500} />
+          <StoryImg story={story} width={900} height={isShort ? 260 : 500} />
         </div>
         <div className="di-story-body">
           <StoryMeta rank={story.rank} tag={story.tag} />
@@ -280,8 +283,12 @@ export function StoryCard({ story, compact, onOpen, layout = "side-thumb" }) {
 }
 
 export function StoryList({ stories = [], compact, onOpen, layout = "side-thumb" }) {
+  const wrapClass =
+    "di-stories" +
+    (layout === "image-top"       ? " di-stories-image-top" : "") +
+    (layout === "image-top-short" ? " di-stories-image-top di-stories-image-top-short" : "");
   return (
-    <div className={"di-stories" + (layout === "image-top" ? " di-stories-image-top" : "")}>
+    <div className={wrapClass}>
       {stories.map((s, i) => (
         <StoryCard key={s.rank || i} story={s} compact={compact} onOpen={onOpen} layout={layout} />
       ))}
