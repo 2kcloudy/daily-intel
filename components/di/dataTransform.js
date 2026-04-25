@@ -44,24 +44,23 @@ const TAG_THEMES = {
 /**
  * Generate an image URL for a story.
  *
- * Uses the /api/image proxy which:
- *  1. Serves the permanent Blob URL instantly if already cached.
- *  2. Generates via Pollinations, uploads to Blob, and redirects on first hit.
- *
- * Falls back to direct Pollinations if called server-side (no window).
+ * Always routes through the /api/image proxy so every render benefits from the
+ * KV → Blob CDN cache. Older digests stored a direct Pollinations URL on
+ * story.image — we detect and rewrite those to the proxy URL so they still get
+ * the cache layer.
  */
 export function storyImg(story, w = 600, h = 400) {
-  // Prefer the server-generated URL attached at POST time (instant, turbo model).
-  if (story && story.image) return story.image;
+  const tag  = (story?.tag || story?.topic || "markets").toLowerCase().replace(/[\s/+]+/g, "");
+  const seed = story?.imageSeed || story?.seed || strHash(story?.headline || String(story?.rank || 0));
+  const headline = encodeURIComponent((story?.headline || "").slice(0, 120));
+  const proxy = `/api/image?seed=${seed}&tag=${encodeURIComponent(tag)}&headline=${headline}&w=${w}&h=${h}`;
 
-  const tag = (story.tag || story.topic || "markets").toLowerCase().replace(/[\s/+]+/g, "");
-  const theme = TAG_THEMES[tag] || "business news editorial illustration";
-  const words = (story.headline || "").split(" ").slice(0, 6).join(" ");
-  const seed = story.imageSeed || story.seed || strHash(story.headline || String(story.rank || 0));
+  // Already on the proxy? Use it.
+  if (story?.image && story.image.startsWith("/api/image")) return story.image;
 
-  // Use the caching API route in browser
-  const headline = encodeURIComponent((story.headline || "").slice(0, 120));
-  return `/api/image?seed=${seed}&tag=${encodeURIComponent(tag)}&headline=${headline}&w=${w}&h=${h}`;
+  // Fall through to the proxy for direct Pollinations URLs and for stories
+  // that have no .image set at all.
+  return proxy;
 }
 
 /**

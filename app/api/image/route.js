@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { getCachedImageUrl, generateAndCacheImage } from "@/lib/imageCache";
 
+// On a KV miss this hits Pollinations (turbo, ~3-5s) and uploads the result
+// to Blob. 60s leaves headroom for batched lazy generations.
+export const maxDuration = 60;
+
 /**
  * GET /api/image?seed=12345&tag=markets&headline=...&w=900&h=700
  *
  * Returns a redirect to the permanent Blob URL.
- * On first hit: generates via Pollinations, uploads to Blob, caches in KV.
+ * On first hit: generates via Pollinations turbo, uploads to Blob, caches in KV.
  * On subsequent hits: instant redirect from KV cache.
  */
 export async function GET(request) {

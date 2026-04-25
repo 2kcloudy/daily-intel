@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { TickerBar, Masthead, CategoryNav, Bulletin, Footer } from "./Chrome";
 import { StoryList, TagFilter } from "./Stories";
 import Rail from "./Rail";
-import { StoryDetail, SearchOverlay, CategoryStrip } from "./Extras";
+import { StoryDetail, SearchOverlay } from "./Extras";
 import { useTweaks, TweaksPanel } from "./Tweaks";
 import { CATEGORIES, PLACEHOLDER_INDICES } from "./dataTransform";
 
@@ -192,18 +192,13 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
         sources={sources}
       />
 
-      {/* Category page header */}
+      {/* Category page header — category strip removed per editorial decision */}
       {mode === "category" && (
-        <>
-          <div className="di-cat-hero">
-            <div className="di-cat-hero-kicker">{catMeta.kicker} · {dateShort}</div>
-            <h1 className="di-cat-hero-title">{catGlyph} {catLabel}</h1>
-            <p className="di-cat-hero-desc">{catMeta.desc}</p>
-          </div>
-          <div className="di-cat-strip-wrap">
-            <CategoryStrip categoryId={categoryId} />
-          </div>
-        </>
+        <div className="di-cat-hero">
+          <div className="di-cat-hero-kicker">{catMeta.kicker} · {dateShort}</div>
+          <h1 className="di-cat-hero-title">{catGlyph} {catLabel}</h1>
+          <p className="di-cat-hero-desc">{catMeta.desc}</p>
+        </div>
       )}
 
       <main className={`di-main ${densityClass}`}>

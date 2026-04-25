@@ -442,7 +442,7 @@ html[data-theme="dark"] .di-ticker-chip { background: #1e2024; }
 .di-story-body-text {
   font-family: var(--di-font-body, var(--di-font-serif)); font-size: 14.5px;
   line-height: 1.5; color: var(--di-ink-2); margin: 4px 0 0;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  white-space: pre-wrap;
 }
 .di-story-footer {
   display: flex; align-items: center; justify-content: space-between;
