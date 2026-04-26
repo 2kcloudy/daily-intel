@@ -62,6 +62,30 @@ export default function DailyBrief({ brief, label = "Daily Brief", postedAt }) {
     if (a.paused) a.play(); else a.pause();
   }
 
+  function pickWarmVoice(synth) {
+    const voices = synth.getVoices();
+    if (!voices?.length) return null;
+    // Ranked from warmest/most natural-sounding to least, across major platforms.
+    // The browser ignores anything it doesn't have; first match wins.
+    const PREFERRED = [
+      // Apple — Samantha and Allison are the warmest stock voices
+      "Samantha (Enhanced)", "Samantha", "Allison", "Ava (Enhanced)", "Ava",
+      "Karen", "Susan", "Joelle", "Daniel (Enhanced)", "Daniel",
+      // Microsoft Edge / Windows neural voices — best free Windows TTS
+      "Microsoft Aria Online (Natural)", "Microsoft Jenny Online (Natural)",
+      "Microsoft Sonia Online (Natural)", "Microsoft Guy Online (Natural)",
+      "Microsoft Aria", "Microsoft Jenny", "Microsoft Sonia", "Microsoft Guy",
+      // Chrome / Google
+      "Google UK English Female", "Google US English",
+    ];
+    for (const name of PREFERRED) {
+      const hit = voices.find(v => v.name === name);
+      if (hit) return hit;
+    }
+    // Fallback: first English-language voice that isn't flagged "novelty".
+    return voices.find(v => /^en[-_]/i.test(v.lang) && !/Fred|Albert|Zarvox|Cellos/.test(v.name)) || voices[0];
+  }
+
   function toggleSpeechPlay() {
     if (!ttsSupported) return;
     const synth = window.speechSynthesis;
@@ -77,13 +101,14 @@ export default function DailyBrief({ brief, label = "Daily Brief", postedAt }) {
     }
     synth.cancel();
     const u = new SpeechSynthesisUtterance(script);
-    u.rate = 1.05;
-    u.pitch = 1.0;
-    // Pick a pleasant default voice if available
-    const voices = synth.getVoices();
-    const preferred = voices.find(v => /Google US English|Samantha|Microsoft Aria|Microsoft Jenny|Daniel/.test(v.name));
-    if (preferred) u.voice = preferred;
-    u.onend  = () => { setPlaying(false); setProgress(0); };
+    // Slightly slower than default + a hint warmer pitch reads as conversational
+    // rather than robotic on most platforms.
+    u.rate = 0.95;
+    u.pitch = 1.05;
+    u.volume = 1.0;
+    const voice = pickWarmVoice(synth);
+    if (voice) u.voice = voice;
+    u.onend   = () => { setPlaying(false); setProgress(0); };
     u.onpause = () => setPlaying(false);
     synth.speak(u);
     setVoiceUtter(u);
