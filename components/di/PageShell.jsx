@@ -187,7 +187,10 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
       />
       {/* Market Pulse banner removed site-wide per editorial decision. */}
 
-      <main className={`di-main ${densityClass}`}>
+      {/* Right rail removed — story grid spans the full content width so we
+          can scale to 4 columns on desktop. Archive lives at /archive now;
+          the Subscribe button in the masthead handles email signups. */}
+      <main className={`di-main di-main-full ${densityClass}`}>
         <div>
           {/* Tag filter — finance homepage only */}
           {mode === "finance" && (
@@ -202,15 +205,6 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
             layout={cardLayout}
           />
         </div>
-
-        <Rail
-          indices={indices}
-          watchlist={watchlist}
-          archive={archive}
-          onNav={handleNav}
-          showIndices={false}
-          marketUpdatedAt={marketUpdatedAt}
-        />
       </main>
 
       <Footer onNav={handleNav} />

@@ -281,6 +281,11 @@ html[data-theme="dark"]       .di-catnav-wrap { background: rgba(10,11,13,0.92);
   max-width: 1440px; margin: 0 auto; padding: 32px 40px 80px;
   display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 56px;
 }
+/* Full-width variant: rail removed, story grid spans the full content width.
+   Used by every desk page now. */
+.di-main.di-main-full {
+  grid-template-columns: minmax(0, 1fr);
+}
 .di-section-head {
   display: flex; align-items: baseline; justify-content: space-between;
   border-bottom: 2px solid var(--di-ink); padding-bottom: 8px; margin-bottom: 24px;
@@ -461,7 +466,7 @@ html[data-theme="dark"] .di-story-thumb img {
    STORY LIST — image-top variant (default site-wide)
    ========================================================================== */
 .di-stories-image-top {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 24px;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 22px;
   border-top: 1px solid var(--di-line); padding-top: 24px;
 }
 .di-stories-image-top .di-story.di-story-image-top {
@@ -486,10 +491,13 @@ html[data-theme="dark"] .di-story-thumb img {
 html[data-theme="dark"] .di-story-image-top-thumb img {
   filter: saturate(1.05) contrast(1.02) brightness(0.95);
 }
-@media (max-width: 1100px) {
+@media (max-width: 1280px) {
+  .di-stories-image-top { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 960px) {
   .di-stories-image-top { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 720px) {
+@media (max-width: 640px) {
   .di-stories-image-top { grid-template-columns: 1fr; gap: 24px; }
 }
 

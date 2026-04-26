@@ -26,7 +26,78 @@ export function TickerBar({ indices = PLACEHOLDER_INDICES }) {
   );
 }
 
+function SubscribeModal({ onClose }) {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, background: "rgba(8,9,12,0.55)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 1000, backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "var(--di-paper)", border: "1px solid var(--di-line)",
+          borderRadius: 6, padding: "32px 32px 28px", width: "min(440px, 92vw)",
+          fontFamily: "var(--di-font-body, var(--di-font-serif))",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+          <h3 style={{ margin: 0, fontFamily: "var(--di-font-serif)", fontSize: 24, lineHeight: 1.15, letterSpacing: "-0.01em" }}>
+            In your inbox, 6am.
+          </h3>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "var(--di-ink-3)", lineHeight: 1, padding: 0 }}
+          >×</button>
+        </div>
+        <p style={{ margin: "0 0 20px", color: "var(--di-ink-3)", fontSize: 14, lineHeight: 1.5 }}>
+          Finance, health, tech &amp; more — curated by AI, delivered before the open.
+        </p>
+        {sent ? (
+          <div style={{ padding: "14px 16px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 4, fontSize: 14, color: "var(--di-ink)" }}>
+            ✓ Thanks — you're on the list.
+          </div>
+        ) : (
+          <form
+            onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+            style={{ display: "flex", gap: 8 }}
+          >
+            <input
+              type="email"
+              required
+              placeholder="name@firm.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                flex: 1, padding: "10px 12px", border: "1px solid var(--di-line)",
+                borderRadius: 4, fontFamily: "inherit", fontSize: 14,
+                background: "var(--di-paper-2)", color: "var(--di-ink)",
+              }}
+            />
+            <button
+              type="submit"
+              style={{
+                padding: "10px 18px", background: "var(--di-ink)", color: "var(--di-paper)",
+                border: "none", borderRadius: 4, fontFamily: "var(--di-font-ui)",
+                fontSize: 12, fontWeight: 700, letterSpacing: "0.08em",
+                textTransform: "uppercase", cursor: "pointer",
+              }}
+            >Subscribe</button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function Masthead({ date, postedAt, theme, onToggleTheme, onNav, onSearch }) {
+  const [subOpen, setSubOpen] = useState(false);
   return (
     <div className="di-masthead">
       <div className="di-masthead-inner">
@@ -52,9 +123,10 @@ export function Masthead({ date, postedAt, theme, onToggleTheme, onNav, onSearch
             {theme === "dark" ? "☀" : "☾"}
           </button>
           <button className="action" onClick={() => onNav && onNav("archive")}>Archive</button>
-          <button className="action primary">Subscribe</button>
+          <button className="action primary" onClick={() => setSubOpen(true)}>Subscribe</button>
         </div>
       </div>
+      {subOpen && <SubscribeModal onClose={() => setSubOpen(false)} />}
     </div>
   );
 }
