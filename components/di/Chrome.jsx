@@ -31,8 +31,6 @@ export function Masthead({ date, postedAt, theme, onToggleTheme, onNav, onSearch
     <div className="di-masthead">
       <div className="di-masthead-inner">
         <div className="di-masthead-left">
-          <span className="vol">Vol. III</span>
-          <span className="dot" />
           <span>{postedAt || date}</span>
         </div>
         <div
@@ -53,7 +51,6 @@ export function Masthead({ date, postedAt, theme, onToggleTheme, onNav, onSearch
           <button className="di-theme-toggle" onClick={onToggleTheme} title="Toggle theme">
             {theme === "dark" ? "☀" : "☾"}
           </button>
-          <button className="action" onClick={() => onNav && onNav("stats")}>Stats</button>
           <button className="action" onClick={() => onNav && onNav("archive")}>Archive</button>
           <button className="action primary">Subscribe</button>
         </div>

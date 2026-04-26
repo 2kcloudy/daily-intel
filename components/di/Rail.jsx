@@ -95,15 +95,6 @@ export default function Rail({ indices, watchlist, archive, onNav, showIndices =
           <IndicesGrid indices={indices} />
         </section>
       )}
-      {watchlist?.length > 0 && (
-        <section className="di-rail-section">
-          <h4 className="di-rail-title">
-            Watch List
-            <span className="meta">From today's digest</span>
-          </h4>
-          <Watchlist items={watchlist} />
-        </section>
-      )}
       {archive?.length > 0 && (
         <section className="di-rail-section">
           <h4 className="di-rail-title">
