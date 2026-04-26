@@ -139,7 +139,9 @@ export async function POST(request) {
     const results = await Promise.allSettled(
       batch.map(({ seed, headline, tag, w, h }) =>
         mode === "blob"
-          ? generateAndCacheImage(seed, headline, tag, w, h)
+          // force=true so we re-download + upload to Blob even if the KV
+          // entry already holds a Pollinations URL.
+          ? generateAndCacheImage(seed, headline, tag, w, h, true)
           : cachePollinationsUrl(seed, headline, tag, w, h)
       )
     );
