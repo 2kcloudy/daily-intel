@@ -77,6 +77,44 @@ function stripTradeAngle(text = "") {
 }
 
 /**
+ * Build a fallback Daily Brief script from a list of stories so older digests
+ * — posted before the skill started writing one — still get an audio player.
+ * Concatenates the headline + the first sentence of each summary into a
+ * spoken-style narrative. Browser SpeechSynthesis reads this aloud when
+ * digest.brief.audioUrl isn't set.
+ */
+function firstSentence(text = "") {
+  const m = (text || "").match(/[^.!?]+[.!?]+/);
+  return (m ? m[0] : (text || "")).trim();
+}
+
+function buildFallbackBrief(label, dateLabel, stories = []) {
+  const top = (stories || []).slice(0, 7);
+  if (!top.length) return null;
+
+  const intro = dateLabel
+    ? `Here's the ${label} brief for ${dateLabel}. We've got ${stories.length} stories on the page today — let's run through the headlines that matter most.`
+    : `Here's the ${label} brief. We've got ${stories.length} stories on the page today — let's run through the headlines that matter most.`;
+
+  const beats = top.map((s, i) => {
+    const head = (s.headline || s.head || "").replace(/[“”"]/g, "");
+    const lede = firstSentence(stripTradeAngle(s.summary || s.body || ""));
+    if (!head && !lede) return "";
+    if (i === 0) return `First, ${head}. ${lede}`;
+    if (i === top.length - 1) return `Finally, ${head}. ${lede}`;
+    return `${head}. ${lede}`;
+  }).filter(Boolean);
+
+  const outro = `That's your snapshot — full stories below.`;
+
+  const script = [intro, ...beats, outro].join(" ").replace(/\s+/g, " ").trim();
+  const wordCount = script.split(/\s+/).filter(Boolean).length;
+  const durationSec = Math.round((wordCount / 155) * 60);
+
+  return { script, durationSec, generated: "fallback" };
+}
+
+/**
  * Extract a short sub-headline from a longer summary.
  * Returns the first 1-2 sentences, max ~120 chars.
  */
@@ -212,6 +250,10 @@ export function buildFinanceData(digest, allDates = []) {
     dir:    "up",
   }));
 
+  const brief = digest.brief && (digest.brief.script || digest.brief.audioUrl || digest.brief.url)
+    ? digest.brief
+    : buildFallbackBrief("Finance", dateShort, digest.stories || []);
+
   return {
     date:       dateLong,
     dateShort,
@@ -224,7 +266,7 @@ export function buildFinanceData(digest, allDates = []) {
     archive,
     indices:    PLACEHOLDER_INDICES,
     categories: CATEGORIES,
-    brief:      digest.brief || null,
+    brief,
   };
 }
 
@@ -247,12 +289,20 @@ export function buildTabData(digest, tabKey, allDates = []) {
     };
   });
 
+  const tabLabel = cfg?.label || tabKey;
+  const dateShortForBrief = digest.date
+    ? new Date(digest.date + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+    : "";
+  const brief = digest.brief && (digest.brief.script || digest.brief.audioUrl || digest.brief.url)
+    ? digest.brief
+    : buildFallbackBrief(tabLabel, dateShortForBrief, digest.stories || []);
+
   return {
     pulse:    digest.pulse || digest.healthPulse || "",
     sources:  cfg.sources ? cfg.sources.split(" · ") : ["Various"],
     stories,
     watchlist: [],
     archive,
-    brief:    digest.brief || null,
+    brief,
   };
 }
