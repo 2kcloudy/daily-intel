@@ -6,6 +6,7 @@ import { TickerBar, Masthead, CategoryNav, Footer } from "./Chrome";
 import { StoryList, TagFilter } from "./Stories";
 import Rail from "./Rail";
 import { StoryDetail, SearchOverlay } from "./Extras";
+import DailyBrief from "./DailyBrief";
 import { useTweaks, TweaksPanel } from "./Tweaks";
 import { CATEGORIES, PLACEHOLDER_INDICES } from "./dataTransform";
 
@@ -192,6 +193,16 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
           the Subscribe button in the masthead handles email signups. */}
       <main className={`di-main di-main-full ${densityClass}`}>
         <div>
+          {/* Daily Brief audio player — renders only if the digest carries
+              a brief script or audioUrl. Skill provides this in the POST. */}
+          {(data?.brief?.script || data?.brief?.audioUrl || data?.brief?.url) && (
+            <DailyBrief
+              brief={data.brief}
+              label={mode === "finance" ? "Daily Brief" : `${catLabel} Brief`}
+              postedAt={dateShort}
+            />
+          )}
+
           {/* Tag filter — finance homepage only */}
           {mode === "finance" && (
             <TagFilter tags={tags} active={activeTag} onSelect={setActiveTag} />

@@ -224,6 +224,7 @@ export function buildFinanceData(digest, allDates = []) {
     archive,
     indices:    PLACEHOLDER_INDICES,
     categories: CATEGORIES,
+    brief:      digest.brief || null,
   };
 }
 
@@ -252,5 +253,6 @@ export function buildTabData(digest, tabKey, allDates = []) {
     stories,
     watchlist: [],
     archive,
+    brief:    digest.brief || null,
   };
 }

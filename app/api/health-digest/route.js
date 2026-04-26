@@ -23,7 +23,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { date, healthPulse, stories, spotlights } = body;
+  const { date, healthPulse, stories, spotlights, brief } = body;
 
   if (!date || !stories || !Array.isArray(stories)) {
     return NextResponse.json(
@@ -47,6 +47,7 @@ export async function POST(request) {
     healthPulse: healthPulse || "",
     stories,
     spotlights: spotlights || [],
+    brief: brief || null,
     postedAt: new Date().toISOString(),
   };
 
