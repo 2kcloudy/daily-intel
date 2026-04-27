@@ -405,34 +405,12 @@ function tagClass(tag) {
   return "f4-tag-default";
 }
 
-/** Render the story summary, converting "💡 Trade Angle:" to a styled callout. */
+/** Render the story summary; trim the Trade Angle section if present. */
 function renderSummary(summary = "") {
   if (!summary) return null;
-  // Split on the trade angle marker if present
   const idx = summary.indexOf("💡 Trade Angle:");
-  if (idx === -1) {
-    return <p>{summary}</p>;
-  }
-  const head = summary.slice(0, idx).trim();
-  const angle = summary.slice(idx + "💡 Trade Angle:".length).trim();
-  return (
-    <>
-      <p>{head}</p>
-      <p style={{
-        marginTop: 10,
-        padding: "10px 14px",
-        background: "linear-gradient(135deg, rgba(91,94,246,0.08), rgba(109,40,217,0.06))",
-        border: "1px solid rgba(91,94,246,0.18)",
-        borderRadius: 12,
-        fontSize: "13px",
-        color: "#3b3f7a",
-        lineHeight: 1.55,
-      }}>
-        <span style={{ fontWeight: 700, color: "#5b5ef6", letterSpacing: "0.02em" }}>💡 Trade Angle: </span>
-        {angle}
-      </p>
-    </>
-  );
+  const text = idx === -1 ? summary : summary.slice(0, idx).trim();
+  return <p>{text}</p>;
 }
 
 function GlassCard({ story }) {
