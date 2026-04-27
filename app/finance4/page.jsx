@@ -149,42 +149,32 @@ const CSS = `
   padding: 0 28px 80px;
 }
 
-/* Hero feature row */
-.f4-feature {
-  display: grid;
-  grid-template-columns: 1.55fr 1fr;
-  gap: 20px;
-  margin-bottom: 22px;
-}
-.f4-feature-stack {
-  display: flex; flex-direction: column; gap: 20px;
-}
-
-/* Three-column grid for the rest */
+/* Single uniform 3-column grid — every story the same size */
 .f4-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 22px;
 }
 
 /* ── Glass card ── */
 .f4-card {
   position: relative;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.35) 100%);
+    linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.42) 100%);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid rgba(255,255,255,0.85);
+  /* Darker, visible outline that reads on a white page */
+  border: 1px solid rgba(15, 18, 32, 0.14);
   border-radius: 22px;
   overflow: hidden;
+  /* Deep, dark, small directional shadow on the right + bottom */
   box-shadow:
     0 1px 0 rgba(255,255,255,0.95) inset,
-    0 1px 2px rgba(15,18,32,0.04),
-    0 8px 24px rgba(40,52,110,0.07),
-    0 24px 60px rgba(40,52,110,0.06);
+    3px 4px 10px rgba(10, 12, 28, 0.18),
+    5px 8px 16px rgba(10, 12, 28, 0.12);
   transition:
-    transform 0.32s cubic-bezier(0.34,1.56,0.64,1),
-    box-shadow 0.30s ease,
+    transform 0.28s cubic-bezier(0.34,1.56,0.64,1),
+    box-shadow 0.28s ease,
     border-color 0.20s ease;
   display: flex;
   flex-direction: column;
@@ -220,13 +210,12 @@ const CSS = `
   z-index: 2;
 }
 .f4-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-3px);
   box-shadow:
     0 1px 0 rgba(255,255,255,1) inset,
-    0 2px 4px rgba(15,18,32,0.05),
-    0 16px 36px rgba(40,52,110,0.12),
-    0 36px 80px rgba(40,52,110,0.10);
-  border-color: rgba(255,255,255,1);
+    5px 7px 14px rgba(10, 12, 28, 0.24),
+    8px 12px 22px rgba(10, 12, 28, 0.16);
+  border-color: rgba(15, 18, 32, 0.22);
 }
 
 /* Card image */
@@ -284,26 +273,18 @@ const CSS = `
 }
 .f4-card-title {
   font-family: 'Fraunces', serif;
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 600;
-  line-height: 1.28;
+  line-height: 1.3;
   letter-spacing: -0.015em;
   color: #0f1220;
   margin-bottom: 10px;
 }
-.f4-card-title-xl {
-  font-size: 28px;
-  line-height: 1.18;
-  margin-bottom: 14px;
-}
 .f4-card-summary {
-  font-size: 14px;
+  font-size: 13.5px;
   color: #4a5070;
-  line-height: 1.65;
+  line-height: 1.6;
   flex: 1;
-}
-.f4-card-summary-xl {
-  font-size: 15px;
 }
 /* Trade angle inline emphasis */
 .f4-card-summary :global(strong),
@@ -395,7 +376,6 @@ const CSS = `
 
 /* Responsive */
 @media (max-width: 1100px) {
-  .f4-feature { grid-template-columns: 1fr; }
   .f4-grid    { grid-template-columns: repeat(2, 1fr); gap: 18px; }
 }
 @media (max-width: 700px) {
@@ -455,14 +435,12 @@ function renderSummary(summary = "") {
   );
 }
 
-function GlassCard({ story, variant = "default" }) {
-  const isXl = variant === "hero";
-  const imgHeight = isXl ? 280 : variant === "feature" ? 160 : 180;
+function GlassCard({ story }) {
   return (
     <article className="f4-card">
       <a className="f4-card-link" href={story.url || "#"} target="_blank" rel="noopener noreferrer">
         {story.image && (
-          <div className="f4-card-img" style={{ height: imgHeight }}>
+          <div className="f4-card-img" style={{ height: 180 }}>
             <img src={story.image} alt="" loading="lazy" />
             <div className="f4-card-img-sheen" />
           </div>
@@ -479,11 +457,11 @@ function GlassCard({ story, variant = "default" }) {
               </span>
             )}
           </div>
-          <h3 className={`f4-card-title ${isXl ? "f4-card-title-xl" : ""}`}>
+          <h3 className="f4-card-title">
             {story.headline}
           </h3>
           {story.summary && (
-            <div className={`f4-card-summary ${isXl ? "f4-card-summary-xl" : ""}`}>
+            <div className="f4-card-summary">
               {renderSummary(story.summary)}
             </div>
           )}
@@ -533,9 +511,6 @@ export default async function Finance4Page() {
   }
 
   const stories = (digest.stories || []).slice().sort((a, b) => (a.rank || 0) - (b.rank || 0));
-  const hero = stories[0];
-  const featured = stories.slice(1, 3);
-  const rest = stories.slice(3);
   const dateLong = formatLongDate(digest.date);
 
   return (
@@ -580,33 +555,12 @@ export default async function Finance4Page() {
           </div>
 
           <div className="f4-main">
-            {/* Hero + featured */}
-            {hero && (
-              <div className="f4-feature">
-                <GlassCard story={hero} variant="hero" />
-                <div className="f4-feature-stack">
-                  {featured.map(s => (
-                    <GlassCard key={s.rank || s.headline} story={s} variant="feature" />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Rest of grid */}
-            {rest.length > 0 && (
-              <>
-                <div className="f4-section-head" style={{ padding: "12px 0 18px" }}>
-                  <span className="f4-section-title">More in Markets</span>
-                  <div className="f4-section-rule" />
-                  <span className="f4-section-count">{rest.length} stories</span>
-                </div>
-                <div className="f4-grid">
-                  {rest.map(s => (
-                    <GlassCard key={s.rank || s.headline} story={s} variant="default" />
-                  ))}
-                </div>
-              </>
-            )}
+            {/* Single uniform grid — all stories the same size */}
+            <div className="f4-grid">
+              {stories.map(s => (
+                <GlassCard key={s.rank || s.headline} story={s} />
+              ))}
+            </div>
           </div>
 
           <footer className="f4-footer">
