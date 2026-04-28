@@ -163,7 +163,7 @@ function BaysFilterHeader() {
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         gap: 24, maxWidth: 1400, margin: "0 auto", padding: "0 40px",
-        height: 110,
+        height: 130,
       }}>
 
         {/* Left — logo */}
@@ -204,15 +204,23 @@ function BaysFilterHeader() {
 
         {/* Right — email signup */}
         {!subscribed ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 9, flexShrink: 0, alignItems: "flex-end" }}>
+          <div style={{
+            flexShrink: 0,
+            border: "2.5px solid #29B6F6",
+            borderRadius: 12,
+            background: "rgba(41,182,246,0.05)",
+            padding: "18px 22px",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
+            minWidth: 300,
+          }}>
             {/* Tagline */}
             <p style={{
               margin: 0,
-              fontSize: 12, fontWeight: 500, lineHeight: 1.4,
-              color: "var(--di-ink-3, #4a5261)",
+              fontSize: 12, fontWeight: 600, lineHeight: 1.45,
+              color: "var(--di-ink-2, #2a2f3a)",
               fontFamily: "var(--di-font-ui, Inter, sans-serif)",
               fontStyle: "italic",
-              maxWidth: 300, textAlign: "center",
+              textAlign: "center",
             }}>
               Get the world's most important and actionable information sent to your inbox, daily.
             </p>
@@ -221,22 +229,13 @@ function BaysFilterHeader() {
             <form
               onSubmit={handleSubscribe}
               style={{
-                display: "flex", alignItems: "center",
-                background: "var(--di-card, #fff)",
-                border: "1.5px solid var(--di-line, #e4e7ec)",
+                display: "flex", alignItems: "center", width: "100%",
+                background: "#fff",
+                border: "1.5px solid #29B6F6",
                 borderRadius: 999,
                 overflow: "hidden",
-                height: 40,
-                transition: "border-color 0.15s ease, box-shadow 0.15s ease",
-                boxShadow: "0 1px 4px rgba(2,4,12,0.06)",
-              }}
-              onFocus={e => {
-                e.currentTarget.style.borderColor = "#29B6F6";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(41,182,246,0.14)";
-              }}
-              onBlur={e => {
-                e.currentTarget.style.borderColor = "var(--di-line, #e4e7ec)";
-                e.currentTarget.style.boxShadow = "0 1px 4px rgba(2,4,12,0.06)";
+                height: 44,
+                boxShadow: "0 2px 8px rgba(41,182,246,0.15)",
               }}
             >
               <input
@@ -250,13 +249,11 @@ function BaysFilterHeader() {
                   border: "none", outline: "none", background: "transparent",
                   fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
                   color: "var(--di-ink, #0c0d10)",
-                  width: 190, minWidth: 0,
+                  flex: 1, minWidth: 0,
                 }}
               />
-              {/* Divider */}
-              <span style={{ width: 1, height: 22, background: "var(--di-line, #e4e7ec)", flexShrink: 0 }} />
               <button type="submit" style={{
-                height: "100%", padding: "0 18px",
+                height: "100%", padding: "0 20px",
                 background: "#29B6F6", border: "none",
                 fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
                 textTransform: "uppercase", color: "#fff", cursor: "pointer",
