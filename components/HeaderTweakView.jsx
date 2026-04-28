@@ -167,13 +167,16 @@ function BaysFilterHeader() {
       }}>
 
         {/* Left — logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
-          <BaysFilterIcon size={48} />
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 14, flexShrink: 0 }}>
+          {/* Small top offset so icon top aligns with cap-height of "B" */}
+          <div style={{ marginTop: 4 }}>
+            <BaysFilterIcon size={48} />
+          </div>
           <span style={{
-            fontFamily: "'Barlow Condensed', Impact, 'Arial Narrow', sans-serif",
-            fontWeight: 900,
+            fontFamily: "'Bebas Neue', 'Barlow Condensed', Impact, sans-serif",
+            fontWeight: 400,
             fontSize: 68,
-            letterSpacing: "0.03em",
+            letterSpacing: "0.04em",
             textTransform: "uppercase",
             color: "var(--di-ink, #0c0d10)",
             lineHeight: 1,
