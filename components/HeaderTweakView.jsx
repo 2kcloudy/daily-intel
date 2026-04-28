@@ -167,9 +167,9 @@ function BaysFilterHeader() {
       }}>
 
         {/* Left — logo */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 14, flexShrink: 0 }}>
-          {/* Small top offset so icon top aligns with cap-height of "B" */}
-          <div style={{ marginTop: 4 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
+          {/* Nudge icon up so its center aligns with cap-height center, not em-box center */}
+          <div style={{ transform: "translateY(-6px)", flexShrink: 0 }}>
             <BaysFilterIcon size={48} />
           </div>
           <span style={{
