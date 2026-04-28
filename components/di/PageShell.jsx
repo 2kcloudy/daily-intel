@@ -66,7 +66,7 @@ const CAT_META = {
  *   mode="category"  categoryId="tech"
  *   tabData={buildTabData(...)}  financeData={buildFinanceData(...)}
  */
-export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [], cardLayout = "image-top" }) {
+export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [], cardLayout = "image-top", TweaksComponent }) {
   const router = useRouter();
   const [tweaks, updateTweaks] = useTweaks();
   const [showTweaks, setShowTweaks] = useState(false);
@@ -228,7 +228,10 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
           Tweaks
         </button>
       )}
-      {showTweaks && (
+      {showTweaks && TweaksComponent && (
+        <TweaksComponent onClose={() => setShowTweaks(false)} />
+      )}
+      {showTweaks && !TweaksComponent && (
         <TweaksPanel tweaks={tweaks} update={updateTweaks} onClose={() => setShowTweaks(false)} />
       )}
 

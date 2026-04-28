@@ -424,7 +424,7 @@ html[data-theme="dark"] .di-ticker-chip { background: #1e2024; }
 .di-story {
   display: flex; flex-direction: column;
   background: var(--di-card);
-  border-radius: 22px;
+  border-radius: var(--di-glass-radius, 22px);
   border: 1px solid rgba(15, 18, 32, 0.12);
   box-shadow:
     rgba(8, 10, 20, 0.28) -1.5px 0px 0px 0px inset,
@@ -505,7 +505,7 @@ html[data-theme="dark"] .di-story {
   display: flex; flex-direction: column; gap: 14px;
   padding: 0; border-right: none !important; border-bottom: none;
   background: var(--di-card);
-  border-radius: 22px;
+  border-radius: var(--di-glass-radius, 22px);
   border: 1px solid rgba(15, 18, 32, 0.12);
   box-shadow:
     rgba(8, 10, 20, 0.28) -1.5px 0px 0px 0px inset,
@@ -951,7 +951,7 @@ html[data-theme="dark"] .di-tweaks { box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
   .di-hero-body-text { font-size: 15px; }
   .di-hero-full .di-hero-head { font-size: 36px; }
   .di-stories { grid-template-columns: 1fr; }
-  .di-story { border-radius: 18px; }
+  .di-story { border-radius: var(--di-glass-radius, 18px); }
   .di-story-thumb { height: 160px; }
   .di-story-head { font-size: 18px; }
   .di-cat-hero { padding: 24px 20px 20px; }

@@ -22,6 +22,14 @@ export default function PrototypesIndex() {
       desc: "3-column grid with clean flat cards — 1px border, 4px radius, no shadow. Editorial and minimal.",
       preview: "▭",
     },
+    {
+      href: "/prototypes/boxy-glass",
+      label: "Boxy Glass",
+      tag: "New",
+      tagColor: "#9c27b0",
+      desc: "Glass depth shadows with structured 6px corners — all the depth, none of the softness.",
+      preview: "⬛",
+    },
   ];
 
   return (

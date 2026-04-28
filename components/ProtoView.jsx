@@ -1,13 +1,20 @@
 "use client";
+import { useMemo } from "react";
 import PageShell from "./di/PageShell";
+import ProtoTweaks from "./ProtoTweaks";
 import { buildFinanceData } from "./di/dataTransform";
 
 /**
  * ProtoView — wraps PageShell with a small prototype banner across the top.
  * Used by /prototypes/glass and /prototypes/flat.
  */
-export default function ProtoView({ digest, allDates, cardLayout, protoName, protoDesc, protoHref, altHref, altLabel }) {
+export default function ProtoView({ digest, allDates, cardLayout, protoName, protoDesc, protoHref, altHref, altLabel, initialGlassStyle }) {
   const financeData = buildFinanceData(digest, allDates);
+  // Stable component reference — useMemo keyed on initialGlassStyle so it doesn't cause remounts on every render
+  const BoundProtoTweaks = useMemo(
+    () => ({ onClose }) => <ProtoTweaks onClose={onClose} initialGlassStyle={initialGlassStyle} />,
+    [initialGlassStyle]
+  );
 
   return (
     <>
@@ -75,6 +82,7 @@ export default function ProtoView({ digest, allDates, cardLayout, protoName, pro
         financeData={financeData}
         allDates={allDates}
         cardLayout={cardLayout}
+        TweaksComponent={BoundProtoTweaks}
       />
     </>
   );
