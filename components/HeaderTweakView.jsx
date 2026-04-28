@@ -231,7 +231,7 @@ function BaysFilterHeader() {
               style={{
                 display: "flex", alignItems: "center", width: "100%",
                 background: "#fff",
-                border: "1px solid #0c0d10",
+                border: "1px solid rgba(15, 18, 32, 0.22)",
                 borderRadius: 999,
                 overflow: "hidden",
                 height: 44,
