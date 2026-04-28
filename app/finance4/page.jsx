@@ -37,7 +37,7 @@ const CSS = `
 .f4-header {
   max-width: 1340px;
   margin: 0 auto;
-  padding: 4px 28px 4px;
+  padding: 0 28px 0;
   display: flex; align-items: center; justify-content: space-between; gap: 20px;
   flex-wrap: wrap;
 }
@@ -45,10 +45,10 @@ const CSS = `
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 .f4-logo {
-  width: 36px;
+  width: 80px;
   height: auto;
   flex-shrink: 0;
   display: block;
@@ -101,7 +101,7 @@ const CSS = `
 .f4-pulse-wrap {
   max-width: 1340px;
   margin: 0 auto;
-  padding: 0 28px 8px;
+  padding: 0 28px 4px;
 }
 .f4-pulse {
   font-family: 'Fraunces', serif;
@@ -128,7 +128,7 @@ const CSS = `
 .f4-section-head {
   max-width: 1340px;
   margin: 0 auto;
-  padding: 6px 28px 6px;
+  padding: 2px 28px 4px;
   display: flex; align-items: center; gap: 14px;
 }
 .f4-section-title {
