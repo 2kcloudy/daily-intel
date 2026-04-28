@@ -170,18 +170,18 @@ const CSS = `
   border-radius: 22px;
   overflow: hidden;
   box-shadow:
-    /* Dark glass bevel — LEFT edge */
-    inset 1.5px 0 0 rgba(8, 10, 20, 0.28),
+    /* Dark glass bevel — RIGHT edge */
+    inset -1.5px 0 0 rgba(8, 10, 20, 0.28),
     /* Dark glass bevel — BOTTOM edge */
     inset 0 -1.5px 0 rgba(8, 10, 20, 0.32),
-    /* Soft dark inner shading over bottom-LEFT corner */
-    inset 3px -3px 18px rgba(8, 10, 20, 0.14),
-    /* Tiny but very dark drop shadow — offset to bottom-LEFT */
-    -2px 3px 4px rgba(2, 4, 12, 0.55),
+    /* Soft dark inner shading over bottom-RIGHT corner */
+    inset -3px -3px 18px rgba(8, 10, 20, 0.14),
+    /* Tiny but very dark drop shadow — offset to bottom-RIGHT */
+    2px 3px 4px rgba(2, 4, 12, 0.55),
     /* Mid drop shadow */
-    -4px 6px 14px rgba(2, 4, 12, 0.18),
+    4px 6px 14px rgba(2, 4, 12, 0.18),
     /* Far ambient depth */
-    -10px 16px 36px rgba(8, 10, 22, 0.14);
+    10px 16px 36px rgba(8, 10, 22, 0.14);
   transition:
     transform 0.28s cubic-bezier(0.34,1.56,0.64,1),
     box-shadow 0.28s ease,
@@ -204,12 +204,12 @@ const CSS = `
 .f4-card:hover {
   transform: translateY(-3px);
   box-shadow:
-    inset 1.5px 0 0 rgba(8, 10, 20, 0.32),
+    inset -1.5px 0 0 rgba(8, 10, 20, 0.32),
     inset 0 -1.5px 0 rgba(8, 10, 20, 0.36),
-    inset 3px -3px 20px rgba(8, 10, 20, 0.18),
-    -2px 4px 5px rgba(2, 4, 12, 0.60),
-    -6px 10px 20px rgba(2, 4, 12, 0.22),
-    -14px 22px 48px rgba(8, 10, 22, 0.18);
+    inset -3px -3px 20px rgba(8, 10, 20, 0.18),
+    2px 4px 5px rgba(2, 4, 12, 0.60),
+    6px 10px 20px rgba(2, 4, 12, 0.22),
+    14px 22px 48px rgba(8, 10, 22, 0.18);
   border-color: rgba(15, 18, 32, 0.18);
 }
 
