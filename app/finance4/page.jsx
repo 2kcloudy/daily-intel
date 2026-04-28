@@ -165,17 +165,23 @@ const CSS = `
 .f4-card {
   position: relative;
   background: #ffffff;
-  /* Simple uniform border — no fancy bevel work on top/left */
+  /* Simple uniform border, with dark glass bevels on LEFT + BOTTOM */
   border: 1px solid rgba(15, 18, 32, 0.12);
   border-radius: 22px;
   overflow: hidden;
   box-shadow:
-    /* Tight contact shadow */
-    1px 2px 3px rgba(2, 4, 12, 0.10),
+    /* Dark glass bevel — LEFT edge */
+    inset 1.5px 0 0 rgba(8, 10, 20, 0.28),
+    /* Dark glass bevel — BOTTOM edge */
+    inset 0 -1.5px 0 rgba(8, 10, 20, 0.32),
+    /* Soft dark inner shading over bottom-LEFT corner */
+    inset 3px -3px 18px rgba(8, 10, 20, 0.14),
+    /* Tiny but very dark drop shadow — offset to bottom-LEFT */
+    -2px 3px 4px rgba(2, 4, 12, 0.55),
     /* Mid drop shadow */
-    4px 6px 14px rgba(2, 4, 12, 0.10),
-    /* Far ambient depth — does most of the floating work */
-    14px 20px 44px rgba(8, 10, 22, 0.10);
+    -4px 6px 14px rgba(2, 4, 12, 0.18),
+    /* Far ambient depth */
+    -10px 16px 36px rgba(8, 10, 22, 0.14);
   transition:
     transform 0.28s cubic-bezier(0.34,1.56,0.64,1),
     box-shadow 0.28s ease,
@@ -198,9 +204,12 @@ const CSS = `
 .f4-card:hover {
   transform: translateY(-3px);
   box-shadow:
-    1px 2px 4px rgba(2, 4, 12, 0.12),
-    6px 8px 18px rgba(2, 4, 12, 0.14),
-    18px 24px 50px rgba(8, 10, 22, 0.14);
+    inset 1.5px 0 0 rgba(8, 10, 20, 0.32),
+    inset 0 -1.5px 0 rgba(8, 10, 20, 0.36),
+    inset 3px -3px 20px rgba(8, 10, 20, 0.18),
+    -2px 4px 5px rgba(2, 4, 12, 0.60),
+    -6px 10px 20px rgba(2, 4, 12, 0.22),
+    -14px 22px 48px rgba(8, 10, 22, 0.18);
   border-color: rgba(15, 18, 32, 0.18);
 }
 
