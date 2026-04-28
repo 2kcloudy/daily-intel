@@ -201,18 +201,42 @@ function BaysFilterHeader() {
 
         {/* Right — email signup */}
         {!subscribed ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 7, flexShrink: 0, alignItems: "flex-end" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 9, flexShrink: 0, alignItems: "flex-end" }}>
+            {/* Tagline */}
             <p style={{
               margin: 0,
-              fontSize: 12, fontWeight: 500, lineHeight: 1.4,
-              color: "var(--di-ink-3, #4a5261)",
+              fontSize: 11, fontWeight: 500, lineHeight: 1.45,
+              color: "var(--di-ink-4, #787f8c)",
               fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-              fontStyle: "italic",
-              maxWidth: 300, textAlign: "right",
+              letterSpacing: "0.01em",
+              maxWidth: 280, textAlign: "right",
             }}>
-              Get the world's most important and actionable information sent to your inbox, daily.
+              The world's most important &amp; actionable information,{" "}
+              <em style={{ color: "var(--di-ink-3, #4a5261)", fontStyle: "italic" }}>delivered daily.</em>
             </p>
-            <form onSubmit={handleSubscribe} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+
+            {/* Merged pill input + button */}
+            <form
+              onSubmit={handleSubscribe}
+              style={{
+                display: "flex", alignItems: "center",
+                background: "var(--di-card, #fff)",
+                border: "1.5px solid var(--di-line, #e4e7ec)",
+                borderRadius: 999,
+                overflow: "hidden",
+                height: 40,
+                transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+                boxShadow: "0 1px 4px rgba(2,4,12,0.06)",
+              }}
+              onFocus={e => {
+                e.currentTarget.style.borderColor = "#29B6F6";
+                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(41,182,246,0.14)";
+              }}
+              onBlur={e => {
+                e.currentTarget.style.borderColor = "var(--di-line, #e4e7ec)";
+                e.currentTarget.style.boxShadow = "0 1px 4px rgba(2,4,12,0.06)";
+              }}
+            >
               <input
                 type="email"
                 placeholder="your@email.com"
@@ -220,38 +244,46 @@ function BaysFilterHeader() {
                 onChange={e => setEmail(e.target.value)}
                 required
                 style={{
-                  height: 36, padding: "0 14px",
-                  border: "1px solid var(--di-line, #e4e7ec)", borderRadius: 999,
+                  height: "100%", padding: "0 16px",
+                  border: "none", outline: "none", background: "transparent",
                   fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-                  color: "var(--di-ink, #0c0d10)", background: "var(--di-card, #fff)",
-                  outline: "none", width: 200,
-                  transition: "border-color 0.15s ease",
+                  color: "var(--di-ink, #0c0d10)",
+                  width: 190, minWidth: 0,
                 }}
-                onFocus={e => e.target.style.borderColor = "#29B6F6"}
-                onBlur={e => e.target.style.borderColor = "var(--di-line, #e4e7ec)"}
               />
+              {/* Divider */}
+              <span style={{ width: 1, height: 22, background: "var(--di-line, #e4e7ec)", flexShrink: 0 }} />
               <button type="submit" style={{
-                height: 36, padding: "0 16px",
-                background: "#29B6F6", border: "none", borderRadius: 999,
-                fontSize: 12, fontWeight: 700, letterSpacing: "0.06em",
+                height: "100%", padding: "0 18px",
+                background: "#29B6F6", border: "none",
+                fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
                 textTransform: "uppercase", color: "#fff", cursor: "pointer",
                 fontFamily: "var(--di-font-ui, Inter, sans-serif)",
                 transition: "background 0.15s ease", flexShrink: 0,
+                whiteSpace: "nowrap",
               }}
                 onMouseEnter={e => e.currentTarget.style.background = "#039BE5"}
                 onMouseLeave={e => e.currentTarget.style.background = "#29B6F6"}
               >
-                Sign Up
+                Sign Up →
               </button>
             </form>
           </div>
         ) : (
-          <span style={{
-            fontSize: 12, fontWeight: 600, color: "#29B6F6",
-            fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8,
+            background: "#e8f7ee", border: "1px solid #a8dbbe",
+            borderRadius: 999, padding: "8px 18px",
           }}>
-            ✓ You're in!
-          </span>
+            <span style={{ fontSize: 15, lineHeight: 1 }}>✓</span>
+            <span style={{
+              fontSize: 12, fontWeight: 600, color: "#007a3d",
+              fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+              letterSpacing: "0.02em",
+            }}>
+              You're in!
+            </span>
+          </div>
         )}
       </div>
     </header>
