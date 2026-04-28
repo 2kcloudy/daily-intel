@@ -37,12 +37,21 @@ const CSS = `
 .f4-header {
   max-width: 1340px;
   margin: 0 auto;
-  padding: 14px 28px 8px;
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;
+  padding: 4px 28px 4px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
   flex-wrap: wrap;
 }
 .f4-brand {
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.f4-logo {
+  width: 36px;
+  height: auto;
+  flex-shrink: 0;
+  display: block;
 }
 .f4-kicker {
   font-family: 'IBM Plex Mono', monospace;
@@ -92,7 +101,7 @@ const CSS = `
 .f4-pulse-wrap {
   max-width: 1340px;
   margin: 0 auto;
-  padding: 0 28px 16px;
+  padding: 0 28px 8px;
 }
 .f4-pulse {
   font-family: 'Fraunces', serif;
@@ -119,7 +128,7 @@ const CSS = `
 .f4-section-head {
   max-width: 1340px;
   margin: 0 auto;
-  padding: 12px 28px 12px;
+  padding: 6px 28px 6px;
   display: flex; align-items: center; gap: 14px;
 }
 .f4-section-title {
@@ -155,36 +164,36 @@ const CSS = `
 /* ── Glass card ── */
 .f4-card {
   position: relative;
-  /* Off-white card — a shade cooler than the pure-white page so cards float */
-  background:
-    linear-gradient(180deg, rgba(246, 248, 252, 0.98) 0%, rgba(230, 235, 243, 0.96) 100%);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid rgba(15, 18, 32, 0.10);
+  /* Pure white — same as the page. Float effect comes from shadows + tinted glass rim. */
+  background: #ffffff;
+  border: 1px solid rgba(15, 18, 32, 0.12);
   border-radius: 22px;
   overflow: hidden;
-  /* 3D glass bevel: STRONG shiny TOP + LEFT, dark BOTTOM + RIGHT, tiny dark drop shadow */
+  /* 3D glass: cool-tinted shiny TOP + LEFT (white-on-white needs a tint to read),
+     dark BOTTOM + RIGHT bevel, 3-layer drop shadow for floating depth. */
   box-shadow:
-    /* Thick crisp shiny bevel — TOP edge (2.5px white) */
-    inset 0 2.5px 0 rgba(255, 255, 255, 1),
-    /* Thick crisp shiny bevel — LEFT edge (2.5px white) */
-    inset 2.5px 0 0 rgba(255, 255, 255, 0.95),
-    /* Secondary inner-edge highlight on top — adds depth */
-    inset 0 4px 1px rgba(255, 255, 255, 0.65),
+    /* Cool-tinted shiny bevel — TOP edge (reads as light catching the glass) */
+    inset 0 2.5px 0 rgba(180, 205, 245, 0.55),
+    /* Cool-tinted shiny bevel — LEFT edge */
+    inset 2.5px 0 0 rgba(180, 205, 245, 0.45),
+    /* Secondary inner-edge highlight on top */
+    inset 0 4px 1px rgba(200, 220, 250, 0.40),
     /* Secondary inner-edge highlight on left */
-    inset 4px 0 1px rgba(255, 255, 255, 0.55),
-    /* BIG soft glow pooling over the top-left corner */
-    inset 6px 6px 30px rgba(255, 255, 255, 0.85),
-    /* Dark glass bevel — BOTTOM edge */
-    inset 0 -1.5px 0 rgba(8, 10, 20, 0.32),
+    inset 4px 0 1px rgba(200, 220, 250, 0.32),
+    /* Soft cool glow pooling over the top-left corner — implies overhead light */
+    inset 6px 6px 30px rgba(220, 235, 255, 0.55),
+    /* Dark glass bevel — BOTTOM edge (carves the card from the white page) */
+    inset 0 -1.5px 0 rgba(8, 10, 20, 0.34),
     /* Dark glass bevel — RIGHT edge */
-    inset -1.5px 0 0 rgba(8, 10, 20, 0.26),
-    /* Soft inner shading over bottom-right corner */
-    inset -3px -3px 18px rgba(8, 10, 20, 0.14),
-    /* Tiny but very dark drop shadow — bottom-right, gives 3D pop */
-    2px 3px 4px rgba(2, 4, 12, 0.55),
-    /* Ambient depth */
-    10px 14px 32px rgba(8, 10, 22, 0.20);
+    inset -1.5px 0 0 rgba(8, 10, 20, 0.28),
+    /* Soft dark inner shading over bottom-right corner */
+    inset -3px -3px 18px rgba(8, 10, 20, 0.16),
+    /* Tight contact shadow */
+    1px 2px 3px rgba(2, 4, 12, 0.45),
+    /* Mid drop shadow */
+    4px 6px 14px rgba(2, 4, 12, 0.30),
+    /* Far ambient depth */
+    14px 20px 44px rgba(8, 10, 22, 0.22);
   transition:
     transform 0.28s cubic-bezier(0.34,1.56,0.64,1),
     box-shadow 0.28s ease,
@@ -192,17 +201,16 @@ const CSS = `
   display: flex;
   flex-direction: column;
 }
-/* Top sheen — VERY strong polished-glass highlight from top-left, fading down + right */
+/* Top sheen — cool-tinted polished-glass shimmer from top-left (white card needs tint to read) */
 .f4-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; height: 72%;
   background: linear-gradient(135deg,
-    rgba(255,255,255,1)    0%,
-    rgba(255,255,255,0.70) 18%,
-    rgba(255,255,255,0.30) 42%,
-    rgba(255,255,255,0.10) 65%,
-    transparent           100%);
+    rgba(210, 228, 252, 0.55) 0%,
+    rgba(220, 234, 252, 0.30) 22%,
+    rgba(232, 242, 252, 0.12) 50%,
+    transparent              100%);
   pointer-events: none;
   z-index: 1;
   border-radius: 22px 22px 0 0;
@@ -235,17 +243,18 @@ const CSS = `
 .f4-card:hover {
   transform: translateY(-3px);
   box-shadow:
-    inset 0 2.5px 0 rgba(255, 255, 255, 1),
-    inset 2.5px 0 0 rgba(255, 255, 255, 1),
-    inset 0 4px 1px rgba(255, 255, 255, 0.75),
-    inset 4px 0 1px rgba(255, 255, 255, 0.65),
-    inset 6px 6px 32px rgba(255, 255, 255, 0.95),
-    inset 0 -1.5px 0 rgba(8, 10, 20, 0.36),
-    inset -1.5px 0 0 rgba(8, 10, 20, 0.30),
-    inset -3px -3px 20px rgba(8, 10, 20, 0.18),
-    3px 5px 6px rgba(2, 4, 12, 0.62),
-    16px 20px 42px rgba(8, 10, 22, 0.26);
-  border-color: rgba(15, 18, 32, 0.16);
+    inset 0 2.5px 0 rgba(180, 205, 245, 0.70),
+    inset 2.5px 0 0 rgba(180, 205, 245, 0.60),
+    inset 0 4px 1px rgba(200, 220, 250, 0.55),
+    inset 4px 0 1px rgba(200, 220, 250, 0.45),
+    inset 6px 6px 32px rgba(220, 235, 255, 0.70),
+    inset 0 -1.5px 0 rgba(8, 10, 20, 0.38),
+    inset -1.5px 0 0 rgba(8, 10, 20, 0.32),
+    inset -3px -3px 20px rgba(8, 10, 20, 0.20),
+    2px 3px 4px rgba(2, 4, 12, 0.50),
+    6px 8px 18px rgba(2, 4, 12, 0.34),
+    18px 24px 50px rgba(8, 10, 22, 0.26);
+  border-color: rgba(15, 18, 32, 0.18);
 }
 
 /* Card image */
@@ -531,6 +540,24 @@ export default async function Finance4Page() {
           {/* Header */}
           <header className="f4-header">
             <div className="f4-brand">
+              <svg
+                className="f4-logo"
+                viewBox="0 0 40 24"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <defs>
+                  <linearGradient id="f4-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#1f2440" />
+                    <stop offset="100%" stopColor="#0f1220" />
+                  </linearGradient>
+                </defs>
+                {/* Sideways filter / funnel pointing right — like > */}
+                <path
+                  d="M 1 2 L 11 2 L 26 11 L 33 11 L 33 13 L 26 13 L 11 22 L 1 22 Z"
+                  fill="url(#f4-logo-grad)"
+                />
+              </svg>
               <h1 className="f4-title">Bays Finance</h1>
             </div>
           </header>
