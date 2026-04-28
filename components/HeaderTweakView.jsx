@@ -158,19 +158,21 @@ function BaysFilterHeader() {
   }
 
   return (
-    <header style={{ background: "var(--di-paper, #fafaf7)", padding: "0 40px" }}>
+    <header style={{ background: "var(--di-paper, #fafaf7)" }}>
+      {/* Same maxWidth+padding pattern as pills and stories so left edges align perfectly */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        gap: 24, height: 68, maxWidth: 1400, margin: "0 auto",
+        gap: 24, maxWidth: 1400, margin: "0 auto", padding: "0 40px",
+        height: 110,
       }}>
 
         {/* Left — logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
-          <BaysFilterIcon size={46} />
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
+          <BaysFilterIcon size={92} />
           <span style={{
             fontFamily: "'Barlow Condensed', Impact, 'Arial Narrow', sans-serif",
             fontWeight: 900,
-            fontSize: 34,
+            fontSize: 68,
             letterSpacing: "0.03em",
             textTransform: "uppercase",
             color: "var(--di-ink, #0c0d10)",
@@ -251,8 +253,8 @@ function TopicPills({ active, onSelect }) {
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
-      padding: "10px 40px 10px",
       maxWidth: 1400, margin: "0 auto",
+      padding: "10px 40px 10px",
     }}>
       {TOPIC_PILLS.map(label => {
         const isActive = active === label;
