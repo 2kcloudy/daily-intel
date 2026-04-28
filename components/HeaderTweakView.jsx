@@ -168,7 +168,7 @@ function BaysFilterHeader() {
 
         {/* Left — logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
-          <BaysFilterIcon size={92} />
+          <BaysFilterIcon size={48} />
           <span style={{
             fontFamily: "'Barlow Condensed', Impact, 'Arial Narrow', sans-serif",
             fontWeight: 900,
