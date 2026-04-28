@@ -164,36 +164,18 @@ const CSS = `
 /* ── Glass card ── */
 .f4-card {
   position: relative;
-  /* Pure white — same as the page. Float effect comes from shadows + tinted glass rim. */
   background: #ffffff;
+  /* Simple uniform border — no fancy bevel work on top/left */
   border: 1px solid rgba(15, 18, 32, 0.12);
   border-radius: 22px;
   overflow: hidden;
-  /* 3D glass: cool-tinted shiny TOP + LEFT (white-on-white needs a tint to read),
-     dark BOTTOM + RIGHT bevel, 3-layer drop shadow for floating depth. */
   box-shadow:
-    /* Cool-tinted shiny bevel — TOP edge (reads as light catching the glass) */
-    inset 0 2.5px 0 rgba(180, 205, 245, 0.55),
-    /* Cool-tinted shiny bevel — LEFT edge */
-    inset 2.5px 0 0 rgba(180, 205, 245, 0.45),
-    /* Secondary inner-edge highlight on top */
-    inset 0 4px 1px rgba(200, 220, 250, 0.40),
-    /* Secondary inner-edge highlight on left */
-    inset 4px 0 1px rgba(200, 220, 250, 0.32),
-    /* Soft cool glow pooling over the top-left corner — implies overhead light */
-    inset 6px 6px 30px rgba(220, 235, 255, 0.55),
-    /* Dark glass bevel — BOTTOM edge (carves the card from the white page) */
-    inset 0 -1.5px 0 rgba(8, 10, 20, 0.34),
-    /* Dark glass bevel — RIGHT edge */
-    inset -1.5px 0 0 rgba(8, 10, 20, 0.28),
-    /* Soft dark inner shading over bottom-right corner */
-    inset -3px -3px 18px rgba(8, 10, 20, 0.16),
     /* Tight contact shadow */
-    1px 2px 3px rgba(2, 4, 12, 0.45),
+    1px 2px 3px rgba(2, 4, 12, 0.10),
     /* Mid drop shadow */
-    4px 6px 14px rgba(2, 4, 12, 0.30),
-    /* Far ambient depth */
-    14px 20px 44px rgba(8, 10, 22, 0.22);
+    4px 6px 14px rgba(2, 4, 12, 0.10),
+    /* Far ambient depth — does most of the floating work */
+    14px 20px 44px rgba(8, 10, 22, 0.10);
   transition:
     transform 0.28s cubic-bezier(0.34,1.56,0.64,1),
     box-shadow 0.28s ease,
@@ -201,36 +183,9 @@ const CSS = `
   display: flex;
   flex-direction: column;
 }
-/* Top sheen — cool-tinted polished-glass shimmer from top-left (white card needs tint to read) */
-.f4-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 72%;
-  background: linear-gradient(135deg,
-    rgba(210, 228, 252, 0.55) 0%,
-    rgba(220, 234, 252, 0.30) 22%,
-    rgba(232, 242, 252, 0.12) 50%,
-    transparent              100%);
-  pointer-events: none;
-  z-index: 1;
-  border-radius: 22px 22px 0 0;
-}
-/* Edge ring — bright top-left → dark bottom-right diagonal wash */
-.f4-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 22px;
-  pointer-events: none;
-  background: linear-gradient(135deg,
-    rgba(255,255,255,0.55) 0%,
-    rgba(255,255,255,0.18) 25%,
-    transparent 50%,
-    rgba(8,10,20,0.08) 78%,
-    rgba(8,10,20,0.18) 100%);
-  mix-blend-mode: overlay;
-  z-index: 1;
-}
+/* Sheen + edge ring removed — cards are clean white with a simple border */
+.f4-card::before { content: none; }
+.f4-card::after  { content: none; }
 .f4-card-link {
   display: flex;
   flex-direction: column;
@@ -243,17 +198,9 @@ const CSS = `
 .f4-card:hover {
   transform: translateY(-3px);
   box-shadow:
-    inset 0 2.5px 0 rgba(180, 205, 245, 0.70),
-    inset 2.5px 0 0 rgba(180, 205, 245, 0.60),
-    inset 0 4px 1px rgba(200, 220, 250, 0.55),
-    inset 4px 0 1px rgba(200, 220, 250, 0.45),
-    inset 6px 6px 32px rgba(220, 235, 255, 0.70),
-    inset 0 -1.5px 0 rgba(8, 10, 20, 0.38),
-    inset -1.5px 0 0 rgba(8, 10, 20, 0.32),
-    inset -3px -3px 20px rgba(8, 10, 20, 0.20),
-    2px 3px 4px rgba(2, 4, 12, 0.50),
-    6px 8px 18px rgba(2, 4, 12, 0.34),
-    18px 24px 50px rgba(8, 10, 22, 0.26);
+    1px 2px 4px rgba(2, 4, 12, 0.12),
+    6px 8px 18px rgba(2, 4, 12, 0.14),
+    18px 24px 50px rgba(8, 10, 22, 0.14);
   border-color: rgba(15, 18, 32, 0.18);
 }
 
