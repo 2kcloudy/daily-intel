@@ -165,19 +165,23 @@ function BaysFilterHeader() {
       }}>
 
         {/* Left — logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-          <BaysFilterIcon size={42} />
+        <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
+          <BaysFilterIcon size={46} />
           <span style={{
-            fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-            fontWeight: 900, fontSize: 22, letterSpacing: "0.06em",
-            textTransform: "uppercase", color: "var(--di-ink, #0c0d10)", lineHeight: 1,
+            fontFamily: "'Barlow Condensed', Impact, 'Arial Narrow', sans-serif",
+            fontWeight: 900,
+            fontSize: 34,
+            letterSpacing: "0.03em",
+            textTransform: "uppercase",
+            color: "var(--di-ink, #0c0d10)",
+            lineHeight: 1,
           }}>
             Bay's Filter
           </span>
         </div>
 
         {/* Center — nav */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 28, fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
+        <nav style={{ display: "flex", alignItems: "center", gap: 44, fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
           {["About", "Archive"].map(label => (
             <a key={label} href="#" style={{
               fontSize: 13, fontWeight: 600, letterSpacing: "0.03em",
