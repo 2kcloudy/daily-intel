@@ -447,7 +447,7 @@ html[data-theme="dark"] .di-ticker-chip { background: #1e2024; }
     rgba(2, 4, 12, 0.25) 6px 14px 28px 0px,
     rgba(8, 10, 22, 0.18) 14px 28px 52px 0px);
 }
-.di-story:nth-child(odd)  { padding-right: 0; border-right: none; }
+.di-story:nth-child(odd)  { padding-right: 0; }
 .di-story:nth-child(even) { padding-left: 0; }
 .di-story-body { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 18px 22px 16px; flex: 1; }
 .di-story-meta {
@@ -503,7 +503,7 @@ html[data-theme="dark"] .di-story {
 }
 .di-stories-image-top .di-story.di-story-image-top {
   display: flex; flex-direction: column; gap: 14px;
-  padding: 0; border-right: none !important; border-bottom: none;
+  padding: 0;
   background: var(--di-card);
   border-radius: var(--di-glass-radius, 22px);
   border: 1px solid var(--di-card-border, rgba(15, 18, 32, 0.12));
@@ -529,7 +529,7 @@ html[data-theme="dark"] .di-story {
 }
 .di-stories-image-top .di-story.di-story-image-top:nth-child(odd),
 .di-stories-image-top .di-story.di-story-image-top:nth-child(even) {
-  padding-left: 0; padding-right: 0; border-right: none;
+  padding-left: 0; padding-right: 0;
 }
 html[data-theme="dark"] .di-stories-image-top .di-story.di-story-image-top {
   border-color: rgba(255, 255, 255, 0.07);
@@ -652,7 +652,7 @@ html[data-theme="dark"] .di-story-flat-thumb img {
 .di-main.spacious .di-story { grid-template-columns: 1fr; padding: 40px 0; }
 .di-main.spacious .di-story-thumb { aspect-ratio: 16 / 9; margin-bottom: 8px; order: -1; }
 .di-main.spacious .di-stories { grid-template-columns: 1fr; }
-.di-main.spacious .di-story:nth-child(odd) { padding-right: 0; border-right: none; }
+.di-main.spacious .di-story:nth-child(odd) { padding-right: 0; }
 .di-main.spacious .di-story:nth-child(even) { padding-left: 0; }
 .di-main.spacious .di-story-head { font-size: 30px; }
 
@@ -930,7 +930,7 @@ html[data-theme="dark"] .di-tweaks { box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
 @media (max-width: 1100px) {
   .di-main { grid-template-columns: 1fr; gap: 32px; }
   .di-stories { grid-template-columns: repeat(2, 1fr); }
-  .di-story:nth-child(odd) { padding-right: 0; border-right: none; }
+  .di-story:nth-child(odd) { padding-right: 0; }
   .di-story:nth-child(even) { padding-left: 0; }
   .di-hero { grid-template-columns: 1fr; }
   .di-rail { position: static; }
