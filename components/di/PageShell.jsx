@@ -66,7 +66,7 @@ const CAT_META = {
  *   mode="category"  categoryId="tech"
  *   tabData={buildTabData(...)}  financeData={buildFinanceData(...)}
  */
-export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [], cardLayout = "image-top", TweaksComponent }) {
+export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [], cardLayout = "image-top", TweaksComponent, hideDefaultNav = false }) {
   const router = useRouter();
   const [tweaks, updateTweaks] = useTweaks();
   const [showTweaks, setShowTweaks] = useState(false);
@@ -179,21 +179,25 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
 
   return (
     <>
-      <Masthead
-        date={financeData?.date || ""}
-        postedAt={dateShort}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        onNav={handleNav}
-        onSearch={() => setSearchOpen(true)}
-        brief={data?.brief}
-        briefLabel={mode === "finance" ? "Daily Brief" : `${catLabel} Brief`}
-      />
-      <CategoryNav
-        categories={CATEGORIES}
-        active={activeNavId}
-        onSelect={handleNav}
-      />
+      {!hideDefaultNav && (
+        <>
+          <Masthead
+            date={financeData?.date || ""}
+            postedAt={dateShort}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            onNav={handleNav}
+            onSearch={() => setSearchOpen(true)}
+            brief={data?.brief}
+            briefLabel={mode === "finance" ? "Daily Brief" : `${catLabel} Brief`}
+          />
+          <CategoryNav
+            categories={CATEGORIES}
+            active={activeNavId}
+            onSelect={handleNav}
+          />
+        </>
+      )}
       {/* Market Pulse banner removed site-wide per editorial decision.
           Daily Brief audio player moved into the masthead.
           Inline TagFilter replaced by the floating FilterDrawer below. */}

@@ -30,6 +30,14 @@ export default function PrototypesIndex() {
       desc: "Glass depth shadows with structured 6px corners — all the depth, none of the softness.",
       preview: "⬛",
     },
+    {
+      href: "/prototypes/header-tweak",
+      label: "Header Tweak",
+      tag: "New",
+      tagColor: "#0288D1",
+      desc: "Bay's Filter brand header — custom nav, category dropdown, email signup, topic pill row.",
+      preview: "🔵",
+    },
   ];
 
   return (
