@@ -45,10 +45,10 @@ const CSS = `
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 16px;
+  gap: 4px;
 }
 .f4-logo {
-  width: 100px;
+  width: 88px;
   height: auto;
   flex-shrink: 0;
   display: block;
@@ -498,7 +498,7 @@ export default async function Finance4Page() {
             <div className="f4-brand">
               <svg
                 className="f4-logo"
-                viewBox="0 0 50 24"
+                viewBox="0 0 44 24"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
               >
