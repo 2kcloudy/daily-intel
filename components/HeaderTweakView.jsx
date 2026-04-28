@@ -231,11 +231,11 @@ function BaysFilterHeader() {
               style={{
                 display: "flex", alignItems: "center", width: "100%",
                 background: "#fff",
-                border: "1.5px solid #29B6F6",
+                border: "1px solid #0c0d10",
                 borderRadius: 999,
                 overflow: "hidden",
                 height: 44,
-                boxShadow: "0 2px 8px rgba(41,182,246,0.15)",
+                boxShadow: "none",
               }}
             >
               <input
