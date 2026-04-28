@@ -169,7 +169,7 @@ function BaysFilterHeader() {
         {/* Left — logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
           {/* Nudge icon up so its center aligns with cap-height center, not em-box center */}
-          <div style={{ transform: "translateY(6px)", flexShrink: 0 }}>
+          <div style={{ transform: "translateY(2px)", flexShrink: 0 }}>
             <BaysFilterIcon size={48} />
           </div>
           <span style={{
