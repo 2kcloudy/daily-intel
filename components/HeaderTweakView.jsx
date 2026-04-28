@@ -169,7 +169,7 @@ function BaysFilterHeader() {
         {/* Left — logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
           {/* Nudge icon up so its center aligns with cap-height center, not em-box center */}
-          <div style={{ transform: "translateY(2px)", flexShrink: 0 }}>
+          <div style={{ flexShrink: 0 }}>
             <BaysFilterIcon size={48} />
           </div>
           <span style={{
@@ -179,7 +179,7 @@ function BaysFilterHeader() {
             letterSpacing: "0.04em",
             textTransform: "uppercase",
             color: "var(--di-ink, #0c0d10)",
-            lineHeight: 1,
+            lineHeight: "0.85",
           }}>
             Bay's Filter
           </span>
