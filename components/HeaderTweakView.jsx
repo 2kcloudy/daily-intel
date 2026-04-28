@@ -205,14 +205,13 @@ function BaysFilterHeader() {
             {/* Tagline */}
             <p style={{
               margin: 0,
-              fontSize: 11, fontWeight: 500, lineHeight: 1.45,
-              color: "var(--di-ink-4, #787f8c)",
+              fontSize: 12, fontWeight: 500, lineHeight: 1.4,
+              color: "var(--di-ink-3, #4a5261)",
               fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-              letterSpacing: "0.01em",
-              maxWidth: 280, textAlign: "right",
+              fontStyle: "italic",
+              maxWidth: 300, textAlign: "center",
             }}>
-              The world's most important &amp; actionable information,{" "}
-              <em style={{ color: "var(--di-ink-3, #4a5261)", fontStyle: "italic" }}>delivered daily.</em>
+              Get the world's most important and actionable information sent to your inbox, daily.
             </p>
 
             {/* Merged pill input + button */}
