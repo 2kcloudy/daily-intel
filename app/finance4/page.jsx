@@ -7,8 +7,8 @@ import { getLatestDigest } from "@/lib/storage";
 export const revalidate = 60;
 
 export const metadata = {
-  title: "Daily Intel · Finance (Glass)",
-  description: "Glass-widget design experiment for the Finance tab",
+  title: "Bays Finance",
+  description: "Bays Finance — daily curated finance brief",
 };
 
 const CSS = `
@@ -41,7 +41,7 @@ const CSS = `
 .f4-header {
   max-width: 1340px;
   margin: 0 auto;
-  padding: 36px 28px 22px;
+  padding: 14px 28px 8px;
   display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;
   flex-wrap: wrap;
 }
@@ -96,7 +96,7 @@ const CSS = `
 .f4-pulse-wrap {
   max-width: 1340px;
   margin: 0 auto;
-  padding: 0 28px 28px;
+  padding: 0 28px 16px;
 }
 .f4-pulse {
   font-family: 'Fraunces', serif;
@@ -123,7 +123,7 @@ const CSS = `
 .f4-section-head {
   max-width: 1340px;
   margin: 0 auto;
-  padding: 28px 28px 18px;
+  padding: 12px 28px 12px;
   display: flex; align-items: center; gap: 14px;
 }
 .f4-section-title {
@@ -160,18 +160,30 @@ const CSS = `
 .f4-card {
   position: relative;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.42) 100%);
+    linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.46) 100%);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  /* Darker, visible outline that reads on a white page */
-  border: 1px solid rgba(15, 18, 32, 0.14);
+  border: 1px solid rgba(15, 18, 32, 0.10);
   border-radius: 22px;
   overflow: hidden;
-  /* Deep, dark, small directional shadow on the right + bottom */
+  /* 3D glass bevel: shiny TOP + LEFT, dark BOTTOM + RIGHT, tiny dark drop shadow */
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.95) inset,
-    3px 4px 10px rgba(10, 12, 28, 0.18),
-    5px 8px 16px rgba(10, 12, 28, 0.12);
+    /* Crisp shiny bevel — TOP edge */
+    inset 0 1.5px 0 rgba(255, 255, 255, 1),
+    /* Crisp shiny bevel — LEFT edge */
+    inset 1.5px 0 0 rgba(255, 255, 255, 0.85),
+    /* Soft inner glow over top-left corner */
+    inset 3px 3px 14px rgba(255, 255, 255, 0.55),
+    /* Dark glass bevel — BOTTOM edge */
+    inset 0 -1.5px 0 rgba(8, 10, 20, 0.30),
+    /* Dark glass bevel — RIGHT edge */
+    inset -1.5px 0 0 rgba(8, 10, 20, 0.24),
+    /* Soft inner shading over bottom-right corner */
+    inset -3px -3px 16px rgba(8, 10, 20, 0.12),
+    /* Tiny but very dark drop shadow — bottom-right, gives 3D pop */
+    2px 3px 4px rgba(2, 4, 12, 0.55),
+    /* Ambient depth */
+    8px 12px 28px rgba(8, 10, 22, 0.18);
   transition:
     transform 0.28s cubic-bezier(0.34,1.56,0.64,1),
     box-shadow 0.28s ease,
@@ -179,24 +191,33 @@ const CSS = `
   display: flex;
   flex-direction: column;
 }
-/* Top sheen highlight */
+/* Top sheen — strong polished-glass highlight from top-left, fading down + right */
 .f4-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; height: 50%;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.55), transparent);
+  top: 0; left: 0; right: 0; height: 60%;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.85) 0%,
+    rgba(255,255,255,0.45) 28%,
+    rgba(255,255,255,0.15) 58%,
+    transparent 100%);
   pointer-events: none;
   z-index: 1;
   border-radius: 22px 22px 0 0;
 }
-/* Edge highlight ring */
+/* Edge ring — bright top-left → dark bottom-right diagonal wash */
 .f4-card::after {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: 22px;
   pointer-events: none;
-  background: linear-gradient(135deg, rgba(255,255,255,0.40), transparent 45%, transparent 65%, rgba(255,255,255,0.18));
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.55) 0%,
+    rgba(255,255,255,0.18) 25%,
+    transparent 50%,
+    rgba(8,10,20,0.08) 78%,
+    rgba(8,10,20,0.18) 100%);
   mix-blend-mode: overlay;
   z-index: 1;
 }
@@ -212,10 +233,15 @@ const CSS = `
 .f4-card:hover {
   transform: translateY(-3px);
   box-shadow:
-    0 1px 0 rgba(255,255,255,1) inset,
-    5px 7px 14px rgba(10, 12, 28, 0.24),
-    8px 12px 22px rgba(10, 12, 28, 0.16);
-  border-color: rgba(15, 18, 32, 0.22);
+    inset 0 1.5px 0 rgba(255, 255, 255, 1),
+    inset 1.5px 0 0 rgba(255, 255, 255, 0.95),
+    inset 3px 3px 16px rgba(255, 255, 255, 0.70),
+    inset 0 -1.5px 0 rgba(8, 10, 20, 0.34),
+    inset -1.5px 0 0 rgba(8, 10, 20, 0.28),
+    inset -3px -3px 18px rgba(8, 10, 20, 0.16),
+    3px 5px 6px rgba(2, 4, 12, 0.62),
+    14px 18px 38px rgba(8, 10, 22, 0.24);
+  border-color: rgba(15, 18, 32, 0.16);
 }
 
 /* Card image */
@@ -501,16 +527,7 @@ export default async function Finance4Page() {
           {/* Header */}
           <header className="f4-header">
             <div className="f4-brand">
-              <span className="f4-kicker">Daily Intel · Finance · Glass</span>
-              <h1 className="f4-title">The Finance Brief</h1>
-            </div>
-            <div className="f4-meta">
-              <span className="f4-live-chip">
-                <span className="f4-live-dot" />
-                Live
-              </span>
-              <span className="f4-meta-item">{dateLong}</span>
-              <span className="f4-meta-item">{stories.length} stories</span>
+              <h1 className="f4-title">Bays Finance</h1>
             </div>
           </header>
 
