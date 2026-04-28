@@ -44,7 +44,7 @@ function rankBorderOpacity(rank) {
   return Math.max(0.15, 1.0 - (rank - 1) * 0.07);
 }
 
-/* Seed for stable image generation */
+/* Seed for stable image generation (legacy fallback) */
 function seedFromString(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -54,20 +54,26 @@ function seedFromString(str) {
   return Math.abs(hash);
 }
 
-/* AI image with shimmer + emoji fallback + 12s timeout */
-function StoryImage({ headline, topic, accentColor, accentDim, imagePromptStyle, ready }) {
+/* Fallback URL — used only for pre-existing stories without story.image. */
+function buildFallbackImageUrl(headline, topic, imagePromptStyle) {
+  const base = imagePromptStyle || "editorial news illustration, muted professional tones";
+  const prompt = `${(headline || "").split(" ").slice(0, 6).join(" ")}, ${topic || "news"}, ${base}, no text`;
+  const seed = seedFromString(headline || "");
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=900&height=700&seed=${seed}&nologo=true&model=turbo`;
+}
+
+/* AI image with shimmer + emoji fallback + 20s timeout */
+function StoryImage({ headline, topic, accentColor, accentDim, imagePromptStyle, image }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const timerRef = useRef(null);
 
-  const prompt = `${imagePromptStyle || "Editorial news illustration, clean minimal style"}: ${topic || "news"} - ${(headline || "").slice(0, 80)}. No text, photorealistic, professional.`;
-  const src = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=600&height=220&nologo=true&seed=${seedFromString(headline || "")}`;
+  const src = image || buildFallbackImageUrl(headline, topic, imagePromptStyle);
 
   useEffect(() => {
-    if (!ready) return;
-    timerRef.current = setTimeout(() => { if (!loaded) setError(true); }, 12000);
+    timerRef.current = setTimeout(() => { if (!loaded) setError(true); }, 20000);
     return () => clearTimeout(timerRef.current);
-  }, [loaded, ready]);
+  }, [loaded]);
 
   if (error) {
     return (
@@ -98,14 +104,13 @@ function StoryImage({ headline, topic, accentColor, accentDim, imagePromptStyle,
 }
 
 export default function GenericStoryCard({
-  rank = 1, headline, summary, source, url, topic,
+  rank = 1, headline, summary, source, url, topic, image,
   compact = false, isTrending = false,
   config = {},
 }) {
   const [hovered, setHovered] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [ready, setReady] = useState(false);
   const sentiment = inferSentiment(headline, summary);
   const faviconUrl = getFaviconUrl(source);
 
@@ -116,11 +121,6 @@ export default function GenericStoryCard({
     accentBadgeBg = "rgba(184,146,26,0.09)",
     imagePromptStyle,
   } = config;
-
-  useEffect(() => {
-    const t = setTimeout(() => setReady(true), (rank - 1) * 900);
-    return () => clearTimeout(t);
-  }, [rank]);
 
   const borderOpacity = rankBorderOpacity(rank);
   const rankBorderColor = accentColor.startsWith("#")
@@ -209,7 +209,7 @@ export default function GenericStoryCard({
         headline={headline} topic={topic}
         accentColor={accentColor} accentDim={accentDim}
         imagePromptStyle={imagePromptStyle}
-        ready={ready}
+        image={image}
       />
 
       {/* Top row: rank + topic + sentiment + trending */}

@@ -1,34 +1,14 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { saveHealthDigest, getLatestHealthDigest, getAllHealthDates } from "@/lib/storage";
-import { pregenerateDigestImages } from "@/lib/imageCache";
+import { attachImagesToStories, pregenerateDigestImages } from "@/lib/imageCache";
+
+// Allow up to 60s so the awaited image pre-warm has room to finish.
+export const maxDuration = 60;
 
 /**
  * POST /api/health-digest
  * Claude posts a new health digest here.
- *
- * Body: {
- *   date: "YYYY-MM-DD",
- *   healthPulse: "One-sentence wellness summary...",
- *   stories: [
- *     {
- *       headline: "...",
- *       summary: "65-85 word summary",
- *       source: "NYT",
- *       url: "https://...",
- *       topic: "Sleep" | "Nutrition" | "Exercise" | "Longevity" | "Heart" |
- *              "Gut" | "Mental" | "Supplements" | "Research" | "Wearables" |
- *              "Peptides" | "Hormones" | "Inflammation" | "Breathing"
- *     }
- *   ],
- *   spotlights: [
- *     {
- *       name: "Peter Attia",
- *       type: "influencer",   // or "podcast"
- *       insight: "This week's key insight from their content...",
- *       url: "https://..."
- *     }
- *   ]
- * }
  */
 export async function POST(request) {
   const apiKey = request.headers.get("x-api-key");
@@ -43,7 +23,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { date, healthPulse, stories, spotlights } = body;
+  const { date, healthPulse, stories, spotlights, brief } = body;
 
   if (!date || !stories || !Array.isArray(stories)) {
     return NextResponse.json(
@@ -59,25 +39,38 @@ export async function POST(request) {
     );
   }
 
+  // Attach deterministic Pollinations turbo URLs to every story before saving.
+  attachImagesToStories(stories);
+
   const digest = {
     date,
     healthPulse: healthPulse || "",
     stories,
     spotlights: spotlights || [],
+    brief: brief || null,
     postedAt: new Date().toISOString(),
   };
 
   await saveHealthDigest(date, digest);
 
-  pregenerateDigestImages(stories).then(r =>
-    console.log(`[images] Health ${date}: ${r.done} generated, ${r.failed} failed`)
-  ).catch(() => {});
+  try {
+    revalidatePath("/health");
+    revalidatePath(`/health/${date}`);
+  } catch {}
+
+  let imageStats = { done: 0, failed: 0, total: 0 };
+  try {
+    imageStats = await pregenerateDigestImages(stories);
+    console.log(`[images] Health ${date}: ${imageStats.done}/${imageStats.total} generated, ${imageStats.failed} failed`);
+  } catch (err) {
+    console.log(`[images] Health ${date}: pregen failed:`, err?.message);
+  }
 
   return NextResponse.json({
     success: true,
     digest: { date, storyCount: stories.length },
     url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/health/${date}`,
-    images: "generating in background",
+    images: imageStats,
   });
 }
 

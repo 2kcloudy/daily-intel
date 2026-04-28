@@ -2,7 +2,7 @@ import { getLatestTabDigest, getAllTabDates, getTabDigest } from "@/lib/storage"
 import GenericDigestView from "@/components/GenericDigestView";
 import { TAB_CONFIGS } from "@/components/TabConfig";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 export const metadata = {
   title: TAB_CONFIGS["crypto"].metaTitle,

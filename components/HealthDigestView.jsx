@@ -384,6 +384,7 @@ export default function HealthDigestView({ digest, allDates }) {
                       source={story.source}
                       url={story.url}
                       topic={story.topic}
+                      image={story.image}
                     />
                   ))}
                 </div>

@@ -95,12 +95,12 @@ function TickerChips({ tickers = [] }) {
   );
 }
 
-function StoryMeta({ rank, tag }) {
+function StoryMeta({ tag }) {
+  if (!tag) return null;
   const tagClass = (tag || "").toLowerCase().replace(/[\s/+]+/g, "");
   return (
     <div className="di-hero-meta">
-      <span className="di-rank">№ {String(rank).padStart(2, "0")}</span>
-      <span className={"di-cat-label " + tagClass}>— {tag}</span>
+      <span className={"di-cat-label " + tagClass}>{tag}</span>
     </div>
   );
 }
@@ -112,7 +112,7 @@ export function HeroStory({ story, onOpen }) {
         <StoryImg story={story} width={900} height={700} />
       </div>
       <div className="di-hero-body">
-        <StoryMeta rank={story.rank} tag={story.tag} />
+        <StoryMeta tag={story.tag} />
         <h2 className="di-hero-head">
           <a href={story.url} target="_blank" rel="noopener" onClick={e => { e.preventDefault(); onOpen && onOpen(story); }}>
             {story.headline}
@@ -135,7 +135,7 @@ export function HeroStory({ story, onOpen }) {
 export function HeroFull({ story, onOpen }) {
   return (
     <div className="di-hero-full" onClick={() => onOpen && onOpen(story)}>
-      <StoryMeta rank={story.rank} tag={story.tag} />
+      <StoryMeta tag={story.tag} />
       <h2 className="di-hero-head">{story.headline}</h2>
       <p className="di-hero-sub">{story.sub}</p>
       <div className="di-hero-full-img">
@@ -189,45 +189,75 @@ export function MarketPanel({ indices = [] }) {
   );
 }
 
-export function StoryCard({ story, compact, onOpen }) {
+function PublishedAtPill({ publishedAt }) {
+  if (!publishedAt) return null;
+  return (
+    <span style={{
+      fontFamily: "var(--di-font-ui)", fontSize: 10, fontWeight: 600,
+      color: "var(--di-accent)", textTransform: "uppercase", letterSpacing: "0.08em",
+    }}>
+      {(() => {
+        try {
+          const d = new Date(publishedAt);
+          const h = (Date.now() - d) / 3600000;
+          if (h < 6)  return `${Math.round(h)}h ago`;
+          if (h < 24) return "Today";
+          if (h < 48) return "Yesterday";
+          return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        } catch { return null; }
+      })()}
+    </span>
+  );
+}
+
+export function StoryCard({ story, compact, onOpen, layout = "side-thumb" }) {
+  const useImageTop = (layout === "image-top" || layout === "image-top-short") && !compact;
+  const isShort = layout === "image-top-short";
+
+  if (useImageTop) {
+    const articleClass =
+      "di-story di-story-image-top" + (isShort ? " di-story-image-top-short" : "");
+    return (
+      <article className={articleClass} onClick={() => onOpen && onOpen(story)}>
+        <div className="di-story-image-top-thumb">
+          <StoryImg story={story} width={900} height={isShort ? 260 : 500} />
+        </div>
+        <div className="di-story-body">
+          <StoryMeta tag={story.tag} />
+          <h3 className="di-story-head">
+            <a href={story.url} target="_blank" rel="noopener"
+               onClick={e => { e.preventDefault(); onOpen && onOpen(story); }}>
+              {story.headline}
+            </a>
+          </h3>
+          <p className="di-story-body-text">{story.body}</p>
+          <div className="di-story-footer">
+            <span className="di-source">{story.source}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <PublishedAtPill publishedAt={story.publishedAt} />
+              <TickerChips tickers={(story.tickers || []).slice(0, 2)} />
+            </div>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   return (
     <article className="di-story" onClick={() => onOpen && onOpen(story)}>
-      {compact && <div className="di-rank-big">{String(story.rank).padStart(2, "0")}</div>}
       <div className="di-story-body">
-        {!compact && <StoryMeta rank={story.rank} tag={story.tag} />}
-        {compact && (
-          <div className="di-hero-meta" style={{ marginBottom: 2 }}>
-            <span className={"di-cat-label " + (story.tag || "").toLowerCase()}>{story.tag}</span>
-          </div>
-        )}
+        <StoryMeta tag={story.tag} />
         <h3 className="di-story-head">
           <a href={story.url} target="_blank" rel="noopener"
              onClick={e => { e.preventDefault(); onOpen && onOpen(story); }}>
             {story.headline}
           </a>
         </h3>
-        <p className="di-story-sub">{story.sub}</p>
         <p className="di-story-body-text">{story.body}</p>
         <div className="di-story-footer">
           <span className="di-source">{story.source}</span>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            {story.publishedAt && (
-              <span style={{
-                fontFamily: "var(--di-font-ui)", fontSize: 10, fontWeight: 600,
-                color: "var(--di-accent)", textTransform: "uppercase", letterSpacing: "0.08em",
-              }}>
-                {(() => {
-                  try {
-                    const d = new Date(story.publishedAt);
-                    const h = (Date.now() - d) / 3600000;
-                    if (h < 6)  return `${Math.round(h)}h ago`;
-                    if (h < 24) return "Today";
-                    if (h < 48) return "Yesterday";
-                    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                  } catch { return null; }
-                })()}
-              </span>
-            )}
+            <PublishedAtPill publishedAt={story.publishedAt} />
             <TickerChips tickers={(story.tickers || []).slice(0, 2)} />
           </div>
         </div>
@@ -246,11 +276,15 @@ export function StoryCard({ story, compact, onOpen }) {
   );
 }
 
-export function StoryList({ stories = [], compact, onOpen }) {
+export function StoryList({ stories = [], compact, onOpen, layout = "side-thumb" }) {
+  const wrapClass =
+    "di-stories" +
+    (layout === "image-top"       ? " di-stories-image-top" : "") +
+    (layout === "image-top-short" ? " di-stories-image-top di-stories-image-top-short" : "");
   return (
-    <div className="di-stories">
+    <div className={wrapClass}>
       {stories.map((s, i) => (
-        <StoryCard key={s.rank || i} story={s} compact={compact} onOpen={onOpen} />
+        <StoryCard key={s.rank || i} story={s} compact={compact} onOpen={onOpen} layout={layout} />
       ))}
     </div>
   );

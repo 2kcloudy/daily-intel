@@ -44,21 +44,74 @@ const TAG_THEMES = {
 /**
  * Generate an image URL for a story.
  *
- * Uses the /api/image proxy which:
- *  1. Serves the permanent Blob URL instantly if already cached.
- *  2. Generates via Pollinations, uploads to Blob, and redirects on first hit.
- *
- * Falls back to direct Pollinations if called server-side (no window).
+ * Always routes through the /api/image proxy so every render benefits from the
+ * KV → Blob CDN cache. Older digests stored a direct Pollinations URL on
+ * story.image — we detect and rewrite those to the proxy URL so they still get
+ * the cache layer.
  */
 export function storyImg(story, w = 600, h = 400) {
-  const tag = (story.tag || story.topic || "markets").toLowerCase().replace(/[\s/+]+/g, "");
-  const theme = TAG_THEMES[tag] || "business news editorial illustration";
-  const words = (story.headline || "").split(" ").slice(0, 6).join(" ");
-  const seed = story.seed || strHash(story.headline || String(story.rank || 0));
+  const tag  = (story?.tag || story?.topic || "markets").toLowerCase().replace(/[\s/+]+/g, "");
+  const seed = story?.imageSeed || story?.seed || strHash(story?.headline || String(story?.rank || 0));
+  const headline = encodeURIComponent((story?.headline || "").slice(0, 120));
+  const proxy = `/api/image?seed=${seed}&tag=${encodeURIComponent(tag)}&headline=${headline}&w=${w}&h=${h}`;
 
-  // Use the caching API route in browser
-  const headline = encodeURIComponent((story.headline || "").slice(0, 120));
-  return `/api/image?seed=${seed}&tag=${encodeURIComponent(tag)}&headline=${headline}&w=${w}&h=${h}`;
+  // Already on the proxy? Use it.
+  if (story?.image && story.image.startsWith("/api/image")) return story.image;
+
+  // Fall through to the proxy for direct Pollinations URLs and for stories
+  // that have no .image set at all.
+  return proxy;
+}
+
+/**
+ * Strip the legacy "💡 Trade Angle:" / "Trade Angle:" tail from a summary so
+ * older digests render clean alongside new ones. Matches the lightbulb emoji
+ * and any plain-text variant, with or without surrounding asterisks/markdown.
+ */
+function stripTradeAngle(text = "") {
+  if (!text) return "";
+  return text
+    .replace(/\s*[\r\n]+\s*\**\s*(?:💡\s*)?Trade\s*Angle\s*:[\s\S]*$/i, "")
+    .replace(/\s*\**\s*💡\s*Trade\s*Angle\s*:[\s\S]*$/i, "")
+    .trim();
+}
+
+/**
+ * Build a fallback Daily Brief script from a list of stories so older digests
+ * — posted before the skill started writing one — still get an audio player.
+ * Concatenates the headline + the first sentence of each summary into a
+ * spoken-style narrative. Browser SpeechSynthesis reads this aloud when
+ * digest.brief.audioUrl isn't set.
+ */
+function firstSentence(text = "") {
+  const m = (text || "").match(/[^.!?]+[.!?]+/);
+  return (m ? m[0] : (text || "")).trim();
+}
+
+function buildFallbackBrief(label, dateLabel, stories = []) {
+  const top = (stories || []).slice(0, 7);
+  if (!top.length) return null;
+
+  const intro = dateLabel
+    ? `Here's the ${label} brief for ${dateLabel}. We've got ${stories.length} stories on the page today — let's run through the headlines that matter most.`
+    : `Here's the ${label} brief. We've got ${stories.length} stories on the page today — let's run through the headlines that matter most.`;
+
+  const beats = top.map((s, i) => {
+    const head = (s.headline || s.head || "").replace(/[“”"]/g, "");
+    const lede = firstSentence(stripTradeAngle(s.summary || s.body || ""));
+    if (!head && !lede) return "";
+    if (i === 0) return `First, ${head}. ${lede}`;
+    if (i === top.length - 1) return `Finally, ${head}. ${lede}`;
+    return `${head}. ${lede}`;
+  }).filter(Boolean);
+
+  const outro = `That's your snapshot — full stories below.`;
+
+  const script = [intro, ...beats, outro].join(" ").replace(/\s+/g, " ").trim();
+  const wordCount = script.split(/\s+/).filter(Boolean).length;
+  const durationSec = Math.round((wordCount / 155) * 60);
+
+  return { script, durationSec, generated: "fallback" };
 }
 
 /**
@@ -78,16 +131,18 @@ function extractSub(text = "") {
  */
 export function transformFinanceStory(s, index) {
   const rank = s.rank || index + 1;
+  const body = stripTradeAngle(s.summary || "");
   return {
     rank,
     tag:      s.topic || "Markets",
     source:   s.source || "",
     url:         s.url || "#",
     headline:    s.headline || "",
-    sub:         extractSub(s.summary),
-    body:        s.summary || "",
+    sub:         extractSub(body),
+    body,
     tickers:     [],
-    seed:        strHash(s.headline || String(rank)),
+    seed:        s.imageSeed || strHash(s.headline || String(rank)),
+    image:       s.image || null,
     publishedAt: s.publishedAt || null,
   };
 }
@@ -97,16 +152,18 @@ export function transformFinanceStory(s, index) {
  */
 export function transformTabStory(s, index) {
   const rank = s.rank || index + 1;
+  const body = stripTradeAngle(s.summary || "");
   return {
     rank,
     tag:         s.topic || "News",
     source:      s.source || "",
     url:         s.url || "#",
     headline:    s.headline || "",
-    sub:         extractSub(s.summary),
-    body:        s.summary || "",
+    sub:         extractSub(body),
+    body,
     tickers:     [],
-    seed:        strHash(s.headline || String(rank)),
+    seed:        s.imageSeed || strHash(s.headline || String(rank)),
+    image:       s.image || null,
     publishedAt: s.publishedAt || null,
   };
 }
@@ -193,6 +250,10 @@ export function buildFinanceData(digest, allDates = []) {
     dir:    "up",
   }));
 
+  const brief = digest.brief && (digest.brief.script || digest.brief.audioUrl || digest.brief.url)
+    ? digest.brief
+    : buildFallbackBrief("Finance", dateShort, digest.stories || []);
+
   return {
     date:       dateLong,
     dateShort,
@@ -205,6 +266,7 @@ export function buildFinanceData(digest, allDates = []) {
     archive,
     indices:    PLACEHOLDER_INDICES,
     categories: CATEGORIES,
+    brief,
   };
 }
 
@@ -227,11 +289,20 @@ export function buildTabData(digest, tabKey, allDates = []) {
     };
   });
 
+  const tabLabel = cfg?.label || tabKey;
+  const dateShortForBrief = digest.date
+    ? new Date(digest.date + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+    : "";
+  const brief = digest.brief && (digest.brief.script || digest.brief.audioUrl || digest.brief.url)
+    ? digest.brief
+    : buildFallbackBrief(tabLabel, dateShortForBrief, digest.stories || []);
+
   return {
     pulse:    digest.pulse || digest.healthPulse || "",
     sources:  cfg.sources ? cfg.sources.split(" · ") : ["Various"],
     stories,
     watchlist: [],
     archive,
+    brief,
   };
 }

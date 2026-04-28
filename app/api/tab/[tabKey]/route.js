@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { saveTabDigest, getLatestTabDigest, getAllTabDates } from "@/lib/storage";
-import { pregenerateDigestImages } from "@/lib/imageCache";
+import { attachImagesToStories, pregenerateDigestImages } from "@/lib/imageCache";
 
 const VALID_TABS = ["tech", "geopolitics", "energy", "real-estate", "startups", "crypto", "science", "longevity", "policy", "performance"];
+
+// Allow up to 60s so the awaited image pre-warm has room to finish.
+export const maxDuration = 60;
 
 export async function POST(request, { params }) {
   const { tabKey } = params;
@@ -27,25 +31,38 @@ export async function POST(request, { params }) {
     );
   }
 
+  // Attach deterministic Pollinations turbo URLs to every story before saving.
+  attachImagesToStories(stories);
+
   const digest = {
     date,
     pulse: pulse || "",
     stories,
     postedAt: new Date().toISOString(),
     ...body, // allow extra fields
+    stories, // keep image-augmented stories even though body is spread after
   };
 
   await saveTabDigest(tabKey, date, digest);
 
-  pregenerateDigestImages(stories).then(r =>
-    console.log(`[images] ${tabKey} ${date}: ${r.done} generated, ${r.failed} failed`)
-  ).catch(() => {});
+  try {
+    revalidatePath(`/${tabKey}`);
+    revalidatePath(`/${tabKey}/${date}`);
+  } catch {}
+
+  let imageStats = { done: 0, failed: 0, total: 0 };
+  try {
+    imageStats = await pregenerateDigestImages(stories);
+    console.log(`[images] ${tabKey} ${date}: ${imageStats.done}/${imageStats.total} generated, ${imageStats.failed} failed`);
+  } catch (err) {
+    console.log(`[images] ${tabKey} ${date}: pregen failed:`, err?.message);
+  }
 
   return NextResponse.json({
     success: true,
     digest: { date, storyCount: stories.length },
     url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/${tabKey}/${date}`,
-    images: "generating in background",
+    images: imageStats,
   });
 }
 
