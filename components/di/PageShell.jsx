@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-import { TickerBar, Masthead, CategoryNav, Footer } from "./Chrome";
+import { Masthead, CategoryNav, Footer } from "./Chrome";
 import { StoryList, TagFilter } from "./Stories";
 import Rail from "./Rail";
 import { StoryDetail, SearchOverlay } from "./Extras";
@@ -172,7 +172,6 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
 
   return (
     <>
-      <TickerBar indices={indices} />
       <Masthead
         date={financeData?.date || ""}
         postedAt={dateShort}
