@@ -425,7 +425,7 @@ html[data-theme="dark"] .di-ticker-chip { background: #1e2024; }
   display: flex; flex-direction: column;
   background: var(--di-card);
   border-radius: var(--di-glass-radius, 22px);
-  border: 1px solid rgba(15, 18, 32, 0.12);
+  border: 1px solid var(--di-card-border, rgba(15, 18, 32, 0.12));
   box-shadow: var(--di-card-shadow,
     rgba(8, 10, 20, 0.28) -1.5px 0px 0px 0px inset,
     rgba(8, 10, 20, 0.32) 0px -1.5px 0px 0px inset,
@@ -506,7 +506,7 @@ html[data-theme="dark"] .di-story {
   padding: 0; border-right: none !important; border-bottom: none;
   background: var(--di-card);
   border-radius: var(--di-glass-radius, 22px);
-  border: 1px solid rgba(15, 18, 32, 0.12);
+  border: 1px solid var(--di-card-border, rgba(15, 18, 32, 0.12));
   box-shadow: var(--di-card-shadow,
     rgba(8, 10, 20, 0.28) -1.5px 0px 0px 0px inset,
     rgba(8, 10, 20, 0.32) 0px -1.5px 0px 0px inset,

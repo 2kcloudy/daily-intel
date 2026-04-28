@@ -357,6 +357,7 @@ export default function HeaderTweakView({ digest, allDates }) {
     document.documentElement.style.setProperty("--di-glass-radius", "6px");
     document.documentElement.style.setProperty("--di-card-shadow", "none");
     document.documentElement.style.setProperty("--di-card-hover-shadow", "none");
+    document.documentElement.style.setProperty("--di-card-border", "rgba(15, 18, 32, 0.22)");
   }, []);
 
   const tagCounts = useMemo(() => {

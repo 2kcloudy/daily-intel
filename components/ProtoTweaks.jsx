@@ -30,13 +30,16 @@ export default function ProtoTweaks({ onClose, initialGlassStyle = "rounded" }) 
     root.style.setProperty("--di-font-body", font.body);
     root.style.setProperty("--di-font-head", font.head);
     root.style.setProperty("--di-glass-radius", glass.radius);
-    // Flat: zero out both shadow variables. Other styles: remove overrides so CSS defaults kick in.
+    // Flat: zero out shadows, bump border to make cards stand out slightly.
+    // Other styles: remove overrides so CSS defaults kick in.
     if (glass.shadow === "none") {
       root.style.setProperty("--di-card-shadow", "none");
       root.style.setProperty("--di-card-hover-shadow", "none");
+      root.style.setProperty("--di-card-border", "rgba(15, 18, 32, 0.22)");
     } else {
       root.style.removeProperty("--di-card-shadow");
       root.style.removeProperty("--di-card-hover-shadow");
+      root.style.removeProperty("--di-card-border");
     }
   }, [tweaks.typography, tweaks.glassStyle]);
 
