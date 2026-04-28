@@ -213,6 +213,39 @@ function PublishedAtPill({ publishedAt }) {
 export function StoryCard({ story, compact, onOpen, layout = "side-thumb" }) {
   const useImageTop = (layout === "image-top" || layout === "image-top-short") && !compact;
   const isShort = layout === "image-top-short";
+  const useFlat = layout === "flat" && !compact;
+
+  if (useFlat) {
+    const tag = story.tag || story.topic || "";
+    const tagClass = tag.toLowerCase().replace(/[\s/+]+/g, "");
+    return (
+      <article className="di-story-flat" onClick={() => onOpen && onOpen(story)}>
+        <div className="di-story-flat-thumb">
+          <StoryImg story={story} width={900} height={500} />
+        </div>
+        <div className="di-story-flat-body">
+          <div className="di-story-flat-meta">
+            <span className={"di-cat-label " + tagClass}>{tag}</span>
+          </div>
+          <h3 className="di-story-flat-head">
+            <a href={story.url} target="_blank" rel="noopener"
+               onClick={e => { e.preventDefault(); onOpen && onOpen(story); }}>
+              {story.headline}
+            </a>
+          </h3>
+          <p className="di-story-flat-sub">{story.sub}</p>
+          <p className="di-story-flat-body-text">{story.body}</p>
+          <div className="di-story-flat-footer">
+            <span>{story.source}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <PublishedAtPill publishedAt={story.publishedAt} />
+              <TickerChips tickers={(story.tickers || []).slice(0, 2)} />
+            </div>
+          </div>
+        </div>
+      </article>
+    );
+  }
 
   if (useImageTop) {
     const articleClass =
@@ -278,7 +311,7 @@ export function StoryCard({ story, compact, onOpen, layout = "side-thumb" }) {
 
 export function StoryList({ stories = [], compact, onOpen, layout = "side-thumb" }) {
   const wrapClass =
-    "di-stories" +
+    (layout === "flat"            ? "di-stories-flat" : "di-stories") +
     (layout === "image-top"       ? " di-stories-image-top" : "") +
     (layout === "image-top-short" ? " di-stories-image-top di-stories-image-top-short" : "");
   return (
