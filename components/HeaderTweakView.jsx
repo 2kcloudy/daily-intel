@@ -174,7 +174,7 @@ function BaysFilterHeader() {
             fontWeight: 900,
             fontSize: 68,
             letterSpacing: "0.03em",
-            textTransform: "uppercase",
+            textTransform: "lowercase",
             color: "var(--di-ink, #0c0d10)",
             lineHeight: 1,
           }}>
@@ -352,9 +352,11 @@ export default function HeaderTweakView({ digest, allDates }) {
   const [showTweaks, setShowTweaks] = useState(false);
   const [activeTag, setActiveTag] = useState("all");
 
-  // Apply boxy glass immediately on mount — don't wait for Tweaks panel to open
+  // Apply flat style immediately on mount — don't wait for Tweaks panel to open
   useEffect(() => {
     document.documentElement.style.setProperty("--di-glass-radius", "6px");
+    document.documentElement.style.setProperty("--di-card-shadow", "none");
+    document.documentElement.style.setProperty("--di-card-hover-shadow", "none");
   }, []);
 
   const tagCounts = useMemo(() => {
@@ -420,7 +422,7 @@ export default function HeaderTweakView({ digest, allDates }) {
         </button>
       )}
       {showTweaks && (
-        <ProtoTweaks onClose={() => setShowTweaks(false)} initialGlassStyle="boxy" />
+        <ProtoTweaks onClose={() => setShowTweaks(false)} initialGlassStyle="flat" />
       )}
 
       {/* Story modal */}
