@@ -25,14 +25,10 @@ const CSS = `
   overflow-x: hidden;
 }
 
-/* Subtle ambient sheen so the glass effect has *something* to refract against,
-   while keeping the page reading as "white" overall. */
+/* Pure white page — no ambient tint. Cards float against pure #fff. */
 .f4-ambient {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 50% 40% at 12% 6%,  rgba(180,170,255,0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 88% 18%, rgba(140,200,255,0.05) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 45% at 50% 100%,rgba(200,180,255,0.04) 0%, transparent 70%);
+  background: transparent;
 }
 
 /* ── Header ── */
@@ -159,31 +155,36 @@ const CSS = `
 /* ── Glass card ── */
 .f4-card {
   position: relative;
+  /* Off-white card — a shade cooler than the pure-white page so cards float */
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.46) 100%);
+    linear-gradient(180deg, rgba(246, 248, 252, 0.98) 0%, rgba(230, 235, 243, 0.96) 100%);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   border: 1px solid rgba(15, 18, 32, 0.10);
   border-radius: 22px;
   overflow: hidden;
-  /* 3D glass bevel: shiny TOP + LEFT, dark BOTTOM + RIGHT, tiny dark drop shadow */
+  /* 3D glass bevel: STRONG shiny TOP + LEFT, dark BOTTOM + RIGHT, tiny dark drop shadow */
   box-shadow:
-    /* Crisp shiny bevel — TOP edge */
-    inset 0 1.5px 0 rgba(255, 255, 255, 1),
-    /* Crisp shiny bevel — LEFT edge */
-    inset 1.5px 0 0 rgba(255, 255, 255, 0.85),
-    /* Soft inner glow over top-left corner */
-    inset 3px 3px 14px rgba(255, 255, 255, 0.55),
+    /* Thick crisp shiny bevel — TOP edge (2.5px white) */
+    inset 0 2.5px 0 rgba(255, 255, 255, 1),
+    /* Thick crisp shiny bevel — LEFT edge (2.5px white) */
+    inset 2.5px 0 0 rgba(255, 255, 255, 0.95),
+    /* Secondary inner-edge highlight on top — adds depth */
+    inset 0 4px 1px rgba(255, 255, 255, 0.65),
+    /* Secondary inner-edge highlight on left */
+    inset 4px 0 1px rgba(255, 255, 255, 0.55),
+    /* BIG soft glow pooling over the top-left corner */
+    inset 6px 6px 30px rgba(255, 255, 255, 0.85),
     /* Dark glass bevel — BOTTOM edge */
-    inset 0 -1.5px 0 rgba(8, 10, 20, 0.30),
+    inset 0 -1.5px 0 rgba(8, 10, 20, 0.32),
     /* Dark glass bevel — RIGHT edge */
-    inset -1.5px 0 0 rgba(8, 10, 20, 0.24),
+    inset -1.5px 0 0 rgba(8, 10, 20, 0.26),
     /* Soft inner shading over bottom-right corner */
-    inset -3px -3px 16px rgba(8, 10, 20, 0.12),
+    inset -3px -3px 18px rgba(8, 10, 20, 0.14),
     /* Tiny but very dark drop shadow — bottom-right, gives 3D pop */
     2px 3px 4px rgba(2, 4, 12, 0.55),
     /* Ambient depth */
-    8px 12px 28px rgba(8, 10, 22, 0.18);
+    10px 14px 32px rgba(8, 10, 22, 0.20);
   transition:
     transform 0.28s cubic-bezier(0.34,1.56,0.64,1),
     box-shadow 0.28s ease,
@@ -191,16 +192,17 @@ const CSS = `
   display: flex;
   flex-direction: column;
 }
-/* Top sheen — strong polished-glass highlight from top-left, fading down + right */
+/* Top sheen — VERY strong polished-glass highlight from top-left, fading down + right */
 .f4-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; height: 60%;
+  top: 0; left: 0; right: 0; height: 72%;
   background: linear-gradient(135deg,
-    rgba(255,255,255,0.85) 0%,
-    rgba(255,255,255,0.45) 28%,
-    rgba(255,255,255,0.15) 58%,
-    transparent 100%);
+    rgba(255,255,255,1)    0%,
+    rgba(255,255,255,0.70) 18%,
+    rgba(255,255,255,0.30) 42%,
+    rgba(255,255,255,0.10) 65%,
+    transparent           100%);
   pointer-events: none;
   z-index: 1;
   border-radius: 22px 22px 0 0;
@@ -233,14 +235,16 @@ const CSS = `
 .f4-card:hover {
   transform: translateY(-3px);
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, 1),
-    inset 1.5px 0 0 rgba(255, 255, 255, 0.95),
-    inset 3px 3px 16px rgba(255, 255, 255, 0.70),
-    inset 0 -1.5px 0 rgba(8, 10, 20, 0.34),
-    inset -1.5px 0 0 rgba(8, 10, 20, 0.28),
-    inset -3px -3px 18px rgba(8, 10, 20, 0.16),
+    inset 0 2.5px 0 rgba(255, 255, 255, 1),
+    inset 2.5px 0 0 rgba(255, 255, 255, 1),
+    inset 0 4px 1px rgba(255, 255, 255, 0.75),
+    inset 4px 0 1px rgba(255, 255, 255, 0.65),
+    inset 6px 6px 32px rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 0 rgba(8, 10, 20, 0.36),
+    inset -1.5px 0 0 rgba(8, 10, 20, 0.30),
+    inset -3px -3px 20px rgba(8, 10, 20, 0.18),
     3px 5px 6px rgba(2, 4, 12, 0.62),
-    14px 18px 38px rgba(8, 10, 22, 0.24);
+    16px 20px 42px rgba(8, 10, 22, 0.26);
   border-color: rgba(15, 18, 32, 0.16);
 }
 
