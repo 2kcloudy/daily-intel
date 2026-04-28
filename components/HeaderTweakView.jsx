@@ -201,38 +201,50 @@ function BaysFilterHeader() {
 
         {/* Right — email signup */}
         {!subscribed ? (
-          <form onSubmit={handleSubscribe} style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-            <input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              style={{
-                height: 36, padding: "0 14px",
-                border: "1px solid var(--di-line, #e4e7ec)", borderRadius: 999,
-                fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-                color: "var(--di-ink, #0c0d10)", background: "var(--di-card, #fff)",
-                outline: "none", width: 200,
-                transition: "border-color 0.15s ease",
-              }}
-              onFocus={e => e.target.style.borderColor = "#29B6F6"}
-              onBlur={e => e.target.style.borderColor = "var(--di-line, #e4e7ec)"}
-            />
-            <button type="submit" style={{
-              height: 36, padding: "0 16px",
-              background: "#29B6F6", border: "none", borderRadius: 999,
-              fontSize: 12, fontWeight: 700, letterSpacing: "0.06em",
-              textTransform: "uppercase", color: "#fff", cursor: "pointer",
+          <div style={{ display: "flex", flexDirection: "column", gap: 7, flexShrink: 0, alignItems: "flex-end" }}>
+            <p style={{
+              margin: 0,
+              fontSize: 12, fontWeight: 500, lineHeight: 1.4,
+              color: "var(--di-ink-3, #4a5261)",
               fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-              transition: "background 0.15s ease", flexShrink: 0,
-            }}
-              onMouseEnter={e => e.currentTarget.style.background = "#039BE5"}
-              onMouseLeave={e => e.currentTarget.style.background = "#29B6F6"}
-            >
-              Sign Up
-            </button>
-          </form>
+              fontStyle: "italic",
+              maxWidth: 300, textAlign: "right",
+            }}>
+              Get the world's most important and actionable information sent to your inbox, daily.
+            </p>
+            <form onSubmit={handleSubscribe} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <input
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                style={{
+                  height: 36, padding: "0 14px",
+                  border: "1px solid var(--di-line, #e4e7ec)", borderRadius: 999,
+                  fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                  color: "var(--di-ink, #0c0d10)", background: "var(--di-card, #fff)",
+                  outline: "none", width: 200,
+                  transition: "border-color 0.15s ease",
+                }}
+                onFocus={e => e.target.style.borderColor = "#29B6F6"}
+                onBlur={e => e.target.style.borderColor = "var(--di-line, #e4e7ec)"}
+              />
+              <button type="submit" style={{
+                height: 36, padding: "0 16px",
+                background: "#29B6F6", border: "none", borderRadius: 999,
+                fontSize: 12, fontWeight: 700, letterSpacing: "0.06em",
+                textTransform: "uppercase", color: "#fff", cursor: "pointer",
+                fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                transition: "background 0.15s ease", flexShrink: 0,
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = "#039BE5"}
+                onMouseLeave={e => e.currentTarget.style.background = "#29B6F6"}
+              >
+                Sign Up
+              </button>
+            </form>
+          </div>
         ) : (
           <span style={{
             fontSize: 12, fontWeight: 600, color: "#29B6F6",
