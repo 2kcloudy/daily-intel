@@ -206,7 +206,7 @@ function BaysFilterHeader() {
         {!subscribed ? (
           <div style={{
             flexShrink: 0,
-            border: "2.5px solid #29B6F6",
+            border: "1px solid #0c0d10",
             borderRadius: 12,
             background: "rgba(41,182,246,0.05)",
             padding: "18px 22px",
