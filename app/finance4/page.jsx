@@ -48,7 +48,7 @@ const CSS = `
   gap: 16px;
 }
 .f4-logo {
-  width: 80px;
+  width: 100px;
   height: auto;
   flex-shrink: 0;
   display: block;
@@ -498,14 +498,15 @@ export default async function Finance4Page() {
             <div className="f4-brand">
               <svg
                 className="f4-logo"
-                viewBox="0 0 40 24"
+                viewBox="0 0 50 24"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
               >
                 <defs>
-                  <linearGradient id="f4-logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#1f2440" />
-                    <stop offset="100%" stopColor="#0f1220" />
+                  <linearGradient id="f4-logo-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#1a2a6c" />
+                    <stop offset="55%" stopColor="#5b3fbf" />
+                    <stop offset="100%" stopColor="#a855f7" />
                   </linearGradient>
                 </defs>
                 {/* Sideways filter / funnel pointing right — like > */}
@@ -513,6 +514,15 @@ export default async function Finance4Page() {
                   d="M 1 2 L 11 2 L 26 11 L 33 11 L 33 13 L 26 13 L 11 22 L 1 22 Z"
                   fill="url(#f4-logo-grad)"
                 />
+                {/* Outward expanding ring — cyan glow */}
+                <circle cx="33" cy="12" r="3" fill="none" stroke="#22d3ee" strokeWidth="1" opacity="0.6">
+                  <animate attributeName="r" values="3;9;3" dur="1.8s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.6;0;0.6" dur="1.8s" repeatCount="indefinite" />
+                </circle>
+                {/* Inner pulsing spark — solid cyan */}
+                <circle cx="33" cy="12" r="2.5" fill="#22d3ee">
+                  <animate attributeName="r" values="2.5;3.4;2.5" dur="1.8s" repeatCount="indefinite" />
+                </circle>
               </svg>
               <h1 className="f4-title">Bays Finance</h1>
             </div>
