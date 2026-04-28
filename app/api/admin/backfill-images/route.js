@@ -1,24 +1,11 @@
 import { NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
-import {
-  getCachedImageUrl,
-  cachePollinationsUrl,
-  generateAndCacheImage,
-  storyImageSeed,
-} from "@/lib/imageCache";
-
-// Blob mode downloads from Pollinations and uploads to Vercel Blob — slow,
-// so give the function room.
-export const maxDuration = 60;
+import { getCachedImageUrl, cachePollinationsUrl, storyImageSeed } from "@/lib/imageCache";
 
 const ALL_TABS = [
   "finance", "health", "tech", "geopolitics", "energy",
   "real-estate", "startups", "crypto", "science", "longevity", "policy", "performance",
 ];
-
-function isBlobUrl(url) {
-  return typeof url === "string" && url.includes("blob.vercel-storage.com");
-}
 
 const TAB_KV_KEYS = {
   finance:       { dates: "digest:dates",             getDigest: (d) => `digest:${d}` },
@@ -35,28 +22,19 @@ const TAB_KV_KEYS = {
   performance:   { dates: "performance-digest:dates", getDigest: (d) => `performance-digest:${d}` },
 };
 
-// Default backfill keeps it cheap: only the primary 900×700 size that the
-// homepage actually renders. Older sizes regenerate lazily via /api/image.
-const IMAGE_SIZES = [[900, 700]];
-const MAX_MS_URL  = 25000; // KV-write only mode
-const MAX_MS_BLOB = 55000; // Pollinations + Blob upload
+const IMAGE_SIZES = [[900, 700], [300, 300], [1600, 800]];
+const CONCURRENT = 20;  // KV writes are fast — no download needed
+const MAX_MS = 25000;   // 25s wall-clock (KV writes take ms, not seconds)
 
 /**
  * POST /api/admin/backfill-images
+ * Generates all missing story images across all 12 tabs.
+ * Concurrent generation (4 at once), idempotent, safe to call repeatedly.
  *
- * Modes:
- *   ?mode=blob (default for missing-image fixes) — runs the full
- *     Pollinations → Blob → KV pipeline so every entry resolves to a
- *     permanent CDN URL. Slow per image (~3-5s each) but rate-limit immune.
- *     Also UPGRADES entries that currently point at a raw Pollinations URL.
- *   ?mode=url  — legacy fast path: writes a Pollinations URL to KV with no
- *     download/upload. Suffers from Pollinations rate limits.
- *
- * Other query params:
- *   tab=finance     — single tab only (default: all 12)
+ * Query params:
+ *   tab=finance     — single tab only
  *   check=true      — count only, no generation
- *   limit=32        — max images to (re)generate this call
- *   force=1         — rewrite existing entries even if non-flux
+ *   limit=32        — max images to generate this call (default 32 = ~2 min)
  */
 export async function POST(request) {
   const apiKey = request.headers.get("x-api-key");
@@ -67,11 +45,8 @@ export async function POST(request) {
   const { searchParams } = new URL(request.url);
   const targetTab  = searchParams.get("tab") || null;
   const checkOnly  = searchParams.get("check") === "true";
-  const requestedMode = (searchParams.get("mode") || "blob").toLowerCase();
-  const mode       = requestedMode === "url" ? "url" : "blob";
-  const concurrent = mode === "blob" ? 4 : 20;
-  const maxMs      = mode === "blob" ? MAX_MS_BLOB : MAX_MS_URL;
-  const imgLimit   = Math.min(parseInt(searchParams.get("limit") || (mode === "blob" ? "16" : "200"), 10), 969);
+  const imgLimit   = Math.min(parseInt(searchParams.get("limit") || "200", 10), 969);
+  // ?force=1 rewrites existing entries (use to migrate flux→turbo URLs)
   const force      = searchParams.get("force") === "1";
 
   const tabs     = targetTab ? [targetTab] : ALL_TABS;
@@ -106,14 +81,9 @@ export async function POST(request) {
 
         for (const [w, h] of IMAGE_SIZES) {
           const cached = await getCachedImageUrl(seed, w, h).catch(() => null);
-          // Blob mode: a non-Blob entry counts as pending so we upgrade it
-          // even on first run (no force flag needed).
-          if (mode === "blob") {
-            if (cached && isBlobUrl(cached) && !force) { totalCached++; continue; }
-          } else {
-            if (cached && !force) { totalCached++; continue; }
-            if (cached && force && !cached.includes("model=flux")) { totalCached++; continue; }
-          }
+          // In force mode, rewrite existing flux URLs with turbo URLs
+          if (cached && !force) { totalCached++; continue; }
+          if (cached && force && !cached.includes("model=flux")) { totalCached++; continue; }
           pending.push({ seed, headline, tag, w, h });
         }
       }
@@ -123,8 +93,8 @@ export async function POST(request) {
   if (checkOnly) {
     return NextResponse.json({
       mode: "check",
-      runMode: mode,
       summary: { cached: totalCached, pending: pending.length },
+      tabs: tabs.reduce((a, t) => ({ ...a, [t]: "see summary" }), {}),
     });
   }
 
@@ -132,17 +102,13 @@ export async function POST(request) {
   const toProcess = pending.slice(0, imgLimit);
   let generated = 0, failed = 0;
 
-  for (let i = 0; i < toProcess.length; i += concurrent) {
-    if (Date.now() - startMs > maxMs) break;
+  for (let i = 0; i < toProcess.length; i += CONCURRENT) {
+    if (Date.now() - startMs > MAX_MS) break;
 
-    const batch = toProcess.slice(i, i + concurrent);
+    const batch = toProcess.slice(i, i + CONCURRENT);
     const results = await Promise.allSettled(
       batch.map(({ seed, headline, tag, w, h }) =>
-        mode === "blob"
-          // force=true so we re-download + upload to Blob even if the KV
-          // entry already holds a Pollinations URL.
-          ? generateAndCacheImage(seed, headline, tag, w, h, true)
-          : cachePollinationsUrl(seed, headline, tag, w, h)
+        cachePollinationsUrl(seed, headline, tag, w, h)
       )
     );
 
@@ -156,7 +122,6 @@ export async function POST(request) {
 
   return NextResponse.json({
     mode:    "generate",
-    runMode: mode,
     summary: {
       cachedBefore: totalCached,
       pendingFound: pending.length,

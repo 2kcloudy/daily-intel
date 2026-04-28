@@ -1,7 +1,7 @@
 import { getLatestHealthDigest, getAllHealthDates } from "@/lib/storage";
 import GenericDigestView from "@/components/GenericDigestView";
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 export const metadata = {
   title: "Health Intel — Daily Intel",

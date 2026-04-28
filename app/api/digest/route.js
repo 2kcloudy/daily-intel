@@ -1,13 +1,6 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import { saveDigest, getLatestDigest, getAllDates } from "@/lib/storage";
-import { attachImagesToStories, pregenerateDigestImages } from "@/lib/imageCache";
-
-// Allow up to 60s so we can pre-warm every story's primary image into Blob/KV
-// before responding. Without this Vercel kills the function as soon as the
-// response is sent and the background pregen gets cut off, leaving the first
-// reader to wait on a cold Pollinations render per card.
-export const maxDuration = 60;
+import { pregenerateDigestImages } from "@/lib/imageCache";
 
 // POST /api/digest — Claude posts a new digest here
 export async function POST(request) {
@@ -24,7 +17,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { date, marketPulse, stories, watchList, brief } = body;
+  const { date, marketPulse, stories, watchList } = body;
 
   if (!date || !stories || !Array.isArray(stories)) {
     return NextResponse.json(
@@ -33,45 +26,27 @@ export async function POST(request) {
     );
   }
 
-  // Attach a deterministic Pollinations turbo image URL to every story
-  // BEFORE saving. The client renders story.image directly — no client-side
-  // URL building, no dimension mismatch, no flux latency.
-  attachImagesToStories(stories);
-
   const digest = {
     date,
     marketPulse: marketPulse || "",
     stories,
     watchList: watchList || [],
-    brief: brief || null,
     postedAt: new Date().toISOString(),
   };
 
   await saveDigest(date, digest);
 
-  // On-demand revalidation — update the list page and this date's page
-  // immediately so readers don't wait for ISR to regenerate.
-  try {
-    revalidatePath("/");
-    revalidatePath(`/${date}`);
-  } catch {}
-
-  // Block on Blob/KV pre-warm so every card has a permanent CDN image by the
-  // time we return. We accept a slower POST (~30-50s for a 15-story digest)
-  // in exchange for first-paint reliability for every reader.
-  let imageStats = { done: 0, failed: 0, total: 0 };
-  try {
-    imageStats = await pregenerateDigestImages(stories);
-    console.log(`[images] Finance ${date}: ${imageStats.done}/${imageStats.total} generated, ${imageStats.failed} failed`);
-  } catch (err) {
-    console.log(`[images] Finance ${date}: pregen failed:`, err?.message);
-  }
+  // Pre-generate images in the background (non-blocking)
+  // waitUntil isn't available in all environments, so we fire-and-forget
+  pregenerateDigestImages(stories).then(r =>
+    console.log(`[images] Finance ${date}: ${r.done} generated, ${r.failed} failed`)
+  ).catch(() => {});
 
   return NextResponse.json({
     success: true,
     digest: { date, storyCount: stories.length },
     url: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/${date}`,
-    images: imageStats,
+    images: "generating in background",
   });
 }
 

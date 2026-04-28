@@ -2,7 +2,7 @@ import { getDigest, getAllDates } from "@/lib/storage";
 import { notFound } from "next/navigation";
 import DigestView from "@/components/DigestView";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export default async function DatePage({ params }) {
   const { date } = params;

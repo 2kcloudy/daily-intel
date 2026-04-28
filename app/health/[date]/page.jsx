@@ -2,7 +2,7 @@ import { getHealthDigest, getAllHealthDates } from "@/lib/storage";
 import { notFound } from "next/navigation";
 import HealthDigestView from "@/components/HealthDigestView";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export default async function HealthDatePage({ params }) {
   const { date } = params;

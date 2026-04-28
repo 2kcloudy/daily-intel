@@ -2,10 +2,10 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-import { Masthead, CategoryNav, Footer, FilterDrawer } from "./Chrome";
-import { StoryList } from "./Stories";
+import { TickerBar, Masthead, CategoryNav, Bulletin, Footer } from "./Chrome";
+import { HeroStory, HeroFull, HeroTop3, MarketPanel, StoryList, TagFilter } from "./Stories";
 import Rail from "./Rail";
-import { StoryDetail, SearchOverlay } from "./Extras";
+import { StoryDetail, SearchOverlay, CategoryStrip } from "./Extras";
 import { useTweaks, TweaksPanel } from "./Tweaks";
 import { CATEGORIES, PLACEHOLDER_INDICES } from "./dataTransform";
 
@@ -66,7 +66,7 @@ const CAT_META = {
  *   mode="category"  categoryId="tech"
  *   tabData={buildTabData(...)}  financeData={buildFinanceData(...)}
  */
-export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [], cardLayout = "image-top" }) {
+export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [] }) {
   const router = useRouter();
   const [tweaks, updateTweaks] = useTweaks();
   const [showTweaks, setShowTweaks] = useState(false);
@@ -123,15 +123,10 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
   const data = mode === "finance" ? financeData : tabData;
   const stories = data?.stories || [];
 
-  // Tag filter — compute counts from whichever field the story carries.
-  // Finance digests use `tag`; tab digests use `topic`. The FilterDrawer
-  // works on every page that has multiple topics.
+  // Tag filter (finance only)
   const tagCounts = useMemo(() => {
     const c = {};
-    stories.forEach(s => {
-      const t = s.tag || s.topic;
-      if (t) c[t] = (c[t] || 0) + 1;
-    });
+    stories.forEach(s => { if (s.tag) c[s.tag] = (c[s.tag] || 0) + 1; });
     return c;
   }, [stories]);
 
@@ -143,14 +138,12 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
   ], [tagCounts, stories.length]);
 
   const filtered = useMemo(() => {
-    if (activeTag === "all") return stories;
-    return stories.filter(s => {
-      const t = (s.tag || s.topic || "").toLowerCase();
-      return t === activeTag;
-    });
-  }, [activeTag, stories]);
+    if (activeTag === "all" || mode !== "finance") return stories;
+    return stories.filter(s => (s.tag || "").toLowerCase() === activeTag);
+  }, [activeTag, stories, mode]);
 
-  // Hero story removed — every story now renders in the standard StoryList grid below.
+  const hero = filtered[0] || stories[0];
+  const rest = filtered.slice(1);
 
   // All stories for search (finance + current tab)
   const allStories = useMemo(() => {
@@ -179,6 +172,7 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
 
   return (
     <>
+      <TickerBar indices={indices} />
       <Masthead
         date={financeData?.date || ""}
         postedAt={dateShort}
@@ -186,39 +180,90 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
         onToggleTheme={toggleTheme}
         onNav={handleNav}
         onSearch={() => setSearchOpen(true)}
-        brief={data?.brief}
-        briefLabel={mode === "finance" ? "Daily Brief" : `${catLabel} Brief`}
       />
       <CategoryNav
         categories={CATEGORIES}
         active={activeNavId}
         onSelect={handleNav}
       />
-      {/* Market Pulse banner removed site-wide per editorial decision.
-          Daily Brief audio player moved into the masthead.
-          Inline TagFilter replaced by the floating FilterDrawer below. */}
+      <Bulletin
+        text={pulse}
+        postedAt={dateShort}
+        storyCount={stories.length}
+        sources={sources}
+      />
 
-      {/* Right rail removed — story grid spans the full content width so we
-          can scale to 4 columns on desktop. Archive lives at /archive now;
-          the Subscribe button in the masthead handles email signups. */}
-      <main className={`di-main di-main-full ${densityClass}`}>
+      {/* Category page header */}
+      {mode === "category" && (
+        <>
+          <div className="di-cat-hero">
+            <div className="di-cat-hero-kicker">{catMeta.kicker} · {dateShort}</div>
+            <h1 className="di-cat-hero-title">{catGlyph} {catLabel}</h1>
+            <p className="di-cat-hero-desc">{catMeta.desc}</p>
+          </div>
+          <div className="di-cat-strip-wrap">
+            <CategoryStrip categoryId={categoryId} />
+          </div>
+        </>
+      )}
+
+      <main className={`di-main ${densityClass}`}>
         <div>
-          {/* Story list — every story rendered in the same grid format */}
+          {/* Hero section */}
+          {hero && (
+            <>
+              {tweaks.heroVariant === "editorial" && <HeroStory story={hero} onOpen={setOpenStory} />}
+              {tweaks.heroVariant === "full"       && <HeroFull  story={hero} onOpen={setOpenStory} />}
+              {tweaks.heroVariant === "dashboard"  && (
+                <div className="di-hero-dash">
+                  <div className="di-hero-dash-left">
+                    <HeroTop3 stories={filtered.slice(0, 3)} onOpen={setOpenStory} />
+                  </div>
+                  <div><MarketPanel indices={indices} /></div>
+                </div>
+              )}
+              {tweaks.heroVariant === "terminal" && (
+                <div className="di-hero-dash">
+                  <HeroStory story={hero} onOpen={setOpenStory} />
+                  <MarketPanel indices={indices} />
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Section header */}
+          <div className="di-section-head">
+            <div className="di-section-title">
+              {mode === "finance" ? "Today's Brief" : `More in ${catLabel}`}
+              <span className="count">
+                {mode === "finance" ? "Ranked by market importance" : `${rest.length} stories`}
+              </span>
+            </div>
+            <div className="di-section-sources">{sources.slice(0, 4).join(" · ")}</div>
+          </div>
+
+          {/* Tag filter — finance homepage only */}
+          {mode === "finance" && (
+            <TagFilter tags={tags} active={activeTag} onSelect={setActiveTag} />
+          )}
+
+          {/* Story list */}
           <StoryList
-            stories={filtered}
+            stories={tweaks.heroVariant === "dashboard" ? filtered : rest}
             compact={tweaks.density === "compact"}
             onOpen={setOpenStory}
-            layout={cardLayout}
           />
         </div>
-      </main>
 
-      {/* Floating left-side Filter tab — shows whenever the page has tags */}
-      <FilterDrawer
-        tags={tags}
-        active={activeTag}
-        onSelect={setActiveTag}
-      />
+        <Rail
+          indices={indices}
+          watchlist={watchlist}
+          archive={archive}
+          onNav={handleNav}
+          showIndices={mode === "finance" && tweaks.showIndices}
+          marketUpdatedAt={marketUpdatedAt}
+        />
+      </main>
 
       <Footer onNav={handleNav} />
 

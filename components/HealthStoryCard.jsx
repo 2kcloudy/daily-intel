@@ -51,27 +51,27 @@ function seedFromString(str) {
   return Math.abs(hash);
 }
 
-/* Fallback URL — only used for legacy stories without story.image. */
-function buildFallbackImageUrl(headline, topic) {
-  const prompt = `${(headline || "").split(" ").slice(0, 6).join(" ")}, ${topic || "wellbeing"}, medical laboratory wellness editorial illustration, no text`;
-  const seed = seedFromString(headline || "");
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=900&height=700&seed=${seed}&nologo=true&model=turbo`;
+function buildImageUrl(headline, topic) {
+  const prompt = `Health and wellness illustration, clean editorial style: ${topic || "wellbeing"} - ${headline.slice(0, 80)}. Soft, minimal, medical-inspired, no text, photorealistic.`;
+  const seed = seedFromString(headline);
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=600&height=220&nologo=true&seed=${seed}`;
 }
 
-function StoryImage({ headline, topic, image }) {
+function StoryImage({ headline, topic, ready }) {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const timerRef = useRef(null);
 
-  const src = image || buildFallbackImageUrl(headline, topic);
+  const src = buildImageUrl(headline, topic);
   const emoji = topicEmoji(topic);
 
   useEffect(() => {
+    if (!ready) return;
     timerRef.current = setTimeout(() => {
       if (!loaded) setError(true);
-    }, 20000);
+    }, 12000);
     return () => clearTimeout(timerRef.current);
-  }, [loaded]);
+  }, [loaded, ready]);
 
   if (error) {
     return (
@@ -116,9 +116,15 @@ function StoryImage({ headline, topic, image }) {
   );
 }
 
-export default function HealthStoryCard({ rank = 1, headline, summary, source, url, topic, image }) {
+export default function HealthStoryCard({ rank = 1, headline, summary, source, url, topic }) {
   const [hovered, setHovered] = useState(false);
+  const [ready, setReady] = useState(false);
   const { text: topicText, bg: topicBg } = topicStyle(topic);
+
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), (rank - 1) * 900);
+    return () => clearTimeout(t);
+  }, [rank]);
 
   return (
     <article
@@ -141,7 +147,7 @@ export default function HealthStoryCard({ rank = 1, headline, summary, source, u
       }}
     >
       {/* AI Image */}
-      <StoryImage headline={headline} topic={topic} image={image} />
+      <StoryImage headline={headline} topic={topic} ready={ready} />
 
       {/* Top row: rank badge + topic tag */}
       <div style={{
