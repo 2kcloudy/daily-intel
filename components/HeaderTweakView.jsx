@@ -334,6 +334,11 @@ export default function HeaderTweakView({ digest, allDates }) {
   const [showTweaks, setShowTweaks] = useState(false);
   const [activeTag, setActiveTag] = useState("all");
 
+  // Apply boxy glass immediately on mount — don't wait for Tweaks panel to open
+  useEffect(() => {
+    document.documentElement.style.setProperty("--di-glass-radius", "6px");
+  }, []);
+
   const tagCounts = useMemo(() => {
     const c = {};
     stories.forEach(s => { const t = s.tag || s.topic; if (t) c[t] = (c[t] || 0) + 1; });
@@ -377,11 +382,8 @@ export default function HeaderTweakView({ digest, allDates }) {
         <TopicPills active={activePill} onSelect={setActivePill} />
       </div>
 
-      {/* Thin rule before stories */}
-      <hr style={{ border: "none", borderTop: "1px solid var(--di-line, #e4e7ec)", margin: 0 }} />
-
-      {/* Story grid — minimal top padding so it sits tight under the pills */}
-      <main style={{ padding: "18px 40px 80px", maxWidth: 1400, margin: "0 auto" }}>
+      {/* Story grid — sits directly under pills with minimal gap */}
+      <main style={{ padding: "8px 40px 80px", maxWidth: 1400, margin: "0 auto" }}>
         <StoryList
           stories={filtered}
           compact={false}
