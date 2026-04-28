@@ -174,7 +174,7 @@ function BaysFilterHeader() {
             fontWeight: 900,
             fontSize: 68,
             letterSpacing: "0.03em",
-            textTransform: "lowercase",
+            textTransform: "none",
             color: "var(--di-ink, #0c0d10)",
             lineHeight: 1,
           }}>
