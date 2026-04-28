@@ -9,10 +9,11 @@ const FONTS = {
 };
 
 const GLASS_STYLES = [
-  { id: "rounded", label: "Rounded",  radius: "22px", desc: "Soft & friendly" },
-  { id: "boxy",    label: "Boxy",     radius: "6px",  desc: "Structured edges" },
-  { id: "sharp",   label: "Sharp",    radius: "0px",  desc: "Hard editorial" },
-  { id: "pill",    label: "Pill",     radius: "40px", desc: "Bubbly & airy" },
+  { id: "rounded", label: "Rounded", radius: "22px", shadow: null,   desc: "Soft & friendly" },
+  { id: "boxy",    label: "Boxy",    radius: "6px",  shadow: null,   desc: "Structured edges" },
+  { id: "sharp",   label: "Sharp",   radius: "0px",  shadow: null,   desc: "Hard editorial" },
+  { id: "pill",    label: "Pill",    radius: "40px", shadow: null,   desc: "Bubbly & airy" },
+  { id: "flat",    label: "Flat",    radius: "6px",  shadow: "none", desc: "No depth, clean border" },
 ];
 
 export default function ProtoTweaks({ onClose, initialGlassStyle = "rounded" }) {
@@ -29,6 +30,14 @@ export default function ProtoTweaks({ onClose, initialGlassStyle = "rounded" }) 
     root.style.setProperty("--di-font-body", font.body);
     root.style.setProperty("--di-font-head", font.head);
     root.style.setProperty("--di-glass-radius", glass.radius);
+    // Flat: zero out both shadow variables. Other styles: remove overrides so CSS defaults kick in.
+    if (glass.shadow === "none") {
+      root.style.setProperty("--di-card-shadow", "none");
+      root.style.setProperty("--di-card-hover-shadow", "none");
+    } else {
+      root.style.removeProperty("--di-card-shadow");
+      root.style.removeProperty("--di-card-hover-shadow");
+    }
   }, [tweaks.typography, tweaks.glassStyle]);
 
   function update(patch) { setTweaks(t => ({ ...t, ...patch })); }

@@ -426,26 +426,26 @@ html[data-theme="dark"] .di-ticker-chip { background: #1e2024; }
   background: var(--di-card);
   border-radius: var(--di-glass-radius, 22px);
   border: 1px solid rgba(15, 18, 32, 0.12);
-  box-shadow:
+  box-shadow: var(--di-card-shadow,
     rgba(8, 10, 20, 0.28) -1.5px 0px 0px 0px inset,
     rgba(8, 10, 20, 0.32) 0px -1.5px 0px 0px inset,
     rgba(8, 10, 20, 0.14) -3px -3px 18px 0px inset,
     rgba(2, 4, 12, 0.55) 2px 3px 4px 0px,
     rgba(2, 4, 12, 0.18) 4px 6px 14px 0px,
-    rgba(8, 10, 22, 0.14) 10px 16px 36px 0px;
+    rgba(8, 10, 22, 0.14) 10px 16px 36px 0px);
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 .di-story:hover {
   transform: translateY(-3px);
-  box-shadow:
+  box-shadow: var(--di-card-hover-shadow,
     rgba(8, 10, 20, 0.28) -1.5px 0px 0px 0px inset,
     rgba(8, 10, 20, 0.32) 0px -1.5px 0px 0px inset,
     rgba(8, 10, 20, 0.14) -3px -3px 18px 0px inset,
     rgba(2, 4, 12, 0.65) 2px 5px 8px 0px,
     rgba(2, 4, 12, 0.25) 6px 14px 28px 0px,
-    rgba(8, 10, 22, 0.18) 14px 28px 52px 0px;
+    rgba(8, 10, 22, 0.18) 14px 28px 52px 0px);
 }
 .di-story:nth-child(odd)  { padding-right: 0; border-right: none; }
 .di-story:nth-child(even) { padding-left: 0; }
@@ -507,25 +507,25 @@ html[data-theme="dark"] .di-story {
   background: var(--di-card);
   border-radius: var(--di-glass-radius, 22px);
   border: 1px solid rgba(15, 18, 32, 0.12);
-  box-shadow:
+  box-shadow: var(--di-card-shadow,
     rgba(8, 10, 20, 0.28) -1.5px 0px 0px 0px inset,
     rgba(8, 10, 20, 0.32) 0px -1.5px 0px 0px inset,
     rgba(8, 10, 20, 0.14) -3px -3px 18px 0px inset,
     rgba(2, 4, 12, 0.55) 2px 3px 4px 0px,
     rgba(2, 4, 12, 0.18) 4px 6px 14px 0px,
-    rgba(8, 10, 22, 0.14) 10px 16px 36px 0px;
+    rgba(8, 10, 22, 0.14) 10px 16px 36px 0px);
   overflow: hidden;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 .di-stories-image-top .di-story.di-story-image-top:hover {
   transform: translateY(-3px);
-  box-shadow:
+  box-shadow: var(--di-card-hover-shadow,
     rgba(8, 10, 20, 0.28) -1.5px 0px 0px 0px inset,
     rgba(8, 10, 20, 0.32) 0px -1.5px 0px 0px inset,
     rgba(8, 10, 20, 0.14) -3px -3px 18px 0px inset,
     rgba(2, 4, 12, 0.65) 2px 5px 8px 0px,
     rgba(2, 4, 12, 0.25) 6px 14px 28px 0px,
-    rgba(8, 10, 22, 0.18) 14px 28px 52px 0px;
+    rgba(8, 10, 22, 0.18) 14px 28px 52px 0px);
 }
 .di-stories-image-top .di-story.di-story-image-top:nth-child(odd),
 .di-stories-image-top .di-story.di-story-image-top:nth-child(even) {
