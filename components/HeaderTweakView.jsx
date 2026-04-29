@@ -211,8 +211,8 @@ function SearchBubble({ query, onChange }) {
   );
 }
 
-/* ── Floating signup box (top-right corner) ─────────────────── */
-function SignupBox() {
+/* ── Header: logo + nav + signup box ────────────────────────── */
+function BaysFilterHeader({ searchQuery, onSearchChange }) {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
@@ -221,91 +221,12 @@ function SignupBox() {
     if (email.trim()) { setSubscribed(true); setEmail(""); }
   }
 
-  if (subscribed) {
-    return (
-      <div style={{
-        position: "absolute", top: 44, right: 0, zIndex: 100,
-        display: "flex", alignItems: "center", gap: 6,
-        background: "#e8f7ee", border: "1px solid #a8dbbe",
-        borderRadius: 8, padding: "14px 20px",
-      }}>
-        <span style={{ fontSize: 14 }}>✓</span>
-        <span style={{ fontSize: 13, fontWeight: 600, color: "#007a3d", fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
-          You're in!
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{
-      position: "absolute", top: 44, right: 0, zIndex: 100,
-      border: "1px solid rgba(15, 18, 32, 0.22)",
-      borderRadius: 8,
-      background: "var(--di-card, #fff)",
-      padding: "14px 16px",
-      display: "flex", flexDirection: "column", gap: 10,
-      width: 300,
-      boxShadow: "0 4px 16px rgba(2,4,12,0.08)",
-    }}>
-      <p style={{
-        margin: 0, fontSize: 12, fontWeight: 600, lineHeight: 1.4,
-        color: "var(--di-ink-3, #4a5261)",
-        fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-        fontStyle: "italic",
-        textAlign: "center",
-      }}>
-        Get the world's most important &amp; actionable intel, daily.
-      </p>
-      <form onSubmit={handleSubscribe} style={{
-        display: "flex", alignItems: "center",
-        background: "#fff",
-        border: "1px solid rgba(15, 18, 32, 0.22)",
-        borderRadius: 999,
-        overflow: "hidden",
-        height: 42,
-      }}>
-        <input
-          type="email"
-          placeholder="your@email.com"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          style={{
-            height: "100%", padding: "0 14px",
-            border: "none", outline: "none", background: "transparent",
-            fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-            color: "var(--di-ink, #0c0d10)",
-            flex: 1, minWidth: 0,
-          }}
-        />
-        <button type="submit" style={{
-          height: "100%", padding: "0 16px",
-          background: "#29B6F6", border: "none",
-          fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
-          textTransform: "uppercase", color: "#fff", cursor: "pointer",
-          fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-          transition: "background 0.15s ease", flexShrink: 0,
-          whiteSpace: "nowrap",
-        }}
-          onMouseEnter={e => e.currentTarget.style.background = "#039BE5"}
-          onMouseLeave={e => e.currentTarget.style.background = "#29B6F6"}
-        >
-          Sign Up →
-        </button>
-      </form>
-    </div>
-  );
-}
-
-/* ── Header: logo + nav (signup floats separately) ──────────── */
-function BaysFilterHeader({ searchQuery, onSearchChange }) {
   return (
     <header style={{ background: "var(--di-paper, #fafaf7)", borderBottom: "1px solid var(--di-line, #e4e7ec)" }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         gap: 24, maxWidth: 1400, margin: "0 auto", padding: "0 40px",
-        height: 88,
+        height: 100,
       }}>
         {/* Left — logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
@@ -322,21 +243,88 @@ function BaysFilterHeader({ searchQuery, onSearchChange }) {
           </span>
         </div>
 
-        {/* Right — nav */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 28, fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
-          <a href="#" style={{
-            fontSize: 13, fontWeight: 600, letterSpacing: "0.03em",
-            color: "var(--di-ink, #0c0d10)", textDecoration: "none",
-            transition: "color 0.12s ease",
-          }}
-            onMouseEnter={e => e.currentTarget.style.color = "#29B6F6"}
-            onMouseLeave={e => e.currentTarget.style.color = "var(--di-ink, #0c0d10)"}
-          >
-            About
-          </a>
-          <CategoriesDropdown />
-          <SearchBubble query={searchQuery} onChange={onSearchChange} />
-        </nav>
+        {/* Right — nav + signup box */}
+        <div style={{ display: "flex", alignItems: "center", gap: 24, flexShrink: 0 }}>
+          <nav style={{ display: "flex", alignItems: "center", gap: 28, fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
+            <a href="#" style={{
+              fontSize: 13, fontWeight: 600, letterSpacing: "0.03em",
+              color: "var(--di-ink, #0c0d10)", textDecoration: "none",
+              transition: "color 0.12s ease",
+            }}
+              onMouseEnter={e => e.currentTarget.style.color = "#29B6F6"}
+              onMouseLeave={e => e.currentTarget.style.color = "var(--di-ink, #0c0d10)"}
+            >
+              About
+            </a>
+            <CategoriesDropdown />
+            <SearchBubble query={searchQuery} onChange={onSearchChange} />
+          </nav>
+
+          {/* Signup box */}
+          {!subscribed ? (
+            <div style={{
+              border: "1px solid rgba(15, 18, 32, 0.22)",
+              borderRadius: 10,
+              background: "#fff",
+              padding: "10px 14px",
+              display: "flex", flexDirection: "column", gap: 8,
+              width: 280, flexShrink: 0,
+            }}>
+              <p style={{
+                margin: 0, fontSize: 11, fontWeight: 600, lineHeight: 1.4,
+                color: "var(--di-ink-3, #4a5261)",
+                fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                fontStyle: "italic", textAlign: "center",
+              }}>
+                Get the world's most important &amp; actionable intel, daily.
+              </p>
+              <form onSubmit={handleSubscribe} style={{
+                display: "flex", alignItems: "center",
+                border: "1px solid rgba(15, 18, 32, 0.22)",
+                borderRadius: 999, overflow: "hidden",
+                height: 36, background: "#fff",
+              }}>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  style={{
+                    height: "100%", padding: "0 12px",
+                    border: "none", outline: "none", background: "transparent",
+                    fontSize: 12, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                    color: "var(--di-ink, #0c0d10)", flex: 1, minWidth: 0,
+                  }}
+                />
+                <button type="submit" style={{
+                  height: "100%", padding: "0 14px",
+                  background: "#29B6F6", border: "none",
+                  fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+                  textTransform: "uppercase", color: "#fff", cursor: "pointer",
+                  fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                  transition: "background 0.15s ease", flexShrink: 0, whiteSpace: "nowrap",
+                }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#039BE5"}
+                  onMouseLeave={e => e.currentTarget.style.background = "#29B6F6"}
+                >
+                  Sign Up →
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: "#e8f7ee", border: "1px solid #a8dbbe",
+              borderRadius: 10, padding: "10px 20px", flexShrink: 0,
+            }}>
+              <span>✓</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#007a3d", fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
+                You're in!
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
@@ -675,11 +663,7 @@ export default function HeaderTweakView({ digest, allDates }) {
   return (
     <>
       <ProtoBanner />
-      {/* position:relative so SignupBox can anchor to top-right of this block */}
-      <div style={{ position: "relative" }}>
-        <BaysFilterHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-        <SignupBox />
-      </div>
+      <BaysFilterHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
       {/* Topic pills */}
       <div style={{ background: "var(--di-paper, #fafaf7)" }}>
