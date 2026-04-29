@@ -211,10 +211,18 @@ function SearchBubble({ query, onChange }) {
   );
 }
 
-/* ── Compact header: logo + nav only ───────────────────────── */
+/* ── Compact header: logo + nav + signup ───────────────────── */
 function BaysFilterHeader({ searchQuery, onSearchChange }) {
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+
+  function handleSubscribe(e) {
+    e.preventDefault();
+    if (email.trim()) { setSubscribed(true); setEmail(""); }
+  }
+
   return (
-    <header style={{ background: "var(--di-paper, #fafaf7)" }}>
+    <header style={{ background: "var(--di-paper, #fafaf7)", borderBottom: "1px solid var(--di-line, #e4e7ec)" }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         gap: 24, maxWidth: 1400, margin: "0 auto", padding: "0 40px",
@@ -238,77 +246,34 @@ function BaysFilterHeader({ searchQuery, onSearchChange }) {
           </span>
         </div>
 
-        {/* Right — nav */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 32, fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
-          <a href="#" style={{
-            fontSize: 13, fontWeight: 600, letterSpacing: "0.03em",
-            color: "var(--di-ink, #0c0d10)", textDecoration: "none",
-            transition: "color 0.12s ease",
-          }}
-            onMouseEnter={e => e.currentTarget.style.color = "#29B6F6"}
-            onMouseLeave={e => e.currentTarget.style.color = "var(--di-ink, #0c0d10)"}
-          >
-            About
-          </a>
-          <CategoriesDropdown />
-          <SearchBubble query={searchQuery} onChange={onSearchChange} />
-        </nav>
-      </div>
-    </header>
-  );
-}
-
-/* ── Prominent signup section ───────────────────────────────── */
-function SignupSection() {
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-  function handleSubscribe(e) {
-    e.preventDefault();
-    if (email.trim()) { setSubscribed(true); setEmail(""); }
-  }
-
-  return (
-    <div style={{
-      background: "var(--di-paper, #fafaf7)",
-      borderTop: "1px solid rgba(15, 18, 32, 0.22)",
-      borderBottom: "1px solid rgba(15, 18, 32, 0.22)",
-    }}>
-      <div style={{
-        maxWidth: 1400, margin: "0 auto", padding: "28px 40px",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        {!subscribed ? (
-          <div style={{
-            border: "1px solid rgba(15, 18, 32, 0.22)",
-            borderRadius: 12,
-            background: "rgba(41,182,246,0.05)",
-            padding: "24px 32px",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
-            width: "100%", maxWidth: 560,
-          }}>
-            <p style={{
-              margin: 0,
-              fontSize: 15, fontWeight: 600, lineHeight: 1.45,
-              color: "var(--di-ink-2, #2a2f3a)",
-              fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-              fontStyle: "italic",
-              textAlign: "center",
-            }}>
-              Get the world's most important and actionable information sent to your inbox, daily.
-            </p>
-
-            <form
-              onSubmit={handleSubscribe}
-              style={{
-                display: "flex", alignItems: "center", width: "100%",
-                background: "#fff",
-                border: "1px solid rgba(15, 18, 32, 0.22)",
-                borderRadius: 999,
-                overflow: "hidden",
-                height: 50,
-              }}
+        {/* Right — nav + signup */}
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <nav style={{ display: "flex", alignItems: "center", gap: 28, fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
+            <a href="#" style={{
+              fontSize: 13, fontWeight: 600, letterSpacing: "0.03em",
+              color: "var(--di-ink, #0c0d10)", textDecoration: "none",
+              transition: "color 0.12s ease",
+            }}
+              onMouseEnter={e => e.currentTarget.style.color = "#29B6F6"}
+              onMouseLeave={e => e.currentTarget.style.color = "var(--di-ink, #0c0d10)"}
             >
+              About
+            </a>
+            <CategoriesDropdown />
+            <SearchBubble query={searchQuery} onChange={onSearchChange} />
+          </nav>
+
+          {/* Inline email signup */}
+          {!subscribed ? (
+            <form onSubmit={handleSubscribe} style={{
+              display: "flex", alignItems: "center",
+              background: "#fff",
+              border: "1px solid var(--di-line, #e4e7ec)",
+              borderRadius: 999,
+              overflow: "hidden",
+              height: 38,
+              flexShrink: 0,
+            }}>
               <input
                 type="email"
                 placeholder="your@email.com"
@@ -316,17 +281,17 @@ function SignupSection() {
                 onChange={e => setEmail(e.target.value)}
                 required
                 style={{
-                  height: "100%", padding: "0 20px",
+                  height: "100%", padding: "0 14px",
                   border: "none", outline: "none", background: "transparent",
-                  fontSize: 15, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                  fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
                   color: "var(--di-ink, #0c0d10)",
-                  flex: 1, minWidth: 0,
+                  width: 180, minWidth: 0,
                 }}
               />
               <button type="submit" style={{
-                height: "100%", padding: "0 24px",
+                height: "100%", padding: "0 16px",
                 background: "#29B6F6", border: "none",
-                fontSize: 12, fontWeight: 700, letterSpacing: "0.08em",
+                fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
                 textTransform: "uppercase", color: "#fff", cursor: "pointer",
                 fontFamily: "var(--di-font-ui, Inter, sans-serif)",
                 transition: "background 0.15s ease", flexShrink: 0,
@@ -338,25 +303,22 @@ function SignupSection() {
                 Sign Up →
               </button>
             </form>
-          </div>
-        ) : (
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8,
-            background: "#e8f7ee", border: "1px solid #a8dbbe",
-            borderRadius: 999, padding: "12px 24px",
-          }}>
-            <span style={{ fontSize: 16, lineHeight: 1 }}>✓</span>
-            <span style={{
-              fontSize: 14, fontWeight: 600, color: "#007a3d",
-              fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-              letterSpacing: "0.02em",
+          ) : (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: "#e8f7ee", border: "1px solid #a8dbbe",
+              borderRadius: 999, padding: "0 16px", height: 38, flexShrink: 0,
             }}>
-              You're in!
-            </span>
-          </div>
-        )}
+              <span style={{ fontSize: 13 }}>✓</span>
+              <span style={{
+                fontSize: 12, fontWeight: 600, color: "#007a3d",
+                fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+              }}>You're in!</span>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </header>
   );
 }
 
@@ -694,9 +656,6 @@ export default function HeaderTweakView({ digest, allDates }) {
     <>
       <ProtoBanner />
       <BaysFilterHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-
-      {/* Prominent email signup section */}
-      <SignupSection />
 
       {/* Topic pills */}
       <div style={{ background: "var(--di-paper, #fafaf7)" }}>
