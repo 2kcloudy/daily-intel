@@ -139,75 +139,42 @@ function CategoriesDropdown() {
 
 /* ── Search bubble ──────────────────────────────────────────── */
 function SearchBubble({ query, onChange }) {
-  const [open, setOpen] = useState(false);
   const inputRef = useRef(null);
 
-  function handleOpen() {
-    setOpen(true);
-    setTimeout(() => inputRef.current?.focus(), 50);
-  }
-  function handleClose() {
-    if (!query) setOpen(false);
-  }
-  function handleClear() {
-    onChange("");
-    setOpen(false);
-  }
-
-  if (open) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <div style={{
-          display: "flex", alignItems: "center",
-          height: 32, padding: "0 12px",
-          border: "1.5px solid #29B6F6",
-          borderRadius: 999,
-          background: "var(--di-card, #fff)",
-          boxShadow: "0 0 0 3px rgba(41,182,246,0.12)",
-        }}>
-          <span style={{ fontSize: 13, marginRight: 6, color: "var(--di-ink-4)" }}>⌕</span>
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={e => onChange(e.target.value)}
-            onBlur={handleClose}
-            placeholder="Search stories…"
-            style={{
-              border: "none", outline: "none", background: "transparent",
-              fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-              color: "var(--di-ink, #0c0d10)", width: 320,
-            }}
-          />
-        </div>
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{
+        display: "flex", alignItems: "center",
+        height: 32, padding: "0 12px",
+        border: "1.5px solid var(--di-line, #e4e7ec)",
+        borderRadius: 999,
+        background: "var(--di-card, #fff)",
+        transition: "border-color 0.12s ease",
+      }}
+        onFocusCapture={e => e.currentTarget.style.borderColor = "#29B6F6"}
+        onBlurCapture={e => e.currentTarget.style.borderColor = "var(--di-line, #e4e7ec)"}
+      >
+        <span style={{ fontSize: 13, marginRight: 6, color: "var(--di-ink-4)" }}>⌕</span>
+        <input
+          ref={inputRef}
+          type="text"
+          value={query}
+          onChange={e => onChange(e.target.value)}
+          placeholder="Search stories…"
+          style={{
+            border: "none", outline: "none", background: "transparent",
+            fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+            color: "var(--di-ink, #0c0d10)", width: 320,
+          }}
+        />
         {query && (
-          <button onClick={handleClear} style={{
+          <button onClick={() => onChange("")} style={{
             background: "none", border: "none", cursor: "pointer",
-            fontSize: 18, color: "var(--di-ink-4)", lineHeight: 1, padding: 0,
+            fontSize: 16, color: "var(--di-ink-4)", lineHeight: 1, padding: "0 0 0 6px",
           }}>×</button>
         )}
       </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={handleOpen}
-      style={{
-        display: "flex", alignItems: "center", gap: 5,
-        height: 32, padding: "0 14px",
-        border: "1.5px solid var(--di-line, #e4e7ec)",
-        borderRadius: 999, background: "var(--di-card, #fff)",
-        fontSize: 13, fontWeight: 600, letterSpacing: "0.02em",
-        color: "var(--di-ink, #0c0d10)", cursor: "pointer",
-        fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-        transition: "border-color 0.12s ease",
-      }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = "#29B6F6"}
-      onMouseLeave={e => e.currentTarget.style.borderColor = "var(--di-line, #e4e7ec)"}
-    >
-      <span style={{ fontSize: 15 }}>⌕</span> Search
-    </button>
+    </div>
   );
 }
 
