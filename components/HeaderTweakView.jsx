@@ -1,9 +1,9 @@
 "use client";
-import { useState, useMemo, useEffect, useRef } from "react";
-import { StoryList } from "./di/Stories";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { FilterDrawer, Footer } from "./di/Chrome";
 import ProtoTweaks from "./ProtoTweaks";
-import { buildFinanceData } from "./di/dataTransform";
+import { buildFinanceData, transformFinanceStory } from "./di/dataTransform";
+import { storyImg } from "./di/dataTransform";
 
 /* ── Bay's Filter icon (funnel in circle) ───────────────────── */
 function BaysFilterIcon({ size = 40 }) {
@@ -26,7 +26,6 @@ const CAT_ITEMS = ["News", "Podcasts", "Newsletters", "13F Reports", "Shareholde
 
 function CategoriesDropdown() {
   const [open, setOpen] = useState(false);
-  // All checked by default
   const [checked, setChecked] = useState(() => new Set(CAT_ITEMS));
   const ref = useRef(null);
 
@@ -44,7 +43,6 @@ function CategoriesDropdown() {
   function toggleAll() {
     setChecked(allChecked ? new Set() : new Set(CAT_ITEMS));
   }
-
   function toggleItem(label) {
     setChecked(prev => {
       const next = new Set(prev);
@@ -53,12 +51,9 @@ function CategoriesDropdown() {
     });
   }
 
-  // Label shown on trigger button
   const triggerLabel = allChecked
     ? "Categories"
-    : checked.size === 0
-      ? "Categories (none)"
-      : `Categories (${checked.size})`;
+    : checked.size === 0 ? "Categories (none)" : `Categories (${checked.size})`;
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
@@ -92,12 +87,9 @@ function CategoriesDropdown() {
           minWidth: 210,
           padding: "6px 0",
         }}>
-
-          {/* All row */}
           <label style={{
             display: "flex", alignItems: "center", gap: 10,
-            padding: "9px 16px",
-            cursor: "pointer",
+            padding: "9px 16px", cursor: "pointer",
             fontFamily: "var(--di-font-ui, Inter, sans-serif)",
             fontSize: 13, fontWeight: 700,
             color: "var(--di-ink, #0c0d10)",
@@ -117,14 +109,12 @@ function CategoriesDropdown() {
             All
           </label>
 
-          {/* Individual items */}
           {CAT_ITEMS.map(label => (
             <label
               key={label}
               style={{
                 display: "flex", alignItems: "center", gap: 10,
-                padding: "8px 16px",
-                cursor: "pointer",
+                padding: "8px 16px", cursor: "pointer",
                 fontFamily: "var(--di-font-ui, Inter, sans-serif)",
                 fontSize: 13, fontWeight: 500,
                 color: "var(--di-ink, #0c0d10)",
@@ -147,8 +137,129 @@ function CategoriesDropdown() {
   );
 }
 
-/* ── Main header ────────────────────────────────────────────── */
-function BaysFilterHeader() {
+/* ── Search bubble ──────────────────────────────────────────── */
+function SearchBubble({ query, onChange }) {
+  const [open, setOpen] = useState(false);
+  const inputRef = useRef(null);
+
+  function handleOpen() {
+    setOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }
+  function handleClose() {
+    if (!query) setOpen(false);
+  }
+  function handleClear() {
+    onChange("");
+    setOpen(false);
+  }
+
+  if (open) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{
+          display: "flex", alignItems: "center",
+          height: 32, padding: "0 12px",
+          border: "1.5px solid #29B6F6",
+          borderRadius: 999,
+          background: "var(--di-card, #fff)",
+          boxShadow: "0 0 0 3px rgba(41,182,246,0.12)",
+        }}>
+          <span style={{ fontSize: 13, marginRight: 6, color: "var(--di-ink-4)" }}>⌕</span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={e => onChange(e.target.value)}
+            onBlur={handleClose}
+            placeholder="Search stories…"
+            style={{
+              border: "none", outline: "none", background: "transparent",
+              fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+              color: "var(--di-ink, #0c0d10)", width: 160,
+            }}
+          />
+        </div>
+        {query && (
+          <button onClick={handleClear} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontSize: 18, color: "var(--di-ink-4)", lineHeight: 1, padding: 0,
+          }}>×</button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={handleOpen}
+      style={{
+        display: "flex", alignItems: "center", gap: 5,
+        height: 32, padding: "0 14px",
+        border: "1.5px solid var(--di-line, #e4e7ec)",
+        borderRadius: 999, background: "var(--di-card, #fff)",
+        fontSize: 13, fontWeight: 600, letterSpacing: "0.02em",
+        color: "var(--di-ink, #0c0d10)", cursor: "pointer",
+        fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+        transition: "border-color 0.12s ease",
+      }}
+      onMouseEnter={e => e.currentTarget.style.borderColor = "#29B6F6"}
+      onMouseLeave={e => e.currentTarget.style.borderColor = "var(--di-line, #e4e7ec)"}
+    >
+      <span style={{ fontSize: 15 }}>⌕</span> Search
+    </button>
+  );
+}
+
+/* ── Compact header: logo + nav only ───────────────────────── */
+function BaysFilterHeader({ searchQuery, onSearchChange }) {
+  return (
+    <header style={{ background: "var(--di-paper, #fafaf7)" }}>
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: 24, maxWidth: 1400, margin: "0 auto", padding: "0 40px",
+        height: 88,
+      }}>
+        {/* Left — logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
+          <div style={{ flexShrink: 0 }}>
+            <BaysFilterIcon size={48} />
+          </div>
+          <span style={{
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontWeight: 900,
+            fontSize: 52,
+            letterSpacing: "0.02em",
+            textTransform: "uppercase",
+            color: "var(--di-ink, #0c0d10)",
+            lineHeight: "0.85",
+          }}>
+            Bay's Filter
+          </span>
+        </div>
+
+        {/* Right — nav */}
+        <nav style={{ display: "flex", alignItems: "center", gap: 32, fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
+          <a href="#" style={{
+            fontSize: 13, fontWeight: 600, letterSpacing: "0.03em",
+            color: "var(--di-ink, #0c0d10)", textDecoration: "none",
+            transition: "color 0.12s ease",
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = "#29B6F6"}
+            onMouseLeave={e => e.currentTarget.style.color = "var(--di-ink, #0c0d10)"}
+          >
+            About
+          </a>
+          <CategoriesDropdown />
+          <SearchBubble query={searchQuery} onChange={onSearchChange} />
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+/* ── Prominent signup section ───────────────────────────────── */
+function SignupSection() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
@@ -158,65 +269,27 @@ function BaysFilterHeader() {
   }
 
   return (
-    <header style={{ background: "var(--di-paper, #fafaf7)" }}>
-      {/* Same maxWidth+padding pattern as pills and stories so left edges align perfectly */}
+    <div style={{
+      background: "var(--di-paper, #fafaf7)",
+      borderTop: "1px solid rgba(15, 18, 32, 0.22)",
+      borderBottom: "1px solid rgba(15, 18, 32, 0.22)",
+    }}>
       <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        gap: 24, maxWidth: 1400, margin: "0 auto", padding: "0 40px",
-        height: 130,
+        maxWidth: 1400, margin: "0 auto", padding: "28px 40px",
+        display: "flex", alignItems: "center", justifyContent: "center",
       }}>
-
-        {/* Left — logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
-          {/* Nudge icon up so its center aligns with cap-height center, not em-box center */}
-          <div style={{ flexShrink: 0 }}>
-            <BaysFilterIcon size={48} />
-          </div>
-          <span style={{
-            fontFamily: "'Bebas Neue', 'Barlow Condensed', Impact, sans-serif",
-            fontWeight: 400,
-            fontSize: 68,
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-            color: "var(--di-ink, #0c0d10)",
-            lineHeight: "0.85",
-          }}>
-            Bay's Filter
-          </span>
-        </div>
-
-        {/* Center — nav */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 44, fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
-          {["About", "Archive"].map(label => (
-            <a key={label} href="#" style={{
-              fontSize: 13, fontWeight: 600, letterSpacing: "0.03em",
-              color: "var(--di-ink, #0c0d10)", textDecoration: "none",
-              transition: "color 0.12s ease",
-            }}
-              onMouseEnter={e => e.currentTarget.style.color = "#29B6F6"}
-              onMouseLeave={e => e.currentTarget.style.color = "var(--di-ink, #0c0d10)"}
-            >
-              {label}
-            </a>
-          ))}
-          <CategoriesDropdown />
-        </nav>
-
-        {/* Right — email signup */}
         {!subscribed ? (
           <div style={{
-            flexShrink: 0,
             border: "1px solid rgba(15, 18, 32, 0.22)",
             borderRadius: 12,
             background: "rgba(41,182,246,0.05)",
-            padding: "18px 22px",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 12,
-            minWidth: 300,
+            padding: "24px 32px",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
+            width: "100%", maxWidth: 560,
           }}>
-            {/* Tagline */}
             <p style={{
               margin: 0,
-              fontSize: 12, fontWeight: 600, lineHeight: 1.45,
+              fontSize: 15, fontWeight: 600, lineHeight: 1.45,
               color: "var(--di-ink-2, #2a2f3a)",
               fontFamily: "var(--di-font-ui, Inter, sans-serif)",
               fontStyle: "italic",
@@ -225,7 +298,6 @@ function BaysFilterHeader() {
               Get the world's most important and actionable information sent to your inbox, daily.
             </p>
 
-            {/* Merged pill input + button */}
             <form
               onSubmit={handleSubscribe}
               style={{
@@ -234,8 +306,7 @@ function BaysFilterHeader() {
                 border: "1px solid rgba(15, 18, 32, 0.22)",
                 borderRadius: 999,
                 overflow: "hidden",
-                height: 44,
-                boxShadow: "none",
+                height: 50,
               }}
             >
               <input
@@ -245,17 +316,17 @@ function BaysFilterHeader() {
                 onChange={e => setEmail(e.target.value)}
                 required
                 style={{
-                  height: "100%", padding: "0 16px",
+                  height: "100%", padding: "0 20px",
                   border: "none", outline: "none", background: "transparent",
-                  fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                  fontSize: 15, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
                   color: "var(--di-ink, #0c0d10)",
                   flex: 1, minWidth: 0,
                 }}
               />
               <button type="submit" style={{
-                height: "100%", padding: "0 20px",
+                height: "100%", padding: "0 24px",
                 background: "#29B6F6", border: "none",
-                fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
+                fontSize: 12, fontWeight: 700, letterSpacing: "0.08em",
                 textTransform: "uppercase", color: "#fff", cursor: "pointer",
                 fontFamily: "var(--di-font-ui, Inter, sans-serif)",
                 transition: "background 0.15s ease", flexShrink: 0,
@@ -272,11 +343,11 @@ function BaysFilterHeader() {
           <div style={{
             display: "flex", alignItems: "center", gap: 8,
             background: "#e8f7ee", border: "1px solid #a8dbbe",
-            borderRadius: 999, padding: "8px 18px",
+            borderRadius: 999, padding: "12px 24px",
           }}>
-            <span style={{ fontSize: 15, lineHeight: 1 }}>✓</span>
+            <span style={{ fontSize: 16, lineHeight: 1 }}>✓</span>
             <span style={{
-              fontSize: 12, fontWeight: 600, color: "#007a3d",
+              fontSize: 14, fontWeight: 600, color: "#007a3d",
               fontFamily: "var(--di-font-ui, Inter, sans-serif)",
               letterSpacing: "0.02em",
             }}>
@@ -285,7 +356,7 @@ function BaysFilterHeader() {
           </div>
         )}
       </div>
-    </header>
+    </div>
   );
 }
 
@@ -337,6 +408,157 @@ function TopicPills({ active, onSelect }) {
   );
 }
 
+/* ── Story card — direct link, no modal ─────────────────────── */
+function HTStoryCard({ story }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const [retries, setRetries] = useState(0);
+  const tag = story.tag || story.topic || "";
+
+  const imgSrc = retries === 0
+    ? (story.image || `/api/image?seed=${story.seed || 0}&tag=${encodeURIComponent(tag)}&headline=${encodeURIComponent((story.headline || "").slice(0, 80))}&w=900&h=600`)
+    : `/api/image?seed=${story.seed || 0}&tag=${encodeURIComponent(tag)}&headline=${encodeURIComponent((story.headline || "").slice(0, 80))}&w=900&h=600&_r=${retries}`;
+
+  function handleImgError() {
+    if (retries < 2) setTimeout(() => setRetries(r => r + 1), 2000 * (retries + 1));
+    else setImgFailed(true);
+  }
+
+  return (
+    <article style={{
+      border: "1px solid rgba(15, 18, 32, 0.22)",
+      borderRadius: "var(--di-glass-radius, 6px)",
+      overflow: "hidden",
+      background: "var(--di-card, #fff)",
+      display: "flex", flexDirection: "column",
+      transition: "box-shadow 0.15s ease",
+    }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = "0 4px 20px rgba(2,4,12,0.12)"}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
+    >
+      {/* Image */}
+      <div style={{ position: "relative", paddingTop: "58%", overflow: "hidden", background: "#f0f2f5", flexShrink: 0 }}>
+        {!imgFailed ? (
+          <img
+            key={retries}
+            src={imgSrc}
+            alt=""
+            loading="lazy"
+            onError={handleImgError}
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(135deg, #111827 0%, #1f2937 100%)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              {tag.slice(0, 2)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: "16px 18px 18px", flex: 1, display: "flex", flexDirection: "column" }}>
+        {/* Tag label */}
+        <div style={{
+          fontSize: 10, fontWeight: 700, textTransform: "uppercase",
+          letterSpacing: "0.1em", color: "#29B6F6", marginBottom: 8,
+        }}>
+          {tag}
+        </div>
+
+        {/* Headline — direct link, no modal */}
+        <h3 style={{
+          fontFamily: "var(--di-font-head, var(--di-font-serif, Georgia, serif))",
+          fontWeight: 700, fontSize: 16, lineHeight: 1.3,
+          margin: "0 0 10px", flex: "0 0 auto",
+        }}>
+          <a
+            href={story.url || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--di-ink, #0c0d10)", textDecoration: "none" }}
+            onMouseEnter={e => e.currentTarget.style.color = "#29B6F6"}
+            onMouseLeave={e => e.currentTarget.style.color = "var(--di-ink, #0c0d10)"}
+          >
+            {story.headline}
+          </a>
+        </h3>
+
+        {/* Summary */}
+        <p style={{
+          fontFamily: "var(--di-font-body, var(--di-font-serif, Georgia, serif))",
+          fontSize: 13, color: "var(--di-ink-3, #4a5261)", lineHeight: 1.6,
+          margin: "0 0 16px", flex: 1,
+        }}>
+          {story.body || story.sub || ""}
+        </p>
+
+        {/* Footer */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <span style={{
+            fontSize: 11, color: "var(--di-ink-4, #787f8c)",
+            fontFamily: "var(--di-font-ui, Inter, sans-serif)", fontWeight: 500,
+          }}>
+            {story.source}
+          </span>
+          <a
+            href={story.url || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontSize: 11, fontWeight: 700, color: "#29B6F6",
+              textDecoration: "none",
+              padding: "5px 12px",
+              border: "1.5px solid #29B6F6",
+              borderRadius: 999,
+              fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+              letterSpacing: "0.04em",
+              transition: "background 0.12s ease, color 0.12s ease",
+              flexShrink: 0,
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "#29B6F6";
+              e.currentTarget.style.color = "#fff";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "#29B6F6";
+            }}
+          >
+            Read Story →
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/* ── Story grid ─────────────────────────────────────────────── */
+function HTStoryGrid({ stories }) {
+  if (!stories.length) return (
+    <p style={{ textAlign: "center", color: "var(--di-ink-4)", padding: "60px 0", fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
+      No stories match your filter.
+    </p>
+  );
+  return (
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: 20,
+    }}>
+      {stories.map((s, i) => (
+        <HTStoryCard key={`${s.rank || i}-${s.headline?.slice(0, 20)}`} story={s} />
+      ))}
+    </div>
+  );
+}
+
 /* ── Prototype banner ───────────────────────────────────────── */
 function ProtoBanner() {
   return (
@@ -376,14 +598,22 @@ function ProtoBanner() {
 /* ── Main view ──────────────────────────────────────────────── */
 export default function HeaderTweakView({ digest, allDates }) {
   const financeData = buildFinanceData(digest, allDates);
-  const stories = financeData?.stories || [];
+  const baseStories = financeData?.stories || [];
 
+  // Endless scroll state
+  const [allStories, setAllStories] = useState(baseStories);
+  const [nextDateIdx, setNextDateIdx] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState((allDates || []).length > 1);
+  const sentinelRef = useRef(null);
+
+  // Filters & search
   const [activePill, setActivePill] = useState(null);
-  const [openStory, setOpenStory] = useState(null);
-  const [showTweaks, setShowTweaks] = useState(false);
   const [activeTag, setActiveTag] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showTweaks, setShowTweaks] = useState(false);
 
-  // Apply flat style immediately on mount — don't wait for Tweaks panel to open
+  // Apply flat style immediately
   useEffect(() => {
     document.documentElement.style.setProperty("--di-glass-radius", "6px");
     document.documentElement.style.setProperty("--di-card-shadow", "none");
@@ -391,63 +621,120 @@ export default function HeaderTweakView({ digest, allDates }) {
     document.documentElement.style.setProperty("--di-card-border", "rgba(15, 18, 32, 0.22)");
   }, []);
 
+  // Endless scroll — load older digests when sentinel enters viewport
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore || !allDates || nextDateIdx >= allDates.length) {
+      if (nextDateIdx >= (allDates || []).length) setHasMore(false);
+      return;
+    }
+    setIsLoadingMore(true);
+    try {
+      const date = allDates[nextDateIdx];
+      const res = await fetch(`/api/digest/${date}`);
+      if (res.ok) {
+        const older = await res.json();
+        const newStories = (older.stories || []).map((s, i) => transformFinanceStory(s, i));
+        setAllStories(prev => [...prev, ...newStories]);
+        setNextDateIdx(n => n + 1);
+        if (nextDateIdx + 1 >= allDates.length) setHasMore(false);
+      } else {
+        setHasMore(false);
+      }
+    } catch {
+      setHasMore(false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, hasMore, allDates, nextDateIdx]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) loadMore();
+    }, { rootMargin: "200px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [loadMore]);
+
+  // Filtering
   const tagCounts = useMemo(() => {
     const c = {};
-    stories.forEach(s => { const t = s.tag || s.topic; if (t) c[t] = (c[t] || 0) + 1; });
+    allStories.forEach(s => { const t = s.tag || s.topic; if (t) c[t] = (c[t] || 0) + 1; });
     return c;
-  }, [stories]);
+  }, [allStories]);
 
   const tags = useMemo(() => [
-    { id: "all", label: "All", count: stories.length },
+    { id: "all", label: "All", count: allStories.length },
     ...Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).map(([id, count]) => ({
       id: id.toLowerCase(), label: id, count,
     })),
-  ], [tagCounts, stories.length]);
+  ], [tagCounts, allStories.length]);
 
   const filtered = useMemo(() => {
-    let result = stories;
+    let result = allStories;
     if (activeTag !== "all") {
       result = result.filter(s => (s.tag || s.topic || "").toLowerCase() === activeTag);
     }
     if (activePill) {
       result = result.filter(s => (s.tag || s.topic || "").toLowerCase() === activePill.toLowerCase());
     }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(s =>
+        (s.headline || "").toLowerCase().includes(q) ||
+        (s.body || "").toLowerCase().includes(q) ||
+        (s.tag || "").toLowerCase().includes(q)
+      );
+    }
     return result;
-  }, [stories, activeTag, activePill]);
-
-  useEffect(() => {
-    function onKey(e) { if (e.key === "Escape" && openStory) setOpenStory(null); }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [openStory]);
+  }, [allStories, activeTag, activePill, searchQuery]);
 
   return (
     <>
       <ProtoBanner />
-      <BaysFilterHeader />
+      <BaysFilterHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
-      {/* Divider under header */}
-      <hr style={{ border: "none", borderTop: "1px solid var(--di-line, #e4e7ec)", margin: 0 }} />
+      {/* Prominent email signup section */}
+      <SignupSection />
 
-      {/* Topic pills — tight padding, no extra gap below */}
+      {/* Topic pills */}
       <div style={{ background: "var(--di-paper, #fafaf7)" }}>
         <TopicPills active={activePill} onSelect={setActivePill} />
       </div>
 
-      {/* Story grid — sits directly under pills with minimal gap */}
+      {/* Story grid */}
       <main style={{ padding: "8px 40px 80px", maxWidth: 1400, margin: "0 auto" }}>
-        <StoryList
-          stories={filtered}
-          compact={false}
-          onOpen={setOpenStory}
-          layout="image-top"
-        />
+        <HTStoryGrid stories={filtered} />
+
+        {/* Endless scroll sentinel */}
+        <div ref={sentinelRef} style={{ height: 1, marginTop: 40 }} />
+
+        {isLoadingMore && (
+          <div style={{
+            textAlign: "center", padding: "24px 0 48px",
+            fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+            fontSize: 13, color: "var(--di-ink-4, #787f8c)",
+          }}>
+            Loading more stories…
+          </div>
+        )}
+
+        {!hasMore && allStories.length > 0 && (
+          <div style={{
+            textAlign: "center", padding: "24px 0 48px",
+            fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+            fontSize: 12, color: "var(--di-ink-4, #787f8c)",
+            letterSpacing: "0.06em", textTransform: "uppercase",
+          }}>
+            — End of archive —
+          </div>
+        )}
       </main>
 
       <FilterDrawer tags={tags} active={activeTag} onSelect={setActiveTag} />
       <Footer onNav={() => {}} />
 
-      {/* Tweaks — default to boxy glass */}
       {!showTweaks && (
         <button className="di-tweaks-toggle" onClick={() => setShowTweaks(true)} title="Design tweaks">
           Tweaks
@@ -455,60 +742,6 @@ export default function HeaderTweakView({ digest, allDates }) {
       )}
       {showTweaks && (
         <ProtoTweaks onClose={() => setShowTweaks(false)} initialGlassStyle="flat" />
-      )}
-
-      {/* Story modal */}
-      {openStory && (
-        <div onClick={() => setOpenStory(null)} style={{
-          position: "fixed", inset: 0, zIndex: 8000,
-          background: "rgba(0,0,0,0.55)", display: "flex",
-          alignItems: "flex-start", justifyContent: "center",
-          padding: "60px 24px 24px", overflowY: "auto",
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: "var(--di-card, #fff)",
-            borderRadius: "var(--di-glass-radius, 6px)",
-            maxWidth: 720, width: "100%",
-            padding: "40px 44px 44px",
-            boxShadow: "0 8px 48px rgba(2,4,12,0.28)",
-          }}>
-            <button onClick={() => setOpenStory(null)} style={{
-              float: "right", background: "none", border: "none",
-              fontSize: 24, cursor: "pointer", color: "var(--di-ink-4)",
-              lineHeight: 1, padding: 0,
-            }}>×</button>
-            <div style={{
-              fontSize: 11, fontWeight: 700, textTransform: "uppercase",
-              letterSpacing: "0.1em", color: "#29B6F6", marginBottom: 12,
-            }}>
-              {openStory.tag || openStory.topic}
-            </div>
-            <h2 style={{
-              fontFamily: "var(--di-font-head, var(--di-font-serif))",
-              fontWeight: 700, fontSize: 26, lineHeight: 1.25,
-              color: "var(--di-ink)", margin: "0 0 12px",
-            }}>{openStory.headline}</h2>
-            {openStory.sub && (
-              <p style={{
-                fontSize: 16, color: "var(--di-ink-3)", margin: "0 0 16px",
-                fontFamily: "var(--di-font-body, var(--di-font-serif))", lineHeight: 1.55,
-              }}>{openStory.sub}</p>
-            )}
-            {openStory.body && (
-              <p style={{
-                fontSize: 15, color: "var(--di-ink-2)", margin: "0 0 20px",
-                fontFamily: "var(--di-font-body, var(--di-font-serif))", lineHeight: 1.65,
-              }}>{openStory.body}</p>
-            )}
-            <a href={openStory.url} target="_blank" rel="noopener" style={{
-              display: "inline-block", padding: "10px 20px", borderRadius: 999,
-              background: "#29B6F6", color: "#fff",
-              fontFamily: "var(--di-font-ui)", fontWeight: 700,
-              fontSize: 12, letterSpacing: "0.06em", textTransform: "uppercase",
-              textDecoration: "none",
-            }}>Read Full Story →</a>
-          </div>
-        </div>
       )}
     </>
   );
