@@ -176,7 +176,7 @@ function SearchBubble({ query, onChange }) {
             style={{
               border: "none", outline: "none", background: "transparent",
               fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
-              color: "var(--di-ink, #0c0d10)", width: 160,
+              color: "var(--di-ink, #0c0d10)", width: 320,
             }}
           />
         </div>
