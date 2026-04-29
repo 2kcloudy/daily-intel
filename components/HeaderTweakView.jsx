@@ -235,7 +235,7 @@ function BaysFilterHeader({ searchQuery, onSearchChange }) {
           </div>
           <span style={{
             fontFamily: "'Playfair Display', Georgia, serif",
-            fontWeight: 900, fontSize: 52, letterSpacing: "0.02em",
+            fontWeight: 700, fontSize: 52, letterSpacing: "0.02em",
             textTransform: "uppercase", color: "var(--di-ink, #0c0d10)",
             lineHeight: "0.85",
           }}>
