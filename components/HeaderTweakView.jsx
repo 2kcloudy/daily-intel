@@ -474,7 +474,7 @@ function HTStoryCard({ story }) {
 
         {/* Headline — direct link, no modal */}
         <h3 style={{
-          fontFamily: "var(--di-font-head, var(--di-font-serif, Georgia, serif))",
+          fontFamily: "var(--di-font-ui, Inter, sans-serif)",
           fontWeight: 700, fontSize: 16, lineHeight: 1.3,
           margin: "0 0 10px", flex: "0 0 auto",
         }}>
@@ -492,7 +492,7 @@ function HTStoryCard({ story }) {
 
         {/* Summary */}
         <p style={{
-          fontFamily: "var(--di-font-body, var(--di-font-serif, Georgia, serif))",
+          fontFamily: "var(--di-font-ui, Inter, sans-serif)",
           fontSize: 13, color: "var(--di-ink-3, #4a5261)", lineHeight: 1.6,
           margin: "0 0 16px", flex: 1,
         }}>
