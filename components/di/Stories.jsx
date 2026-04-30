@@ -339,3 +339,171 @@ export function TagFilter({ tags = [], active, onSelect }) {
     </div>
   );
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   HTStoryCard / HTStoryGrid — prototype "header-tweak" card style.
+   Direct external links, flat border, cyan tag, "Read Story →" pill.
+   ───────────────────────────────────────────────────────────────────────── */
+export function HTStoryCard({ story }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const [retries, setRetries] = useState(0);
+  const tag = story.tag || story.topic || "";
+
+  const imgSrc = retries === 0
+    ? storyImg(story, 900, 600)
+    : `${storyImg(story, 900, 600)}&_r=${retries}`;
+
+  function handleImgError() {
+    if (retries < 2) setTimeout(() => setRetries(r => r + 1), 2000 * (retries + 1));
+    else setImgFailed(true);
+  }
+
+  const gradient = (() => {
+    const GRADS = {
+      markets: "linear-gradient(135deg,#0f2027,#203a43,#2c5364)",
+      ai:      "linear-gradient(135deg,#1a0533,#4a148c,#7b1fa2)",
+      tech:    "linear-gradient(135deg,#0d1b2a,#1a3a5c,#1e5799)",
+      earnings:"linear-gradient(135deg,#1a1200,#4a3500,#7a5800)",
+      energy:  "linear-gradient(135deg,#0a1628,#1b3a2c,#2e7d32)",
+      crypto:  "linear-gradient(135deg,#1a0e00,#4a2800,#c56a00)",
+      defense: "linear-gradient(135deg,#1a1a1a,#2a3a2a,#3a4a3a)",
+      macro:   "linear-gradient(135deg,#0c1445,#1a2a6c,#2e4490)",
+      policy:  "linear-gradient(135deg,#0a0e2e,#1a2050,#243b8a)",
+      health:  "linear-gradient(135deg,#001a0e,#003d1f,#00693a)",
+      world:   "linear-gradient(135deg,#1a0a00,#3d1a00,#7a3a00)",
+      startups:"linear-gradient(135deg,#001a2c,#00405c,#006a8a)",
+      science: "linear-gradient(135deg,#001a2e,#002d50,#005c8a)",
+    };
+    const key = tag.toLowerCase().replace(/[\s/+]+/g, "");
+    return GRADS[key] || "linear-gradient(135deg,#111827,#1f2937,#374151)";
+  })();
+
+  return (
+    <article
+      style={{
+        border: "1px solid rgba(15,18,32,0.22)",
+        borderRadius: 6,
+        overflow: "hidden",
+        background: "var(--di-card, #fff)",
+        display: "flex", flexDirection: "column",
+        transition: "box-shadow 0.15s ease",
+      }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = "0 4px 20px rgba(2,4,12,0.12)"}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = "none"}
+    >
+      {/* Image */}
+      <div style={{ position: "relative", paddingTop: "58%", overflow: "hidden", background: "#f0f2f5", flexShrink: 0 }}>
+        {!imgFailed ? (
+          <img
+            key={retries}
+            src={imgSrc}
+            alt=""
+            loading="lazy"
+            onError={handleImgError}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        ) : (
+          <div style={{
+            position: "absolute", inset: 0,
+            background: gradient,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              {tag.slice(0, 2)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: "16px 18px 18px", flex: 1, display: "flex", flexDirection: "column" }}>
+        {/* Tag */}
+        <div style={{
+          fontSize: 10, fontWeight: 700, textTransform: "uppercase",
+          letterSpacing: "0.1em", color: "#29B6F6", marginBottom: 8,
+        }}>
+          {tag}
+        </div>
+
+        {/* Headline — direct external link */}
+        <h3 style={{
+          fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+          fontWeight: 700, fontSize: 16, lineHeight: 1.3,
+          margin: "0 0 10px", flex: "0 0 auto",
+        }}>
+          <a
+            href={story.url || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--di-ink, #0c0d10)", textDecoration: "none" }}
+            onMouseEnter={e => e.currentTarget.style.color = "#29B6F6"}
+            onMouseLeave={e => e.currentTarget.style.color = "var(--di-ink, #0c0d10)"}
+          >
+            {story.headline}
+          </a>
+        </h3>
+
+        {/* Summary */}
+        <p style={{
+          fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+          fontSize: 13, color: "var(--di-ink-3, #4a5261)", lineHeight: 1.6,
+          margin: "0 0 16px", flex: 1,
+        }}>
+          {story.body || story.sub || story.summary || ""}
+        </p>
+
+        {/* Footer */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <span style={{
+            fontSize: 11, color: "var(--di-ink-4, #787f8c)",
+            fontFamily: "var(--di-font-ui, Inter, sans-serif)", fontWeight: 500,
+          }}>
+            {story.source}
+          </span>
+          <a
+            href={story.url || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontSize: 11, fontWeight: 700, color: "#29B6F6",
+              textDecoration: "none",
+              padding: "5px 12px",
+              border: "1.5px solid #29B6F6",
+              borderRadius: 999,
+              fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+              letterSpacing: "0.04em",
+              transition: "background 0.12s ease, color 0.12s ease",
+              flexShrink: 0,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#29B6F6"; e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#29B6F6"; }}
+          >
+            Read Story →
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export function HTStoryGrid({ stories = [] }) {
+  if (!stories.length) return (
+    <p style={{
+      textAlign: "center", color: "var(--di-ink-4, #787f8c)",
+      padding: "60px 0", fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+    }}>
+      No stories match your filter.
+    </p>
+  );
+  return (
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: 20,
+    }}>
+      {stories.map((s, i) => (
+        <HTStoryCard key={`${s.rank || i}-${(s.headline || "").slice(0, 20)}`} story={s} />
+      ))}
+    </div>
+  );
+}
