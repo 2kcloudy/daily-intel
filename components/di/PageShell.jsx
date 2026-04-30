@@ -4,9 +4,7 @@ import { useRouter } from "next/navigation";
 
 import { Masthead, CategoryNav, Footer, FilterDrawer } from "./Chrome";
 import { StoryList } from "./Stories";
-import Rail from "./Rail";
 import { StoryDetail, SearchOverlay } from "./Extras";
-import { useTweaks, TweaksPanel } from "./Tweaks";
 import { CATEGORIES, PLACEHOLDER_INDICES } from "./dataTransform";
 
 /** Fetch live market data from our API route, fall back to placeholders */
@@ -66,14 +64,13 @@ const CAT_META = {
  *   mode="category"  categoryId="tech"
  *   tabData={buildTabData(...)}  financeData={buildFinanceData(...)}
  */
-export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [], cardLayout = "image-top", TweaksComponent, hideDefaultNav = false }) {
+export default function PageShell({ mode = "finance", financeData, tabData, categoryId, allDates = [], cardLayout = "image-top", hideDefaultNav = false }) {
   const router = useRouter();
-  const [tweaks, updateTweaks] = useTweaks();
-  const [showTweaks, setShowTweaks] = useState(false);
   const [theme, setTheme] = useState("light");
   const [openStory, setOpenStory] = useState(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeTag, setActiveTag] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Live market data (auto-refreshes every 90s)
   const { indices: liveIndices, lastUpdated: marketUpdatedAt } = useLiveMarketData();
@@ -143,12 +140,25 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
   ], [tagCounts, stories.length]);
 
   const filtered = useMemo(() => {
-    if (activeTag === "all") return stories;
-    return stories.filter(s => {
-      const t = (s.tag || s.topic || "").toLowerCase();
-      return t === activeTag;
-    });
-  }, [activeTag, stories]);
+    let result = stories;
+    // Tag filter
+    if (activeTag !== "all") {
+      result = result.filter(s => {
+        const t = (s.tag || s.topic || "").toLowerCase();
+        return t === activeTag;
+      });
+    }
+    // Inline search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(s =>
+        (s.headline || "").toLowerCase().includes(q) ||
+        (s.summary || "").toLowerCase().includes(q) ||
+        (s.tag || s.topic || "").toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [activeTag, searchQuery, stories]);
 
   // Hero story removed — every story now renders in the standard StoryList grid below.
 
@@ -175,7 +185,6 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
   const activeNavId = mode === "finance" ? "finance"
     : (categoryId === "geopolitics" ? "world" : categoryId);
 
-  const densityClass = tweaks.density === "compact" ? "compact" : tweaks.density === "spacious" ? "spacious" : "";
 
   return (
     <>
@@ -190,6 +199,8 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
             onSearch={() => setSearchOpen(true)}
             brief={data?.brief}
             briefLabel={mode === "finance" ? "Daily Brief" : `${catLabel} Brief`}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
           <CategoryNav
             categories={CATEGORIES}
@@ -205,12 +216,12 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
       {/* Right rail removed — story grid spans the full content width so we
           can scale to 4 columns on desktop. Archive lives at /archive now;
           the Subscribe button in the masthead handles email signups. */}
-      <main className={`di-main di-main-full ${densityClass}`}>
+      <main className="di-main di-main-full">
         <div>
           {/* Story list — every story rendered in the same grid format */}
           <StoryList
             stories={filtered}
-            compact={tweaks.density === "compact"}
+            compact={false}
             onOpen={setOpenStory}
             layout={cardLayout}
           />
@@ -225,19 +236,6 @@ export default function PageShell({ mode = "finance", financeData, tabData, cate
       />
 
       <Footer onNav={handleNav} />
-
-      {/* Tweaks toggle (bottom-right, dev / design review) */}
-      {!showTweaks && (
-        <button className="di-tweaks-toggle" onClick={() => setShowTweaks(true)} title="Design tweaks">
-          Tweaks
-        </button>
-      )}
-      {showTweaks && TweaksComponent && (
-        <TweaksComponent onClose={() => setShowTweaks(false)} />
-      )}
-      {showTweaks && !TweaksComponent && (
-        <TweaksPanel tweaks={tweaks} update={updateTweaks} onClose={() => setShowTweaks(false)} />
-      )}
 
       {/* Story detail modal */}
       {openStory && (

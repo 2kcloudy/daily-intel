@@ -148,109 +148,152 @@ export function TickerBar({ indices = PLACEHOLDER_INDICES }) {
   );
 }
 
-function SubscribeModal({ onClose }) {
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+/** Inline search bubble — always expanded at 320px */
+function MastheadSearch({ query, onChange }) {
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed", inset: 0, background: "rgba(8,9,12,0.55)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        zIndex: 1000, backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
-      }}
+    <div style={{
+      display: "flex", alignItems: "center",
+      height: 32, padding: "0 12px",
+      border: "1.5px solid var(--di-line, #e4e7ec)",
+      borderRadius: 999,
+      background: "var(--di-card, var(--di-paper))",
+      transition: "border-color 0.12s ease",
+    }}
+      onFocusCapture={e => e.currentTarget.style.borderColor = "#29B6F6"}
+      onBlurCapture={e => e.currentTarget.style.borderColor = "var(--di-line, #e4e7ec)"}
     >
-      <div
-        onClick={e => e.stopPropagation()}
+      <span style={{ fontSize: 13, marginRight: 6, color: "var(--di-ink-4, #787f8c)" }}>⌕</span>
+      <input
+        type="text"
+        value={query}
+        onChange={e => onChange(e.target.value)}
+        placeholder="Search stories…"
         style={{
-          background: "var(--di-paper)", border: "1px solid var(--di-line)",
-          borderRadius: 6, padding: "32px 32px 28px", width: "min(440px, 92vw)",
-          fontFamily: "var(--di-font-body, var(--di-font-serif))",
+          border: "none", outline: "none", background: "transparent",
+          fontSize: 13, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+          color: "var(--di-ink, #0c0d10)", width: 320,
         }}
-      >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
-          <h3 style={{ margin: 0, fontFamily: "var(--di-font-serif)", fontSize: 24, lineHeight: 1.15, letterSpacing: "-0.01em" }}>
-            In your inbox, 6am.
-          </h3>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "var(--di-ink-3)", lineHeight: 1, padding: 0 }}
-          >×</button>
-        </div>
-        <p style={{ margin: "0 0 20px", color: "var(--di-ink-3)", fontSize: 14, lineHeight: 1.5 }}>
-          Finance, health, tech &amp; more — curated by AI, delivered before the open.
-        </p>
-        {sent ? (
-          <div style={{ padding: "14px 16px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 4, fontSize: 14, color: "var(--di-ink)" }}>
-            ✓ Thanks — you're on the list.
-          </div>
-        ) : (
-          <form
-            onSubmit={(e) => { e.preventDefault(); setSent(true); }}
-            style={{ display: "flex", gap: 8 }}
-          >
-            <input
-              type="email"
-              required
-              placeholder="name@firm.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{
-                flex: 1, padding: "10px 12px", border: "1px solid var(--di-line)",
-                borderRadius: 4, fontFamily: "inherit", fontSize: 14,
-                background: "var(--di-paper-2)", color: "var(--di-ink)",
-              }}
-            />
-            <button
-              type="submit"
-              style={{
-                padding: "10px 18px", background: "var(--di-ink)", color: "var(--di-paper)",
-                border: "none", borderRadius: 4, fontFamily: "var(--di-font-ui)",
-                fontSize: 12, fontWeight: 700, letterSpacing: "0.08em",
-                textTransform: "uppercase", cursor: "pointer",
-              }}
-            >Subscribe</button>
-          </form>
-        )}
-      </div>
+      />
+      {query && (
+        <button onClick={() => onChange("")} style={{
+          background: "none", border: "none", cursor: "pointer",
+          fontSize: 16, color: "var(--di-ink-4, #787f8c)", lineHeight: 1, padding: "0 0 0 6px",
+        }}>×</button>
+      )}
     </div>
   );
 }
 
-export function Masthead({ date, postedAt, theme, onToggleTheme, onNav, onSearch, brief, briefLabel = "Daily Brief" }) {
-  const [subOpen, setSubOpen] = useState(false);
+export function Masthead({ date, postedAt, theme, onToggleTheme, onNav, onSearch, brief, briefLabel = "Daily Brief", searchQuery = "", onSearchChange }) {
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
   const hasBrief = brief && (brief.script || brief.audioUrl || brief.url);
+
+  function handleSubscribe(e) {
+    e.preventDefault();
+    if (email.trim()) { setSubscribed(true); setEmail(""); }
+  }
+
   return (
-    <div className="di-masthead">
-      <div className="di-masthead-inner">
+    <div className="di-masthead" style={{ height: "auto" }}>
+      <div className="di-masthead-inner" style={{ height: 100, alignItems: "center" }}>
+        {/* Left — date + brief player */}
         <div className="di-masthead-left" style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
           <span>{postedAt || date}</span>
           {hasBrief && <BriefMini brief={brief} label={briefLabel} />}
         </div>
+
+        {/* Center — wordmark in Playfair Display */}
         <div
           className="di-wordmark"
           onClick={() => onNav && onNav(null)}
           role="link"
           tabIndex={0}
           onKeyDown={e => e.key === "Enter" && onNav && onNav(null)}
+          style={{
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontWeight: 700,
+          }}
         >
           Daily<span className="amp">·</span>Intel
         </div>
-        <div className="di-masthead-right">
-          <button className="di-search-trigger" onClick={() => onSearch && onSearch()} title="Search (press /)">
-            <span className="icon">⌕</span>
-            <span className="lbl">Search</span>
-            <kbd>/</kbd>
-          </button>
-          <button className="di-theme-toggle" onClick={onToggleTheme} title="Toggle theme">
+
+        {/* Right — search + theme toggle + signup box */}
+        <div className="di-masthead-right" style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
+          {/* Inline search — always expanded */}
+          <MastheadSearch query={searchQuery} onChange={onSearchChange || (() => {})} />
+
+          {/* Theme toggle */}
+          <button className="di-theme-toggle" onClick={onToggleTheme} title="Toggle theme" style={{ flexShrink: 0 }}>
             {theme === "dark" ? "☀" : "☾"}
           </button>
-          <button className="action" onClick={() => onNav && onNav("archive")}>Archive</button>
-          <button className="action primary" onClick={() => setSubOpen(true)}>Subscribe</button>
+
+          {/* Signup box */}
+          {!subscribed ? (
+            <div style={{
+              border: "1px solid rgba(15,18,32,0.22)",
+              borderRadius: 10,
+              background: "var(--di-paper, #fff)",
+              padding: "10px 14px",
+              display: "flex", flexDirection: "column", gap: 8,
+              width: 280, flexShrink: 0,
+            }}>
+              <p style={{
+                margin: 0, fontSize: 11, fontWeight: 600, lineHeight: 1.4,
+                color: "var(--di-ink-3, #4a5261)",
+                fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                fontStyle: "italic", textAlign: "center",
+              }}>
+                Get the world's most important &amp; actionable intel, daily.
+              </p>
+              <form onSubmit={handleSubscribe} style={{
+                display: "flex", alignItems: "center",
+                border: "1px solid rgba(15,18,32,0.22)",
+                borderRadius: 999, overflow: "hidden",
+                height: 36, background: "var(--di-paper, #fff)",
+              }}>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  style={{
+                    height: "100%", padding: "0 12px",
+                    border: "none", outline: "none", background: "transparent",
+                    fontSize: 12, fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                    color: "var(--di-ink, #0c0d10)", flex: 1, minWidth: 0,
+                  }}
+                />
+                <button type="submit" style={{
+                  height: "100%", padding: "0 14px",
+                  background: "#29B6F6", border: "none",
+                  fontSize: 10, fontWeight: 700, letterSpacing: "0.08em",
+                  textTransform: "uppercase", color: "#fff", cursor: "pointer",
+                  fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                  transition: "background 0.15s ease", flexShrink: 0, whiteSpace: "nowrap",
+                }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#039BE5"}
+                  onMouseLeave={e => e.currentTarget.style.background = "#29B6F6"}
+                >
+                  Sign Up →
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: "#e8f7ee", border: "1px solid #a8dbbe",
+              borderRadius: 10, padding: "10px 20px", flexShrink: 0,
+            }}>
+              <span>✓</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#007a3d", fontFamily: "var(--di-font-ui, Inter, sans-serif)" }}>
+                You're in!
+              </span>
+            </div>
+          )}
         </div>
       </div>
-      {subOpen && <SubscribeModal onClose={() => setSubOpen(false)} />}
     </div>
   );
 }
