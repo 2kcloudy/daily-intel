@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { PLACEHOLDER_INDICES } from "./dataTransform";
 
 /**
@@ -148,6 +148,110 @@ export function TickerBar({ indices = PLACEHOLDER_INDICES }) {
   );
 }
 
+/** Categories dropdown — checkbox multi-select */
+const CAT_ITEMS = ["News", "Podcasts", "Newsletters", "13F Reports", "Shareholder Letters"];
+
+function CategoriesDropdown() {
+  const [open, setOpen] = useState(false);
+  const [checked, setChecked] = useState(() => new Set(CAT_ITEMS));
+  const ref = useRef(null);
+
+  const allChecked = checked.size === CAT_ITEMS.length;
+  const someChecked = checked.size > 0 && !allChecked;
+
+  useEffect(() => {
+    function onMouse(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onMouse);
+    return () => document.removeEventListener("mousedown", onMouse);
+  }, []);
+
+  function toggleAll() { setChecked(allChecked ? new Set() : new Set(CAT_ITEMS)); }
+  function toggleItem(label) {
+    setChecked(prev => {
+      const next = new Set(prev);
+      next.has(label) ? next.delete(label) : next.add(label);
+      return next;
+    });
+  }
+
+  const triggerLabel = allChecked ? "Categories" : checked.size === 0 ? "Categories (none)" : `Categories (${checked.size})`;
+
+  return (
+    <div ref={ref} style={{ position: "relative", flexShrink: 0 }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          background: "none", border: "none", cursor: "pointer",
+          fontSize: 13, fontWeight: 600, letterSpacing: "0.03em",
+          color: "var(--di-ink, #0c0d10)",
+          fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+          display: "flex", alignItems: "center", gap: 4,
+          padding: "4px 0", whiteSpace: "nowrap",
+        }}
+        onMouseEnter={e => e.currentTarget.style.color = "#29B6F6"}
+        onMouseLeave={e => e.currentTarget.style.color = "var(--di-ink, #0c0d10)"}
+      >
+        {triggerLabel}
+        <span style={{
+          fontSize: 9, display: "inline-block",
+          transform: open ? "rotate(180deg)" : "rotate(0deg)",
+          transition: "transform 0.15s ease",
+          color: "var(--di-ink-4, #787f8c)",
+        }}>▼</span>
+      </button>
+
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 8px)", right: 0, zIndex: 999,
+          background: "var(--di-card, #fff)",
+          border: "1px solid var(--di-line, #e4e7ec)",
+          borderRadius: 8,
+          boxShadow: "0 4px 16px rgba(2,4,12,0.12), 0 1px 4px rgba(2,4,12,0.06)",
+          minWidth: 210, padding: "6px 0",
+        }}>
+          <label style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "9px 16px", cursor: "pointer",
+            fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+            fontSize: 13, fontWeight: 700,
+            color: "var(--di-ink, #0c0d10)",
+            borderBottom: "1px solid var(--di-line, #e4e7ec)", marginBottom: 4,
+          }}
+            onMouseEnter={e => e.currentTarget.style.background = "var(--di-paper-2, #f4f4f0)"}
+            onMouseLeave={e => e.currentTarget.style.background = ""}
+          >
+            <input type="checkbox" checked={allChecked}
+              ref={el => { if (el) el.indeterminate = someChecked; }}
+              onChange={toggleAll}
+              style={{ width: 15, height: 15, cursor: "pointer", accentColor: "#29B6F6" }}
+            />
+            All
+          </label>
+          {CAT_ITEMS.map(label => (
+            <label key={label} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              padding: "8px 16px", cursor: "pointer",
+              fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+              fontSize: 13, fontWeight: 500,
+              color: "var(--di-ink, #0c0d10)",
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = "var(--di-paper-2, #f4f4f0)"}
+              onMouseLeave={e => e.currentTarget.style.background = ""}
+            >
+              <input type="checkbox" checked={checked.has(label)} onChange={() => toggleItem(label)}
+                style={{ width: 15, height: 15, cursor: "pointer", accentColor: "#29B6F6" }}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Inline search bubble — always expanded at 320px */
 function MastheadSearch({ query, onChange }) {
   return (
@@ -226,7 +330,7 @@ export function Masthead({ date, postedAt, theme, onToggleTheme, onNav, onSearch
           </span>
         </div>
 
-        {/* RIGHT — date/brief + search + theme toggle + signup box */}
+        {/* RIGHT — date/brief · search · About · Categories · theme · signup */}
         <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>
 
           {/* Date + brief player (small, understated) */}
@@ -240,10 +344,27 @@ export function Masthead({ date, postedAt, theme, onToggleTheme, onNav, onSearch
             {hasBrief && <BriefMini brief={brief} label={briefLabel} />}
           </div>
 
-          {/* Always-expanded search bubble */}
+          {/* 1. Search */}
           <MastheadSearch query={searchQuery} onChange={onSearchChange || (() => {})} />
 
-          {/* Theme toggle */}
+          {/* 2. About */}
+          <a href="/about" style={{
+            fontSize: 13, fontWeight: 600, letterSpacing: "0.03em",
+            color: "var(--di-ink, #0c0d10)", textDecoration: "none",
+            whiteSpace: "nowrap", flexShrink: 0,
+            fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+            transition: "color 0.12s ease",
+          }}
+            onMouseEnter={e => e.currentTarget.style.color = "#29B6F6"}
+            onMouseLeave={e => e.currentTarget.style.color = "var(--di-ink, #0c0d10)"}
+          >
+            About
+          </a>
+
+          {/* 3. Categories dropdown */}
+          <CategoriesDropdown />
+
+          {/* 4. Theme toggle */}
           <button
             onClick={onToggleTheme}
             title="Toggle theme"
