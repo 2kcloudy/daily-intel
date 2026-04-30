@@ -454,12 +454,35 @@ export function HTStoryCard({ story }) {
 
         {/* Footer */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-          <span style={{
-            fontSize: 11, color: "var(--di-ink-4, #787f8c)",
-            fontFamily: "var(--di-font-ui, Inter, sans-serif)", fontWeight: 500,
-          }}>
-            {story.source}
-          </span>
+          {/* Source + date */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <span style={{
+              fontSize: 11, color: "var(--di-ink-4, #787f8c)",
+              fontFamily: "var(--di-font-ui, Inter, sans-serif)", fontWeight: 500,
+            }}>
+              {story.source}
+            </span>
+            {story.publishedAt && (
+              <span style={{
+                fontSize: 10, fontWeight: 600,
+                color: "#29B6F6",
+                fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+                textTransform: "uppercase", letterSpacing: "0.06em",
+              }}>
+                {(() => {
+                  try {
+                    const d = new Date(story.publishedAt);
+                    const h = (Date.now() - d) / 3600000;
+                    if (h < 1)  return `${Math.round(h * 60)}m ago`;
+                    if (h < 6)  return `${Math.round(h)}h ago`;
+                    if (h < 24) return "Today";
+                    if (h < 48) return "Yesterday";
+                    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  } catch { return null; }
+                })()}
+              </span>
+            )}
+          </div>
           <a
             href={story.url || "#"}
             target="_blank"

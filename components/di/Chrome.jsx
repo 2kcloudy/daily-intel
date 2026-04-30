@@ -203,23 +203,26 @@ export function Masthead({ date, postedAt, theme, onToggleTheme, onNav, onSearch
         height: 100,
       }}>
 
-        {/* LEFT — Large wordmark */}
+        {/* LEFT — Logo + wordmark */}
         <div
           onClick={() => onNav && onNav(null)}
           role="link"
           tabIndex={0}
           onKeyDown={e => e.key === "Enter" && onNav && onNav(null)}
-          style={{ cursor: "pointer", flexShrink: 0, userSelect: "none" }}
+          style={{ cursor: "pointer", flexShrink: 0, userSelect: "none", display: "flex", alignItems: "center", gap: 14 }}
         >
+          {/* Funnel icon */}
+          <svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+            <circle cx="20" cy="20" r="20" fill="#29B6F6" />
+            <path d="M10 11h20l-8 10v8l-4-2V21L10 11z" fill="white" stroke="white" strokeWidth="0.5" strokeLinejoin="round" />
+          </svg>
           <span style={{
             fontFamily: "'Playfair Display', Georgia, serif",
             fontWeight: 700, fontSize: 52, letterSpacing: "0.02em",
             textTransform: "uppercase", color: "var(--di-ink, #0c0d10)",
             lineHeight: 0.85,
           }}>
-            Daily
-            <span style={{ fontStyle: "italic", fontWeight: 400, padding: "0 6px", color: "var(--di-accent-ink, inherit)" }}>·</span>
-            Intel
+            Bay's Filter
           </span>
         </div>
 
