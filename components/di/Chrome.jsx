@@ -195,44 +195,72 @@ export function Masthead({ date, postedAt, theme, onToggleTheme, onNav, onSearch
   }
 
   return (
-    <div className="di-masthead" style={{ height: "auto" }}>
-      <div className="di-masthead-inner" style={{ height: 100, alignItems: "center" }}>
-        {/* Left — date + brief player */}
-        <div className="di-masthead-left" style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-          <span>{postedAt || date}</span>
-          {hasBrief && <BriefMini brief={brief} label={briefLabel} />}
-        </div>
+    <div className="di-masthead">
+      {/* Override the CSS grid with a 2-zone flex layout matching the prototype */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        gap: 24, maxWidth: 1440, margin: "0 auto", padding: "0 40px",
+        height: 100,
+      }}>
 
-        {/* Center — wordmark in Playfair Display */}
+        {/* LEFT — Large wordmark */}
         <div
-          className="di-wordmark"
           onClick={() => onNav && onNav(null)}
           role="link"
           tabIndex={0}
           onKeyDown={e => e.key === "Enter" && onNav && onNav(null)}
-          style={{
-            fontFamily: "'Playfair Display', Georgia, serif",
-            fontWeight: 700,
-          }}
+          style={{ cursor: "pointer", flexShrink: 0, userSelect: "none" }}
         >
-          Daily<span className="amp">·</span>Intel
+          <span style={{
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontWeight: 700, fontSize: 52, letterSpacing: "0.02em",
+            textTransform: "uppercase", color: "var(--di-ink, #0c0d10)",
+            lineHeight: 0.85,
+          }}>
+            Daily
+            <span style={{ fontStyle: "italic", fontWeight: 400, padding: "0 6px", color: "var(--di-accent-ink, inherit)" }}>·</span>
+            Intel
+          </span>
         </div>
 
-        {/* Right — search + theme toggle + signup box */}
-        <div className="di-masthead-right" style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
-          {/* Inline search — always expanded */}
+        {/* RIGHT — date/brief + search + theme toggle + signup box */}
+        <div style={{ display: "flex", alignItems: "center", gap: 20, flexShrink: 0 }}>
+
+          {/* Date + brief player (small, understated) */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+            <span style={{
+              fontFamily: "var(--di-font-ui, Inter, sans-serif)",
+              fontSize: 11, fontWeight: 600, textTransform: "uppercase",
+              letterSpacing: "0.12em", color: "var(--di-ink-3, #6b7280)",
+              whiteSpace: "nowrap",
+            }}>{postedAt || date}</span>
+            {hasBrief && <BriefMini brief={brief} label={briefLabel} />}
+          </div>
+
+          {/* Always-expanded search bubble */}
           <MastheadSearch query={searchQuery} onChange={onSearchChange || (() => {})} />
 
           {/* Theme toggle */}
-          <button className="di-theme-toggle" onClick={onToggleTheme} title="Toggle theme" style={{ flexShrink: 0 }}>
+          <button
+            onClick={onToggleTheme}
+            title="Toggle theme"
+            style={{
+              background: "none", border: "1px solid var(--di-line, #e4e7ec)",
+              borderRadius: "50%", width: 32, height: 32,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", fontSize: 14, color: "var(--di-ink, #0c0d10)",
+              flexShrink: 0, transition: "border-color 0.15s ease",
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = "var(--di-ink, #0c0d10)"}
+            onMouseLeave={e => e.currentTarget.style.borderColor = "var(--di-line, #e4e7ec)"}
+          >
             {theme === "dark" ? "☀" : "☾"}
           </button>
 
           {/* Signup box */}
           {!subscribed ? (
             <div style={{
-              border: "1px solid rgba(15,18,32,0.22)",
-              borderRadius: 10,
+              border: "1px solid rgba(15,18,32,0.22)", borderRadius: 10,
               background: "var(--di-paper, #fff)",
               padding: "10px 14px",
               display: "flex", flexDirection: "column", gap: 8,
